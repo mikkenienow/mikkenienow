@@ -1,0 +1,97 @@
+# Backends de decisão do laboratório. Trocar de modelo = editar este arquivo.
+# Servidores externos (portas) são iniciados por scripts/services.sh.
+#
+# option_lang: idioma das descrições da taxonomia enviadas ao modelo (pt|en). Modelos treinados só
+# em inglês (Jeff, Laya, decider) podem ir melhor com descrições em inglês mesmo com fala em português.
+
+default_backend: jeff-0.8b
+llm_executor: qwen3.5-2b-chat      # quem responde as rotas LLM / LLM_LARGE
+llm_large_executor: qwen3.5-4b-chat
+
+backends:
+  # ---------------- C) modelos especializados em decisão ----------------
+  jeff-0.8b:
+    type: systemone
+    model: mstrasser/Jeff-Qwen3.5-0.8B@v1.2 (PyTorch fp32, CPU)
+    url: http://127.0.0.1:8765
+    port: 8765
+    request_model: jeff-latest
+    option_lang: en
+  jeff-0.8b-pt:
+    type: systemone
+    model: mstrasser/Jeff-Qwen3.5-0.8B@v1.2 (PyTorch fp32, CPU)
+    url: http://127.0.0.1:8765
+    port: 8765
+    request_model: jeff-latest
+    option_lang: pt
+  julia-1:
+    type: systemone
+    model: SupersonicLabs/Julia-1 (GGUF Q8_0, llama.cpp)
+    url: http://127.0.0.1:8811
+    port: 8811
+    option_lang: en
+  julia-1-pt:
+    type: systemone
+    model: SupersonicLabs/Julia-1 (GGUF Q8_0, llama.cpp)
+    url: http://127.0.0.1:8811
+    port: 8811
+    option_lang: pt
+  laya:
+    type: systemone
+    model: convaiinnovations/laya (GGUF Q8_0, llama.cpp)
+    url: http://127.0.0.1:8812
+    port: 8812
+    option_lang: en
+  # Exemplo: Jev hospedado (TypeSafe/OpenRouter). Requer credencial; não usado nos benchmarks locais.
+  # jev-hosted:
+  #   type: systemone
+  #   model: typesafe/jev
+  #   url: https://api.typesafe.ai
+  #   api_key_env: TYPESAFE_API_KEY
+  #   request_model: jev
+
+  # ---------------- D) LLM pequeno genérico, mesmo prompt/readout do Jeff ----------------
+  qwen3.5-0.8b-logprob:
+    type: llm_logprob
+    model: Qwen/Qwen3.5-0.8B (GGUF Q8_0, llama.cpp) - sem especialização
+    url: http://127.0.0.1:8801
+    port: 8801
+    option_lang: en
+
+  # ---------------- A) LLM generativo convencional (decisão como JSON) ----------------
+  qwen3.5-0.8b-chat:
+    type: llm_generative
+    model: Qwen/Qwen3.5-0.8B (GGUF Q8_0)
+    url: http://127.0.0.1:8801
+    port: 8801
+  qwen3.5-2b-chat:
+    type: llm_generative
+    model: Qwen/Qwen3.5-2B (GGUF Q4_K_M)
+    url: http://127.0.0.1:8802
+    port: 8802
+  qwen3.5-4b-chat:
+    type: llm_generative
+    model: Qwen/Qwen3.5-4B (GGUF Q4_K_M)
+    url: http://127.0.0.1:8803
+    port: 8803
+
+  # ---------------- zero-shot clássicos ----------------
+  nli-mdeberta:
+    type: nli
+    model: MoritzLaurer/mDeBERTa-v3-base-xnli-multilingual-nli-2mil7
+  gliclass-edge:
+    type: gliclass
+    model: knowledgator/gliclass-multilang-edge
+  e5-zeroshot:
+    type: embed_zeroshot
+    model: intfloat/multilingual-e5-small
+
+  # ---------------- B) classificadores tradicionais (treinados em data/train.jsonl) ----------------
+  tfidf-logreg:
+    type: tfidf
+  e5-logreg:
+    type: embed_logreg
+    model: intfloat/multilingual-e5-small
+  e5-knn-router:
+    type: embed_knn
+    model: intfloat/multilingual-e5-small

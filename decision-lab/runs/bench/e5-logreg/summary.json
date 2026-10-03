@@ -1,0 +1,188 @@
+{
+  "n": 159,
+  "accuracy": 0.8679245283018868,
+  "accuracy_strict": 0.8427672955974843,
+  "intent_accuracy_when_addressed": 0.865979381443299,
+  "negatives": 53,
+  "positives": 99,
+  "false_activation_rate": 0.11320754716981132,
+  "missed_rate": 0.020202020202020204,
+  "latency_ms": {
+    "mean": 28.89235865408203,
+    "p50": 27.27037200020277,
+    "p95": 39.99931419998574,
+    "max": 83.34205800019845
+  },
+  "score_kind": [
+    "pseudo_probability"
+  ],
+  "ece": 0.4248758180495309,
+  "auroc_confidence": 0.8881987577639752,
+  "by_tag": {
+    "ambiguous": {
+      "n": 11,
+      "accuracy": 0.9090909090909091
+    },
+    "asr": {
+      "n": 13,
+      "accuracy": 0.7692307692307693
+    },
+    "background": {
+      "n": 5,
+      "accuracy": 0.8
+    },
+    "casual": {
+      "n": 28,
+      "accuracy": 0.9285714285714286
+    },
+    "clear": {
+      "n": 91,
+      "accuracy": 0.9340659340659341
+    },
+    "command": {
+      "n": 82,
+      "accuracy": 0.8292682926829268
+    },
+    "english": {
+      "n": 5,
+      "accuracy": 1.0
+    },
+    "hard": {
+      "n": 28,
+      "accuracy": 0.7857142857142857
+    },
+    "long": {
+      "n": 9,
+      "accuracy": 0.5555555555555556
+    },
+    "mentions_wake": {
+      "n": 6,
+      "accuracy": 0.16666666666666666
+    },
+    "near_wake": {
+      "n": 2,
+      "accuracy": 1.0
+    },
+    "no_wake": {
+      "n": 9,
+      "accuracy": 1.0
+    },
+    "question": {
+      "n": 37,
+      "accuracy": 0.972972972972973
+    },
+    "short": {
+      "n": 19,
+      "accuracy": 0.8421052631578947
+    },
+    "to_human": {
+      "n": 13,
+      "accuracy": 1.0
+    }
+  },
+  "by_label": {
+    "complex": {
+      "n": 15,
+      "accuracy": 1.0
+    },
+    "home_control": {
+      "n": 32,
+      "accuracy": 0.875
+    },
+    "ignore": {
+      "n": 58,
+      "accuracy": 0.896551724137931
+    },
+    "knowledge": {
+      "n": 21,
+      "accuracy": 0.8571428571428571
+    },
+    "media": {
+      "n": 18,
+      "accuracy": 0.7777777777777778
+    },
+    "timer_alarm": {
+      "n": 15,
+      "accuracy": 0.7333333333333333
+    }
+  },
+  "llm": {
+    "llm_calls": 44,
+    "llm_calls_if_no_router": 159,
+    "calls_avoided_pct": 0.7232704402515724,
+    "llm_needed": 36,
+    "llm_missed": 1,
+    "llm_wasted": 8
+  },
+  "threshold_sweep": [
+    {
+      "threshold": 0.0,
+      "accuracy": 0.8679245283018868,
+      "false_activation_rate": 0.11320754716981132,
+      "missed_rate": 0.020202020202020204
+    },
+    {
+      "threshold": 0.3,
+      "accuracy": 0.8364779874213837,
+      "false_activation_rate": 0.0,
+      "missed_rate": 0.21212121212121213
+    },
+    {
+      "threshold": 0.4,
+      "accuracy": 0.6226415094339622,
+      "false_activation_rate": 0.0,
+      "missed_rate": 0.6060606060606061
+    },
+    {
+      "threshold": 0.5,
+      "accuracy": 0.4591194968553459,
+      "false_activation_rate": 0.0,
+      "missed_rate": 0.8686868686868687
+    },
+    {
+      "threshold": 0.6,
+      "accuracy": 0.39622641509433965,
+      "false_activation_rate": 0.0,
+      "missed_rate": 0.9696969696969697
+    },
+    {
+      "threshold": 0.7,
+      "accuracy": 0.37735849056603776,
+      "false_activation_rate": 0.0,
+      "missed_rate": 1.0
+    },
+    {
+      "threshold": 0.8,
+      "accuracy": 0.37735849056603776,
+      "false_activation_rate": 0.0,
+      "missed_rate": 1.0
+    },
+    {
+      "threshold": 0.9,
+      "accuracy": 0.37735849056603776,
+      "false_activation_rate": 0.0,
+      "missed_rate": 1.0
+    },
+    {
+      "threshold": 0.95,
+      "accuracy": 0.37735849056603776,
+      "false_activation_rate": 0.0,
+      "missed_rate": 1.0
+    }
+  ],
+  "perturbation_agreement": 0.8553459119496856,
+  "accuracy_perturbed": 0.8490566037735849,
+  "backend": "e5-logreg",
+  "kind": "trained-embedding",
+  "model": "intfloat/multilingual-e5-small",
+  "option_lang": "pt",
+  "load_seconds": 10.187133812000411,
+  "cpu_seconds_per_decision": 0.10685534591194967,
+  "wall_seconds_per_decision": 0.02895009975471558,
+  "cpu_cores_busy": 3.6910182285138546,
+  "rss_mb": {
+    "server": null,
+    "lab_process_delta": 611
+  },
+  "timestamp": "2026-10-03T20:54:43"
+}
