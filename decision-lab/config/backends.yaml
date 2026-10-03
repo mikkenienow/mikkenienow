@@ -95,3 +95,13 @@ backends:
   e5-knn-router:
     type: embed_knn
     model: intfloat/multilingual-e5-small
+
+  # ---------------- variantes: pergunta extra "é dirigido ao assistente?" (noul) ----------------
+  jeff-0.8b-gate:
+    type: systemone
+    model: mstrasser/Jeff-Qwen3.5-0.8B@v1.2 (PyTorch fp32, CPU) + noul gate
+    url: http://127.0.0.1:8765
+    port: 8765
+    request_model: jeff-latest
+    option_lang: en
+    gate: true
