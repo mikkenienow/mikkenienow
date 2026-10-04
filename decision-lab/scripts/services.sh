@@ -10,7 +10,9 @@ LAB=$PWD
 LOGS=$LAB/runs/logs
 mkdir -p "$LOGS"
 LLAMA=$LAB/vendor/llama.cpp/build/bin/llama-server
-THREADS=${THREADS:-$(nproc)}
+THREADS=${THREADS:-$(nproc)}   # llama.cpp; em desktop com outras cargas use nproc-2 (oversubscription derruba a geração)
+# TORCH_THREADS limita os servidores PyTorch (Jeff, decider); sem ela, o padrão do torch.
+[ -n "${TORCH_THREADS:-}" ] && export OMP_NUM_THREADS=$TORCH_THREADS MKL_NUM_THREADS=$TORCH_THREADS
 
 wait_for() {  # porta, padrão esperado no /health
   for _ in $(seq 1 180); do
