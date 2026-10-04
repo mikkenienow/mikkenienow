@@ -129,5 +129,62 @@ continuam em CPU. Ela só poderia ajudar via llama.cpp + Vulkan (ver "Próximos 
 Comando usado:
 
 ```bash
-LAB_DATA=$HOME/decision-lab-data bash scripts/setup.sh
+LAB_DATA=$HOME/decision-lab-data bash scripts/setup.sh          # ~25 min (build do llama.cpp + ~9,7 GB de modelos)
+THREADS=4 TORCH_THREADS=3 scripts/services.sh start decider llm-large   # o que a cascata padrão + pipeline usam
+scripts/lab.sh                                                   # API + UI em :8000
+BENCH_DIR=runs/bench-local THREADS=4 TORCH_THREADS=3 scripts/bench_all.sh   # bateria do Passo 2 (~3 h)
 ```
+
+Versões instaladas: Jeff `d0173b4` (pesos v1.2), decider `4502408`, llama.cpp `dd26678` (04/10/2026; a VM usou
+`836d571`), torch 2.14.1+cpu, transformers 5.17 (Jeff) / 5.18 (lab), uv 0.12.23, gcc 13.3, cmake 3.28.
+
+Smoke test (exemplos do README) validado: `/v1/decide` com a cascata padrão, classes dinâmicas no decider,
+`/v1/route` com resposta do LLM local, `/v1/stats`.
+
+## Referência de velocidade (`llama-bench`, Qwen3.5-0.8B Q8_0, `-p 512 -n 128`)
+
+| threads | prefill (tok/s) | geração (tok/s) |
+|---|---|---|
+| 6 | 126 | **2,6** |
+| 5 | 117 | 12,8 |
+| 4 | 117 | **19,6** |
+| 3 | 125 | 16,3 |
+| VM da nuvem, 4 vCPUs | 122 | 17,5 |
+
+Duas leituras:
+
+- **Este PC (6 núcleos de 2018, sem AVX-512) empata com a VM de 4 vCPUs** — a previsão registrada acima
+  ("um desktop deve ser ~3–6× mais rápido") **não vale para esta máquina**. Ela vale para CPUs atuais de 8–16 núcleos.
+- **Usar todos os núcleos é pior.** A máquina estava em uso normal durante as medições (navegador, um jogo,
+  o próprio Claude Code; ~1–4 GB de RAM livres no host). Com 6 threads em 6 núcleos, qualquer thread que perde
+  a CPU trava as outras: a geração cai 7,5×.
+
+O mesmo efeito, medido no PyTorch (30 falas):
+
+| threads do torch | decider-0.8b-schema p50 | e5-logreg p50 |
+|---|---|---|
+| 6 (padrão) | 1 699 ms | 104 ms |
+| 4 | 440 ms | 39 ms |
+| **3** | **359 ms** | **20 ms** |
+
+O Jeff não muda (2,7 s com qualquer configuração; ocupa ~2,8 núcleos). **Configuração adotada: `THREADS=4`
+(llama.cpp) e `TORCH_THREADS=3` (decider, Jeff, processo do laboratório).** Numa máquina dedicada o ótimo
+pode ser outro: meça antes de fixar.
+
+## Problemas encontrados nesta máquina (e soluções)
+
+10. **CRLF no checkout do Windows** quebrava os scripts no WSL → `.gitattributes` com `eol=lf`.
+11. **`.gitignore` com barra final** (`vendor/`) não ignora symlink → padrões sem barra.
+12. **WSL2 limitado a 8 GB por padrão** → `.wslconfig` (12 GB + swap). O cache de página do WSL chega a ocupar
+    7–9 GB e aperta o host: `echo 1 > /proc/sys/vm/drop_caches` (root) devolve a memória.
+13. **O WSL encerra a distro quando não há sessão aberta**, matando os servidores de modelos entre um comando e
+    outro. Mantenha um terminal do WSL aberto, ou rode a bateria com `setsid nohup` (um processo vivo segura a distro).
+14. **Oversubscription de threads** (tabelas acima) — o problema mais caro: a primeira bateria mediu o decider a
+    1,7 s em vez de 0,35 s. `services.sh` ganhou `TORCH_THREADS`.
+15. **O cache de schema do decider só fica pronto na 2ª vez que o schema é visto**; as duas primeiras decisões
+    de um schema custam 10–25 s nesta máquina. O `bench.pipeline` media isso como "tempo decidindo" (45 s em vez
+    de 6 s para a cascata). Agora ele aquece o router — e o 2º estágio, se for cascata — antes de medir.
+    Em produção: pré-carregar o schema com `DECIDER_SCHEMAS=schemas.json`.
+16. **Memória do host**: durante a bateria o Windows ficou com ~1–2 GB livres; o Claude Code matou dois shells
+    auxiliares em background por pressão de memória (a bateria em si não foi afetada).
+17. Sem GPU utilizável: **não foi possível verificar os ~22–30 ms publicados do Jeff**.

@@ -5,3 +5,4 @@ runs/logs/
 runs/decisions.jsonl
 __pycache__/
 *.pyc
+runs/slots/

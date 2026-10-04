@@ -1,10 +1,13 @@
 #!/usr/bin/env bash
 # Bateria de re-medição em uma máquina nova: um backend por vez, só o serviço necessário no ar.
-#   BENCH_DIR=runs/bench-local THREADS=4 scripts/bench_all.sh [etapa...]
+#   BENCH_DIR=runs/bench-local THREADS=4 TORCH_THREADS=3 scripts/bench_all.sh [etapa...]
 # Etapas (padrão: todas, nesta ordem): main scaling pipeline cascade report
+# THREADS (llama.cpp) e TORCH_THREADS (Jeff, decider e o processo do laboratório): num desktop em uso, usar
+# todos os núcleos é MAIS LENTO (oversubscription) — meça antes de fixar (docs/02-ambiente.md).
 set -uo pipefail
 cd "$(dirname "$0")/.."
 export BENCH_DIR=${BENCH_DIR:-runs/bench-local}
+[ -n "${TORCH_THREADS:-}" ] && export TORCH_THREADS OMP_NUM_THREADS=$TORCH_THREADS MKL_NUM_THREADS=$TORCH_THREADS
 PY=.venv/bin/python
 S=scripts/services.sh
 

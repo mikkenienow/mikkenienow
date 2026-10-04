@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Inicia/para os servidores de modelos usados pelo laboratório.
-#   scripts/services.sh start [grupo...]   grupos: jeff decider decision llm-small llm-large all (padrão: all)
+#   scripts/services.sh start [grupo...]   grupos: jeff decider decider-gguf decision llm-small llm-large all (padrão: all)
 #   scripts/services.sh stop [grupo...]    sem grupo: para tudo
 #   scripts/services.sh status
 # "all" precisa de ~15 GB de RAM; em máquinas menores suba só os grupos que o benchmark usa.
@@ -49,6 +49,8 @@ start() {
     case $g in
       jeff) start_jeff ;;
       decider) start_decider ;;
+      decider-gguf) SLOT_DIR=${SLOT_DIR:-$LAB/runs/slots}; mkdir -p "$SLOT_DIR"   # no WSL, use um caminho fora de /mnt/c
+                    llama decider-gguf 8822 decider-0.8b-Q8_0.gguf -c 4096 -np 1 --slot-save-path "$SLOT_DIR" ${DECIDER_GGUF_ARGS:-} ;;
       decision) llama julia 8811 Julia-1-Q8_0.gguf; llama laya 8812 Laya-Q8_0.gguf ;;
       llm-small) llama qwen08 8801 Qwen3.5-0.8B-Q8_0.gguf -c 4096 -np 1 ;;
       llm-large) llama qwen2b 8802 Qwen3.5-2B-Q4_K_M.gguf -c 4096 -np 1
@@ -69,6 +71,7 @@ stop() {
       case $g in
         jeff) stop_port 8765 ;;
         decider) stop_port 8821 ;;
+        decider-gguf) stop_port 8822 ;;
         decision) stop_port 8811 8812 ;;
         llm-small) stop_port 8801 ;;
         llm-large) stop_port 8802 8803 ;;
@@ -82,6 +85,6 @@ stop() {
 case ${1:-status} in
   start) shift; start "$@" ;;
   stop) shift; stop "$@" ;;
-  status) for p in 8765 8821 8811 8812 8801 8802 8803; do printf ":%s %s\n" "$p" "$(curl -s -m 2 localhost:$p/health || echo '-')"; done ;;
+  status) for p in 8765 8821 8822 8811 8812 8801 8802 8803; do printf ":%s %s\n" "$p" "$(curl -s -m 2 localhost:$p/health || echo '-')"; done ;;
   *) echo "uso: $0 start|stop|status"; exit 1 ;;
 esac

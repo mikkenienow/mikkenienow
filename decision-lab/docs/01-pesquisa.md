@@ -69,6 +69,17 @@ experimental limpo**: o Qwen3.5-0.8B original com exatamente o mesmo prompt e o 
 | LLM pequeno genérico (logprob) | Qwen3.5-0.8B, mesmo prompt do Jeff | 0,8B | sim | controle experimental do Jeff |
 | LLM generativo (JSON restrito) | Qwen3.5-0.8B / 2B / 4B, llama.cpp | 0,8–4B | sim | gera tokens; confiança = prob. do 1º token do rótulo |
 
+### Atualização de 04/10/2026 (checagem rápida ao retomar na máquina local)
+
+| Item | Estado | Efeito no laboratório |
+|---|---|---|
+| Jeff v1.3 / adapters novos | **ainda não saiu**: o README segue em v1.2 + 9 adapters, com o v1.3 "em ~36 horas" | nenhum; continua o v1.2 |
+| decider-4b | **saiu** (v2.1), com GGUF oficial (Q4_K_M 2,7 GB, Q8_0, BF16); também há GGUF do 2B. **Não há GGUF do 0.8B** | o 0.8B foi convertido localmente para o experimento de prefixo no llama.cpp |
+| Clef no llama.cpp | **entrou** (`conversion/clef.py`, tipo reconhecido pelo `server-decision.cpp`) | nenhum: a base de 27B não cabe nesta máquina |
+| Laya multilíngue em GGUF | **não há GGUF compatível**: o da comunidade traz só o backbone; a cabeça de decisão fica num `.safetensors` à parte, fora do llama.cpp | nenhum |
+
+Nenhuma decisão registrada abaixo mudou.
+
 ## Escolha para o laboratório
 
 **Decisão: não escolher um modelo só. O laboratório fala o protocolo `/v1/systemone`** e trata qualquer

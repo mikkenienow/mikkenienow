@@ -203,6 +203,81 @@ encoder pequenos zero-shot neste domínio; latência de dezenas de ms em CPU mod
 treinado no domínio (ms) como primeiro filtro, um modelo de decisão com schema cacheado para os casos
 incertos e para intenções/classes dinâmicas, e o LLM só para o que precisa de geração.
 
+## Máquina local (re-medição em 04/10/2026)
+
+PC doméstico **em uso normal** (não dedicado): Windows 11 + WSL2, i5-9400F (6 núcleos, AVX2, sem AVX-512),
+16 GB, **sem GPU utilizável** (Radeon RX 580). Detalhes, escolha de threads e problemas em
+[02-ambiente.md](02-ambiente.md#máquina-local-retomada-em-04102026). Resultados em `runs/bench-local/`
+([REPORT.md](../runs/bench-local/REPORT.md)); os da nuvem continuam em `runs/bench/`.
+Comando: `BENCH_DIR=runs/bench-local THREADS=4 TORCH_THREADS=3 scripts/bench_all.sh`.
+
+### Resultado principal — local vs. nuvem
+
+| backend | acurácia | falsa ativação | perdidos | p50 local | p50 nuvem | CPU-s local | CPU-s nuvem |
+|---|---|---|---|---|---|---|---|
+| `e5-logreg` | 86,8% | 11,3% | 2,0% | **17 ms** | 27 ms | 0,05 | 0,11 |
+| `decider-0.8b-schema` | 78,6% | 37,7% | 6,1% | **350 ms** | 542 ms | 1,14 | 2,15 |
+| `jeff-0.8b` | 79,2% | 45,3% | 4,0% | 2 802 ms | 3 051 ms | 7,7 | 7,3 |
+| `jeff-0.8b-pt` | 82,4% | 37,7% | 2,0% | 2 864 ms | 3 072 ms | 8,2 | 7,5 |
+| `qwen3.5-0.8b-logprob` | 46,5% (nuvem 47,8%) | 83,0% | 4,0% | 1 910 ms | 2 040 ms | 7,7 | 7,8 |
+| `qwen3.5-4b-chat` | 88,7% (nuvem 88,1%) | 28,3% | 0,0% (nuvem 1,0%) | 10 340 ms | 8 644 ms | 43,5 | 33,3 |
+
+- **A qualidade reproduziu exatamente** nos modelos PyTorch (mesmas predições: acurácia, falsa ativação, ECE e
+  estabilidade idênticos). Nos modelos do llama.cpp houve diferenças de 1–2 falas (commit mais novo do
+  llama.cpp e outro conjunto de instruções da CPU) — ruído, não mudança de conclusão.
+- Estabilidade do `qwen3.5-4b-chat` à fala sem acentos/pontuação: **93,7%** (não tinha sido medida na nuvem).
+
+Cascatas (simuladas sobre as predições locais, τ = 0,30):
+
+| cascata | acurácia | falsa ativação | perdidos | latência média local | nuvem |
+|---|---|---|---|---|---|
+| e5-logreg → decider (cache) | 89,3% | 7,5% | 4,0% | **79 ms** | 119 ms |
+| e5-logreg → Jeff | 91,2% | 5,7% | 4,0% | 478 ms | 524 ms |
+| e5-logreg → Jeff (opções PT) | 91,8% | 7,5% | 2,0% | 493 ms | – |
+| e5-logreg → Qwen 4B | 94,3% | 3,8% | 2,0% | 1 739 ms | 1 457 ms |
+
+Pipeline ponta a ponta (80 falas, `/v1/route`, com aquecimento):
+
+| estratégia | tempo total | decidindo | chamadas LLM | desperdiçadas | falsa ativação | acerto | comando doméstico ponta a ponta |
+|---|---|---|---|---|---|---|---|
+| sem porteiro (tudo → LLM 2B) | 193 s | – | 80 | 62 | 100% | – | – |
+| **cascata e5 → decider** | **119 s** | **5,8 s** (73 ms/fala) | 20 | 2 | 3,7% | 93,8% | **50 ms** |
+| decider sozinho | 130 s | 31,8 s | 24 | 5 | 25,9% | 85,0% | 388 ms |
+| Qwen 4B como router* | 1 011 s | 881 s | 23 | 5 | 25,9% | 87,5% | 11 000 ms |
+
+\* medido antes de o aquecimento entrar no script; a 10 s por decisão o efeito do aquecimento é desprezível.
+
+Escalonamento (60 falas): acurácias idênticas às da nuvem em todos os cenários. Latência do decider com cache
+**constante** de 2 a 32 opções (456–522 ms nesta rodada, com o host mais carregado que na bateria principal);
+Jeff 1 902 → 5 364 ms (linear nas opções).
+
+### O que mudou nas conclusões
+
+**Não mudou** (confirmado numa segunda máquina, com outra CPU e outra versão do llama.cpp):
+intenção fácil / destinatário difícil (38–45% de falsa ativação zero-shot); especialização vale ~+33 pontos
+(46,5% → 79,2%, mesmo prompt, mesmo custo); a cascata e5 → decider é o melhor custo/benefício; o porteiro
+evita 75% das chamadas ao LLM sem perder perguntas; usar o LLM como router é o pior caso (8,5× o tempo da cascata).
+
+**Mudou ou ficou mais preciso:**
+
+1. **"Um desktop é 3–6× mais rápido que a VM" é falso para um PC de 6 núcleos de 2018.** Ele empata com a VM
+   de 4 vCPUs: 1,5× mais rápido nos modelos PyTorch pequenos (decider, e5), igual no Jeff, **0,8×** no Qwen 4B
+   (sem AVX-512, e disputando CPU com o uso normal da máquina). As latências da nuvem eram uma boa estimativa de
+   um PC doméstico modesto, não um piso pessimista.
+2. **O cache de schema pesa ainda mais aqui: decider 8× mais rápido que o Jeff** (350 vs 2 802 ms; na nuvem 5,6×).
+3. **Novo: configuração de threads importa tanto quanto a escolha do modelo.** Numa máquina compartilhada, usar
+   todos os núcleos deixou o decider 4,7× mais lento (1 699 vs 359 ms), o e5 5× e a geração do llama.cpp 7,5×.
+   Metade dos núcleos foi o ótimo. Um assistente que roda em segundo plano num PC em uso precisa disso por padrão.
+4. **Novo: partida a frio.** As duas primeiras decisões de um schema no decider custam 10–25 s aqui (o cache só
+   é montado na 2ª vez). Para um assistente, o schema tem de ser pré-carregado na subida do serviço.
+5. **Operação contínua**: a cascata custa 73 ms e ~0,23 CPU-s por fala em média (≈ 8% de um núcleo a uma fala a cada 3 s) —
+   cabe com folga mesmo neste PC. O Jeff em PyTorch (2,8 s e ~2,8 núcleos por fala) e o 4B (10 s) não cabem.
+6. **Continua sem verificação**: os ~22–30 ms do Jeff em GPU. Esta máquina não tem GPU utilizável pelo PyTorch;
+   o experimento de LoRA (item 1 abaixo) segue bloqueado por hardware.
+
+Ressalva de método: as latências locais foram medidas com a máquina em uso (carga do host variável; a mesma
+configuração do decider mediu 350 ms numa rodada e ~500 ms em outra). As acurácias não dependem disso.
+
 ## Próximos experimentos sugeridos
 
 1. **Fine-tuning de domínio de um modelo de decisão** (LoRA do Jeff com o adapter kit, ou o decider) com

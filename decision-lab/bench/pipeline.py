@@ -29,6 +29,9 @@ from lab import backends as registry  # noqa: E402
 from lab.executors import LlmExecutor  # noqa: E402
 
 API = "http://127.0.0.1:8000"
+# Aquecimento: um comando (carrega o router) e duas perguntas (LLM e LLM_LARGE).
+WARMUP = ["Alexa, acende a luz da sala", "Alexa, qual a capital da França?",
+          "Alexa, me explica passo a passo como funciona um motor elétrico e compara com um a combustão"]
 
 
 def stream(limit: int | None) -> list[dict[str, Any]]:
@@ -39,6 +42,15 @@ def stream(limit: int | None) -> list[dict[str, Any]]:
 
 def run_router(router: str, rows: list[dict[str, Any]], threshold: float) -> dict[str, Any]:
     client = httpx.Client(timeout=900)
+    # Aquecimento, fora da medição: a 1ª requisição de um modelo frio custa segundos e o decider só monta o cache
+    # de schema na 2ª vez que vê o schema. Numa cascata o 2º estágio é aquecido direto (a fala pode não escalar).
+    spec = registry.load_config()["backends"][router]
+    for name in [router] + ([spec["second"]] if spec.get("type") == "cascade" else []):
+        for _ in range(3):
+            client.post(f"{API}/v1/decide", json={"input": WARMUP[0], "backend": name, "source": "pipeline:warmup"})
+    for text in WARMUP:
+        client.post(f"{API}/v1/route", json={"input": text, "backend": router, "min_confidence": threshold,
+                                             "wait_llm": True, "source": "pipeline:warmup"})
     preds, e2e = [], []
     for i, row in enumerate(rows):
         start = time.perf_counter()
