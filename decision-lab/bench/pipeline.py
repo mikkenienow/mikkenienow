@@ -22,11 +22,11 @@ from typing import Any
 import httpx
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from bench import bench_dir  # noqa: E402
 from bench.metrics import LLM_KEYS, binary_metrics, correct  # noqa: E402
 from bench.run_bench import load_test  # noqa: E402
 from lab import backends as registry  # noqa: E402
 from lab.executors import LlmExecutor  # noqa: E402
-from lab.taxonomy import ROOT  # noqa: E402
 
 API = "http://127.0.0.1:8000"
 
@@ -93,7 +93,7 @@ def main() -> None:
     parser.add_argument("--baseline", action="store_true")
     args = parser.parse_args()
     rows = stream(args.limit)
-    out_path = ROOT / "runs" / "bench" / "pipeline.json"
+    out_path = bench_dir() / "pipeline.json"
     results = json.loads(out_path.read_text()) if out_path.exists() else {}
     if args.baseline:
         results["baseline"] = run_baseline(rows)

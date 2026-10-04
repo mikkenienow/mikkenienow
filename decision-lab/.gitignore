@@ -1,6 +1,6 @@
-.venv/
-vendor/
-models/
+.venv
+vendor
+models
 runs/logs/
 runs/decisions.jsonl
 __pycache__/

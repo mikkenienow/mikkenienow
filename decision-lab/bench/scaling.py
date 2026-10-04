@@ -19,10 +19,11 @@ from pathlib import Path
 from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from bench import bench_dir  # noqa: E402
 from bench.metrics import binary_metrics, correct, percentile  # noqa: E402
 from bench.run_bench import load_test  # noqa: E402
 from lab import backends as registry  # noqa: E402
-from lab.taxonomy import ROOT, Taxonomy  # noqa: E402
+from lab.taxonomy import Taxonomy  # noqa: E402
 from lab.types import Option  # noqa: E402
 
 DISTRACTORS = [  # (chave, pt, en)
@@ -78,7 +79,7 @@ def main() -> None:
     taxonomy, config = Taxonomy.load(), registry.load_config()
     rows = load_test(args.limit)
     results: dict[str, Any] = {}
-    out_path = ROOT / "runs" / "bench" / "scaling.json"
+    out_path = bench_dir() / "scaling.json"
     if out_path.exists():
         results = json.loads(out_path.read_text())
     for name in args.backends.split(","):

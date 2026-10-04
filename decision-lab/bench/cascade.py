@@ -17,9 +17,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from bench.metrics import binary_metrics, correct  # noqa: E402
-from lab.taxonomy import ROOT  # noqa: E402
+from bench import bench_dir  # noqa: E402
 
-BENCH = ROOT / "runs" / "bench"
+BENCH = bench_dir()
 
 
 def load(name: str) -> list[dict]:

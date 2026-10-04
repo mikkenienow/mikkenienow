@@ -10,9 +10,9 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from lab.taxonomy import ROOT  # noqa: E402
+from bench import bench_dir  # noqa: E402
 
-BENCH = ROOT / "runs" / "bench"
+BENCH = bench_dir()
 GROUP = {"decision-model": "C) decisão", "llm-logprob": "D) LLM genérico (logprob)",
          "llm-generative": "A) LLM generativo", "zero-shot-nli": "zero-shot", "zero-shot-gliclass": "zero-shot",
          "zero-shot-embedding": "zero-shot", "trained-tfidf": "B) treinado", "trained-embedding": "B) treinado",

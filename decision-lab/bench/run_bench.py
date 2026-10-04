@@ -21,11 +21,12 @@ from typing import Any
 import psutil
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from bench import bench_dir  # noqa: E402
 from bench.metrics import summarize  # noqa: E402
 from lab import backends as registry  # noqa: E402
 from lab.taxonomy import ROOT, Taxonomy  # noqa: E402
 
-OUT = ROOT / "runs" / "bench"
+OUT = bench_dir()
 
 
 def load_test(limit: int | None = None) -> list[dict[str, Any]]:

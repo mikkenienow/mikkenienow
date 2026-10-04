@@ -79,3 +79,55 @@ Todos os comandos estão em [scripts/setup.sh](../scripts/setup.sh) (idempotente
 8. **`jeff-serve` atende uma requisição por vez** e devolve 529 para concorrentes. O cliente do laboratório
    agora faz retry curto em 529/503.
 9. `pkill -f <padrão>` matava o próprio shell (o padrão aparece na linha de comando). Usado `pkill -f "[l]lama-server"`.
+
+---
+
+# Máquina local (retomada em 04/10/2026)
+
+## Hardware detectado
+
+| Item | Valor |
+|---|---|
+| SO | Windows 11 Pro 10.0.22000 (x64); laboratório dentro do **WSL2** (Ubuntu 24.04.2, kernel 6.18, glibc 2.39) |
+| CPU | Intel Core i5-9400F @ 2,9 GHz — **6 núcleos / 6 threads**, AVX2 + FMA + F16C, **sem AVX-512** |
+| RAM | 15,9 GB no host (≈ 7 GB livres com o uso normal do desktop); WSL2 configurado para 12 GB + 8 GB de swap |
+| GPU | AMD Radeon RX 580 (Polaris, driver 31.0.21923). **Sem NVIDIA/CUDA, sem Apple Silicon/MLX** |
+| Disco | 178 GB livres em C:; dados pesados no ext4 do WSL (`~/decision-lab-data`) |
+
+Consequência: a máquina cai no **caminho CPU**. A RX 580 não serve para PyTorch (sem CUDA; ROCm não suporta
+Polaris; não há `flash-linear-attention` fora de CUDA), então o Jeff/decider em PyTorch e o treino de LoRA
+continuam em CPU. Ela só poderia ajudar via llama.cpp + Vulkan (ver "Próximos passos").
+
+## Escolhas e justificativas
+
+1. **WSL2 em vez de Windows nativo** — os scripts são bash, o Jeff/decider só são testados em Linux/macOS, e o
+   build nativo do llama.cpp é trivial no Ubuntu.
+2. **Repositório em `C:\projeto\assistant` (NTFS), dados pesados no ext4 do WSL.** `vendor/`, `models/` e
+   `.venv` são symlinks para `~/decision-lab-data` (`LAB_DATA=... scripts/setup.sh`). Motivo: o DrvFs
+   (`/mnt/c`) é lento demais para venvs (dezenas de milhares de arquivos) e para carregar ~9 GB de modelos.
+3. **`.wslconfig` com `memory=12GB`, `swap=8GB`** (o arquivo não existia; o padrão do WSL2 é 50% da RAM =
+   8 GB). Motivo: o pipeline precisa de decider (3,5 GB) + Qwen 2B (1,6 GB) + Qwen 4B (4,4 GB) + lab ao mesmo
+   tempo. Não cabe "tudo de uma vez" (Jeff + decider + 3 LLMs ≈ 15 GB): os serviços são subidos por grupo,
+   conforme o benchmark.
+4. **Toolchain**: `apt-get install build-essential cmake ninja-build pkg-config` (via `wsl -u root`, pois o
+   `sudo` do usuário pede senha); `uv 0.12.23` pelo instalador oficial (≥ 0.12.19 exigido pelo Jeff).
+5. **`.gitattributes` com `eol=lf`** em `decision-lab/`: o Git for Windows (`core.autocrlf=true`) fazia
+   checkout dos `.sh` com CRLF, o que quebra o bash do WSL.
+
+## Mudanças no `scripts/setup.sh`
+
+- `ACCEL=auto|cpu|cuda|mlx` (auto: `nvidia-smi` → cuda; Darwin arm64 → mlx; senão cpu).
+  - `cuda`: torch do índice CUDA, Jeff com `uv sync --extra cuda`, llama.cpp com `-DGGML_CUDA=ON`, decider com
+    `flash-linear-attention`.
+  - `mlx`: Jeff com `uv sync --extra mac` (servir com `JEFF_BACKEND=mlx`), llama.cpp com Metal (padrão no macOS).
+  - `cpu`: igual ao que rodou na nuvem (wheels CPU, mesmas versões fixadas).
+  - **Só o caminho `cpu` foi executado e validado** (nesta máquina e na VM). `cuda` e `mlx` foram escritos a
+    partir da documentação dos projetos e não puderam ser testados aqui.
+- `LAB_DATA=/caminho`: coloca `vendor/`, `models/` e `.venv` fora do repositório, com symlinks.
+- Checagem explícita de `uv >= 0.12.19`.
+
+Comando usado:
+
+```bash
+LAB_DATA=$HOME/decision-lab-data bash scripts/setup.sh
+```
