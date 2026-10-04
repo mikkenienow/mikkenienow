@@ -366,5 +366,17 @@
       "escalated": 1.0,
       "mean_latency_ms": 10494.287996006235
     }
+  ],
+  "e5-logreg -> decider-0.8b-gguf-restore": [
+    {
+      "tau": 0.3,
+      "accuracy": 0.8930817610062893,
+      "negatives": 53,
+      "positives": 99,
+      "false_activation_rate": 0.07547169811320754,
+      "missed_rate": 0.04040404040404041,
+      "escalated": 0.16352201257861634,
+      "mean_latency_ms": 56.24656356603622
+    }
   ]
 }

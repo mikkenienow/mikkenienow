@@ -278,8 +278,70 @@ evita 75% das chamadas ao LLM sem perder perguntas; usar o LLM como router é o 
 Ressalva de método: as latências locais foram medidas com a máquina em uso (carga do host variável; a mesma
 configuração do decider mediu 350 ms numa rodada e ~500 ms em outra). As acurácias não dependem disso.
 
+## Experimento 2 — decider em GGUF no llama.cpp com o prefixo do schema restaurado (04/10/2026, máquina local)
+
+Feito no lugar do LoRA, que precisa de GPU. Pergunta: dá para juntar os kernels de CPU do llama.cpp com o cache
+de schema do decider? Hipótese registrada antes: cair de ~540 ms para ~100–200 ms.
+
+**Como** ([lab/backends/decider_llama.py](../lab/backends/decider_llama.py), tipo `decider_llama`):
+
+1. O decider-0.8b foi convertido para GGUF Q8_0 (`scripts/convert_decider_gguf.sh`; o projeto só publica GGUF do
+   2B e do 4B). Não há cabeça extra: o decider lê os logits das letras no LM head.
+2. O backend monta o prompt *schema-first* em ids de tokens, igual ao `decider.prompt` (pergunta + opções =
+   prefixo; `Context:` + fala + `Answer: (` = sufixo), e pede ao `llama-server` (`/completion`, 1 token) os logits
+   das letras; softmax com a temperatura do `decider_config.json` (1,03).
+3. Três modos de reaproveitar o prefixo: `none` (recalcula tudo), `slot` (`cache_prompt` do servidor) e `restore`
+   (calcula o prefixo uma vez, `POST /slots/0?action=save`; antes de cada decisão, `action=restore`).
+
+**Resultado** (159 falas, `--perturb`, `THREADS=4`; mesma máquina e mesma rodada de carga do host):
+
+| serving do decider-0.8b | acurácia | falsa ativação | p50 | p95 | CPU-s | RAM do servidor | tokens processados por fala |
+|---|---|---|---|---|---|---|---|
+| PyTorch fp32 + cache de schema (`decider.serve`) | 78,6% | 37,7% | 350 ms | 438 ms | 1,14 | 3,5 GB | ~17 |
+| llama.cpp Q8_0, sem cache | 78,6% | 37,7% | 1 427 ms | 1 623 ms | 5,90 | 1,0 GB | ~204 |
+| llama.cpp Q8_0, `cache_prompt` do slot | = | = | ~1 350 ms | – | 5,7 | 1,0 GB | ~203 (**não reaproveita**) |
+| **llama.cpp Q8_0, prefixo restaurado** | 78,6% | 37,7% | **204 ms** | 314 ms | **0,79** | **1,0 GB** | ~17,5 (+5 ms do restore) |
+| (referência) Jeff, PyTorch fp32, sem cache | 79,2% | 45,3% | 2 802 ms | 3 126 ms | 7,74 | 3,9 GB | prompt inteiro |
+
+- **Paridade**: 159 de 159 decisões idênticas às do PyTorch; diferença média de probabilidade 0,011 (máx. 0,07),
+  efeito da quantização Q8. ECE 0,07 (PyTorch: 0,02) — a calibração piora um pouco, a ordenação não (AUROC 0,81).
+- **Classes dinâmicas**: latência constante de 2 a 32 opções (198–237 ms), mesmas acurácias do PyTorch em todos os
+  cenários (inclui a renderização "larga" de mais de 10 opções). Cada schema novo custa um prefill (~1,5 s) e um
+  arquivo de estado de 21–26 MB.
+- **Cascata** e5-logreg → decider GGUF (τ = 0,30): 89,3% / 7,5% de falsa ativação / **56 ms** de média (simulada).
+  No pipeline real pela API (`cascade-e5-decider-gguf`): 128 s no total, 5,9 s decidindo (73 ms por fala), 3,7% de
+  falsa ativação, 93,8% de acerto, 0 perguntas perdidas — igual à cascata com PyTorch, com 2,5 GB a menos de RAM.
+
+**Conclusões**
+
+1. **Hipótese confirmada no limite superior**: 350 → 204 ms (1,7×) e 31% menos CPU, com 3,5× menos memória.
+   Contra o mesmo GGUF sem cache, o prefixo restaurado vale **7×**; contra o Jeff em PyTorch, **14×**.
+2. **Os dois ganhos são independentes e se multiplicam**: kernels do llama.cpp ≈ 2× (2 802 ms do Jeff em PyTorch →
+   1 427 ms do decider em GGUF, ambos processando o prompt inteiro) e cache de schema ≈ 7×.
+3. **O `cache_prompt` do llama-server não serve para isso no Qwen3.5.** O estado recorrente das camadas Gated
+   DeltaNet não pode ser "rebobinado" até o fim do prefixo depois que a fala anterior passou por ele, e o servidor
+   reprocessa tudo (com ou sem `--cache-ram`). Só o save/restore explícito de um estado que termina exatamente no
+   fim do prefixo funciona.
+4. O que sobra dos 204 ms é taxa de tokens: ~17 tokens de sufixo a ~90–110 tok/s. Próximos ganhos possíveis:
+   Q4_K_M (na VM o prefill foi 1,35× mais rápido que em Q8_0, a verificar a paridade) e sufixo mais curto.
+5. **Não muda o problema principal**: é o mesmo modelo, com os mesmos 37,7% de falsa ativação. O experimento
+   barateia o 2º estágio da cascata; o destinatário continua dependendo de dados do domínio (item 1 abaixo).
+
+Decisão: o backend padrão **continua** `cascade-e5-decider` (funciona só com o `setup.sh`). O
+`cascade-e5-decider-gguf` é a opção recomendada quando a RAM é o gargalo (é o caso deste PC de 16 GB); exige
+`scripts/convert_decider_gguf.sh` e `scripts/services.sh start decider-gguf`.
+
+Limitações: um slot só (uma decisão por vez; o restore troca o estado do slot), testado só com o 0.8B em Q8_0 e
+só nesta máquina; o Jeff não foi convertido (o layout dele é *state-first* e o readout é uma camada separada do
+LM head, então não há prefixo cacheável nem conversão direta).
+
 ## Próximos experimentos sugeridos
 
+0. **Estado em 04/10/2026**: o item 2 foi feito (seção acima). O item 1 continua sendo o mais importante e está
+   **bloqueado por hardware**: a máquina local não tem GPU utilizável pelo PyTorch (Radeon RX 580). Alternativas
+   sem GPU, ainda não tentadas: treinar o LoRA numa GPU alugada/Colab e só servir aqui; ou fine-tuning do
+   classificador e5 com os mesmos 1–2 mil exemplos (treina em CPU em minutos), que ataca o mesmo problema pelo
+   1º estágio da cascata.
 1. **Fine-tuning de domínio de um modelo de decisão** (LoRA do Jeff com o adapter kit, ou o decider) com
    ~1–2 mil frases do assistente (geradas + revisadas), atacando especificamente o "destinatário". É a hipótese
    mais forte para tirar o porteiro de 38% para < 10% de falsa ativação sem o classificador separado.

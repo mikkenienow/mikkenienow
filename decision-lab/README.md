@@ -26,6 +26,11 @@ API (`/v1/decide`, `/v1/route`) e pela UI → registrada em `runs/decisions.json
 outros componentes (executores da casa simulada, LLM local, UI via SSE) → benchmark comparando 18 backends.
 **Fase 2 executada** (porteiro na frente de LLMs locais, medido ponta a ponta). Fases 3–5 preparadas, não iniciadas.
 
+**Re-medido numa segunda máquina** (PC doméstico, i5 de 6 núcleos, sem GPU utilizável, WSL2): mesmas acurácias,
+latências parecidas com as da VM; resultados em `runs/bench-local/`. **Experimento 2 feito**: decider em GGUF no
+llama.cpp com o prefixo do schema restaurado — 204 ms por decisão (350 ms no PyTorch) com 1 GB de RAM.
+Próximo passo: Fase 3 (celular ↔ PC). O fine-tuning de destinatário (LoRA) segue bloqueado por falta de GPU.
+
 Principais achados (detalhes em [docs/03-resultados.md](docs/03-resultados.md)):
 
 - A especialização em decisão vale **+31 pontos** de acurácia sobre o mesmo modelo-base (Qwen3.5-0.8B → Jeff), sem custo extra.
@@ -54,6 +59,19 @@ scripts/services.sh start all       # sobe os servidores de modelos (Jeff :8765,
 scripts/lab.sh                      # API + UI em http://127.0.0.1:8000
 ```
 
+Em outras máquinas (detalhes em [docs/02-ambiente.md](docs/02-ambiente.md#máquina-local-retomada-em-04102026)):
+
+```bash
+# Windows: rode dentro do WSL2, com os dados pesados fora de /mnt/c
+LAB_DATA=$HOME/decision-lab-data scripts/setup.sh    # ACCEL=cuda|mlx|cpu é detectado (só cpu foi testado)
+# PC com 16 GB ou em uso: suba só o necessário e não use todos os núcleos
+THREADS=4 TORCH_THREADS=3 scripts/services.sh start decider llm-large
+# opcional: decider no llama.cpp com prefixo restaurado (mais rápido, 1 GB de RAM)
+scripts/convert_decider_gguf.sh && SLOT_DIR=$HOME/decision-lab-data/slots scripts/services.sh start decider-gguf
+# re-medir tudo nesta máquina, sem sobrescrever runs/bench/
+BENCH_DIR=runs/bench-local THREADS=4 TORCH_THREADS=3 scripts/bench_all.sh
+```
+
 ```bash
 # decisão com a taxonomia padrão (assistente residencial)
 curl -s localhost:8000/v1/decide -H 'content-type: application/json' \
@@ -80,6 +98,7 @@ Edite [config/backends.yaml](config/backends.yaml). Tipos disponíveis:
 | tipo | o que é |
 |---|---|
 | `systemone` | qualquer servidor no protocolo do Jev (`POST /v1/systemone`): jeff-serve, llama-server com modelos de decisão, decider.serve, laya-serve, ollaya, ou o Jev hospedado (`api_key_env`) |
+| `decider_llama` | decider em GGUF no llama-server, prompt schema-first e prefixo restaurado via `/slots` (`prefix_cache: none|slot|restore`) |
 | `llm_logprob` | LLM genérico no llama-server, 1 forward, probabilidade das letras das opções (mesmo prompt do Jeff) |
 | `llm_generative` | LLM genérico gerando `{"decision": ...}` com JSON schema |
 | `nli`, `gliclass`, `embed_zeroshot` | zero-shot clássicos |

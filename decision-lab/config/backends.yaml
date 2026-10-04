@@ -131,3 +131,35 @@ backends:
     first: e5-logreg
     second: qwen3.5-4b-chat
     threshold: 0.3
+
+  # ---------------- decider-0.8b em GGUF no llama-server (kernels CPU do llama.cpp + prefixo de schema) ----------------
+  # scripts/services.sh start decider-gguf  (GGUF convertido localmente: scripts/convert_decider_gguf.sh)
+  decider-0.8b-gguf:            # sem cache: recalcula prefixo + fala a cada requisição
+    type: decider_llama
+    model: Mapika/decider-0.8b (GGUF Q8_0, llama.cpp, sem cache de prefixo)
+    url: http://127.0.0.1:8822
+    port: 8822
+    tokenizer: models/decider-0.8b
+    prefix_cache: none
+    option_lang: en
+  decider-0.8b-gguf-slot:       # cache_prompt do slot
+    type: decider_llama
+    model: Mapika/decider-0.8b (GGUF Q8_0, llama.cpp, cache de prefixo no slot)
+    url: http://127.0.0.1:8822
+    port: 8822
+    tokenizer: models/decider-0.8b
+    prefix_cache: slot
+    option_lang: en
+  decider-0.8b-gguf-restore:    # estado do prefixo salvo em arquivo e restaurado (/slots save|restore)
+    type: decider_llama
+    model: Mapika/decider-0.8b (GGUF Q8_0, llama.cpp, prefixo restaurado de arquivo)
+    url: http://127.0.0.1:8822
+    port: 8822
+    tokenizer: models/decider-0.8b
+    prefix_cache: restore
+    option_lang: en
+  cascade-e5-decider-gguf:      # a cascata padrão, com o 2º estágio no llama.cpp (1 GB de RAM em vez de 3,5 GB)
+    type: cascade
+    first: e5-logreg
+    second: decider-0.8b-gguf-restore
+    threshold: 0.3

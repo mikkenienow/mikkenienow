@@ -87,5 +87,31 @@
       "TIMERS": 11662.422126571202
     },
     "mean_decision_ms": 11016.712571549966
+  },
+  "cascade-e5-decider-gguf@0.0": {
+    "router": "cascade-e5-decider-gguf",
+    "threshold": 0.0,
+    "n": 80,
+    "accuracy_after_policy": 0.9375,
+    "negatives": 27,
+    "positives": 49,
+    "false_activation_rate": 0.037037037037037035,
+    "missed_rate": 0.02040816326530612,
+    "total_seconds": 128.42753992900361,
+    "decision_seconds": 5.873283470005845,
+    "llm_seconds": 122.10065117199338,
+    "llm_calls": 20,
+    "llm_calls_needed": 18,
+    "llm_wasted": 2,
+    "llm_missed": 0,
+    "mean_e2e_ms_by_route": {
+      "HOME_AUTOMATION": 55.939092133606515,
+      "LLM": 3238.532747500176,
+      "LLM_LARGE": 9186.419263400057,
+      "MEDIA": 64.2528885556304,
+      "NONE": 75.66442461287689,
+      "TIMERS": 83.01205559946538
+    },
+    "mean_decision_ms": 73.41604337507306
   }
 }
