@@ -1,0 +1,344 @@
+{
+  "decider-0.8b-schema": {
+    "gate": {
+      "n_options": 2,
+      "accuracy": 0.75,
+      "negatives": 27,
+      "positives": 30,
+      "false_activation_rate": 0.48148148148148145,
+      "missed_rate": 0.06666666666666667,
+      "latency_p50_ms": 560.1889419995132,
+      "latency_p95_ms": 821.9601233002312,
+      "picked_distractor": 0.0
+    },
+    "n6": {
+      "n_options": 6,
+      "accuracy": 0.6666666666666666,
+      "negatives": 27,
+      "positives": 30,
+      "false_activation_rate": 0.48148148148148145,
+      "missed_rate": 0.1,
+      "latency_p50_ms": 526.3011834995268,
+      "latency_p95_ms": 614.5195961505124,
+      "picked_distractor": 0.0
+    },
+    "n12": {
+      "n_options": 12,
+      "accuracy": 0.7,
+      "negatives": 27,
+      "positives": 30,
+      "false_activation_rate": 0.4444444444444444,
+      "missed_rate": 0.1,
+      "latency_p50_ms": 538.7938790008775,
+      "latency_p95_ms": 630.9101111990458,
+      "picked_distractor": 0.0
+    },
+    "n20": {
+      "n_options": 20,
+      "accuracy": 0.6666666666666666,
+      "negatives": 27,
+      "positives": 30,
+      "false_activation_rate": 0.48148148148148145,
+      "missed_rate": 0.1,
+      "latency_p50_ms": 532.7675695007201,
+      "latency_p95_ms": 645.0925721999738,
+      "picked_distractor": 0.03333333333333333
+    },
+    "n32": {
+      "n_options": 32,
+      "accuracy": 0.65,
+      "negatives": 27,
+      "positives": 30,
+      "false_activation_rate": 0.4074074074074074,
+      "missed_rate": 0.13333333333333333,
+      "latency_p50_ms": 553.7353099998654,
+      "latency_p95_ms": 636.1862118001226,
+      "picked_distractor": 0.08333333333333333
+    }
+  },
+  "julia-1": {
+    "gate": {
+      "n_options": 2,
+      "accuracy": 0.5666666666666667,
+      "negatives": 27,
+      "positives": 30,
+      "false_activation_rate": 0.9259259259259259,
+      "missed_rate": 0.03333333333333333,
+      "latency_p50_ms": 74.63795950025087,
+      "latency_p95_ms": 113.14835185012262,
+      "picked_distractor": 0.0
+    },
+    "n6": {
+      "n_options": 6,
+      "accuracy": 0.35,
+      "negatives": 27,
+      "positives": 30,
+      "false_activation_rate": 1.0,
+      "missed_rate": 0.0,
+      "latency_p50_ms": 156.16015549949225,
+      "latency_p95_ms": 232.2767241493237,
+      "picked_distractor": 0.0
+    },
+    "n12": {
+      "n_options": 12,
+      "accuracy": 0.31666666666666665,
+      "negatives": 27,
+      "positives": 30,
+      "false_activation_rate": 1.0,
+      "missed_rate": 0.0,
+      "latency_p50_ms": 190.90369200057467,
+      "latency_p95_ms": 266.6278979993874,
+      "picked_distractor": 0.0
+    },
+    "n20": {
+      "n_options": 20,
+      "accuracy": 0.31666666666666665,
+      "negatives": 27,
+      "positives": 30,
+      "false_activation_rate": 1.0,
+      "missed_rate": 0.0,
+      "latency_p50_ms": 253.28646799971466,
+      "latency_p95_ms": 349.47815424984555,
+      "picked_distractor": 0.16666666666666666
+    },
+    "n32": {
+      "n_options": 32,
+      "accuracy": 0.03333333333333333,
+      "negatives": 27,
+      "positives": 30,
+      "false_activation_rate": 1.0,
+      "missed_rate": 0.0,
+      "latency_p50_ms": 214.61732399984612,
+      "latency_p95_ms": 250.77060629928383,
+      "picked_distractor": 0.9166666666666666
+    }
+  },
+  "gliclass-edge": {
+    "gate": {
+      "n_options": 2,
+      "accuracy": 0.5666666666666667,
+      "negatives": 27,
+      "positives": 30,
+      "false_activation_rate": 0.9629629629629629,
+      "missed_rate": 0.0,
+      "latency_p50_ms": 57.08088250048604,
+      "latency_p95_ms": 69.297686050686,
+      "picked_distractor": 0.0
+    },
+    "n6": {
+      "n_options": 6,
+      "accuracy": 0.31666666666666665,
+      "negatives": 27,
+      "positives": 30,
+      "false_activation_rate": 1.0,
+      "missed_rate": 0.0,
+      "latency_p50_ms": 93.48746199975722,
+      "latency_p95_ms": 116.27316740032255,
+      "picked_distractor": 0.0
+    },
+    "n12": {
+      "n_options": 12,
+      "accuracy": 0.2,
+      "negatives": 27,
+      "positives": 30,
+      "false_activation_rate": 1.0,
+      "missed_rate": 0.0,
+      "latency_p50_ms": 118.34258499948191,
+      "latency_p95_ms": 149.44341205064117,
+      "picked_distractor": 0.7166666666666667
+    },
+    "n20": {
+      "n_options": 20,
+      "accuracy": 0.2,
+      "negatives": 27,
+      "positives": 30,
+      "false_activation_rate": 1.0,
+      "missed_rate": 0.0,
+      "latency_p50_ms": 153.44144299979234,
+      "latency_p95_ms": 181.16422504954244,
+      "picked_distractor": 0.6666666666666666
+    },
+    "n32": {
+      "n_options": 32,
+      "accuracy": 0.13333333333333333,
+      "negatives": 27,
+      "positives": 30,
+      "false_activation_rate": 1.0,
+      "missed_rate": 0.0,
+      "latency_p50_ms": 184.68270400080655,
+      "latency_p95_ms": 224.56667399956132,
+      "picked_distractor": 0.48333333333333334
+    }
+  },
+  "e5-zeroshot": {
+    "gate": {
+      "n_options": 2,
+      "accuracy": 0.5833333333333334,
+      "negatives": 27,
+      "positives": 30,
+      "false_activation_rate": 0.9259259259259259,
+      "missed_rate": 0.0,
+      "latency_p50_ms": 24.166510999748425,
+      "latency_p95_ms": 35.32533515044632,
+      "picked_distractor": 0.0
+    },
+    "n6": {
+      "n_options": 6,
+      "accuracy": 0.3333333333333333,
+      "negatives": 27,
+      "positives": 30,
+      "false_activation_rate": 0.8148148148148148,
+      "missed_rate": 0.5333333333333333,
+      "latency_p50_ms": 22.323775499899057,
+      "latency_p95_ms": 28.99707550050152,
+      "picked_distractor": 0.0
+    },
+    "n12": {
+      "n_options": 12,
+      "accuracy": 0.18333333333333332,
+      "negatives": 27,
+      "positives": 30,
+      "false_activation_rate": 0.8888888888888888,
+      "missed_rate": 0.2,
+      "latency_p50_ms": 23.03325950015278,
+      "latency_p95_ms": 36.79976770044958,
+      "picked_distractor": 0.5833333333333334
+    },
+    "n20": {
+      "n_options": 20,
+      "accuracy": 0.16666666666666666,
+      "negatives": 27,
+      "positives": 30,
+      "false_activation_rate": 0.8888888888888888,
+      "missed_rate": 0.16666666666666666,
+      "latency_p50_ms": 22.06769149961474,
+      "latency_p95_ms": 30.448106349649603,
+      "picked_distractor": 0.6333333333333333
+    },
+    "n32": {
+      "n_options": 32,
+      "accuracy": 0.15,
+      "negatives": 27,
+      "positives": 30,
+      "false_activation_rate": 0.9259259259259259,
+      "missed_rate": 0.16666666666666666,
+      "latency_p50_ms": 21.457761999954528,
+      "latency_p95_ms": 28.335500951288846,
+      "picked_distractor": 0.7166666666666667
+    }
+  },
+  "nli-mdeberta": {
+    "gate": {
+      "n_options": 2,
+      "accuracy": 0.55,
+      "negatives": 27,
+      "positives": 30,
+      "false_activation_rate": 1.0,
+      "missed_rate": 0.0,
+      "latency_p50_ms": 310.60598400017625,
+      "latency_p95_ms": 350.2278707005644,
+      "picked_distractor": 0.0
+    },
+    "n6": {
+      "n_options": 6,
+      "accuracy": 0.3333333333333333,
+      "negatives": 27,
+      "positives": 30,
+      "false_activation_rate": 1.0,
+      "missed_rate": 0.06666666666666667,
+      "latency_p50_ms": 1015.0351870006489,
+      "latency_p95_ms": 1116.212104949227,
+      "picked_distractor": 0.0
+    },
+    "n12": {
+      "n_options": 12,
+      "accuracy": 0.31666666666666665,
+      "negatives": 27,
+      "positives": 30,
+      "false_activation_rate": 1.0,
+      "missed_rate": 0.06666666666666667,
+      "latency_p50_ms": 1955.2593565003917,
+      "latency_p95_ms": 2097.8725430498343,
+      "picked_distractor": 0.03333333333333333
+    },
+    "n20": {
+      "n_options": 20,
+      "accuracy": 0.31666666666666665,
+      "negatives": 27,
+      "positives": 30,
+      "false_activation_rate": 1.0,
+      "missed_rate": 0.06666666666666667,
+      "latency_p50_ms": 3132.390540500637,
+      "latency_p95_ms": 3427.3717346497506,
+      "picked_distractor": 0.03333333333333333
+    },
+    "n32": {
+      "n_options": 32,
+      "accuracy": 0.31666666666666665,
+      "negatives": 27,
+      "positives": 30,
+      "false_activation_rate": 1.0,
+      "missed_rate": 0.06666666666666667,
+      "latency_p50_ms": 5050.146406000749,
+      "latency_p95_ms": 5622.592280399294,
+      "picked_distractor": 0.06666666666666667
+    }
+  },
+  "jeff-0.8b": {
+    "gate": {
+      "n_options": 2,
+      "accuracy": 0.6666666666666666,
+      "negatives": 27,
+      "positives": 30,
+      "false_activation_rate": 0.14814814814814814,
+      "missed_rate": 0.5333333333333333,
+      "latency_p50_ms": 1982.9758120004044,
+      "latency_p95_ms": 2128.167195148671,
+      "picked_distractor": 0.0
+    },
+    "n6": {
+      "n_options": 6,
+      "accuracy": 0.6833333333333333,
+      "negatives": 27,
+      "positives": 30,
+      "false_activation_rate": 0.5185185185185185,
+      "missed_rate": 0.06666666666666667,
+      "latency_p50_ms": 2850.1541775003716,
+      "latency_p95_ms": 3066.3880245504515,
+      "picked_distractor": 0.0
+    },
+    "n12": {
+      "n_options": 12,
+      "accuracy": 0.6833333333333333,
+      "negatives": 27,
+      "positives": 30,
+      "false_activation_rate": 0.48148148148148145,
+      "missed_rate": 0.1,
+      "latency_p50_ms": 3399.5576294992134,
+      "latency_p95_ms": 3650.1295884498177,
+      "picked_distractor": 0.0
+    },
+    "n20": {
+      "n_options": 20,
+      "accuracy": 0.65,
+      "negatives": 27,
+      "positives": 30,
+      "false_activation_rate": 0.5185185185185185,
+      "missed_rate": 0.06666666666666667,
+      "latency_p50_ms": 4314.368326499789,
+      "latency_p95_ms": 4581.799923350263,
+      "picked_distractor": 0.06666666666666667
+    },
+    "n32": {
+      "n_options": 32,
+      "accuracy": 0.6,
+      "negatives": 27,
+      "positives": 30,
+      "false_activation_rate": 0.5925925925925926,
+      "missed_rate": 0.06666666666666667,
+      "latency_p50_ms": 5615.173432500342,
+      "latency_p95_ms": 5865.234175499518,
+      "picked_distractor": 0.1
+    }
+  }
+}

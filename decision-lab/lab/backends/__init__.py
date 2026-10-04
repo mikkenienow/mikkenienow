@@ -21,6 +21,7 @@ TYPES = {
     "tfidf": ("lab.backends.local", "TfidfBackend"),
     "embed_logreg": ("lab.backends.local", "EmbedLogRegBackend"),
     "embed_knn": ("lab.backends.local", "EmbedKnnBackend"),
+    "cascade": ("lab.backends.cascade", "CascadeBackend"),
 }
 
 

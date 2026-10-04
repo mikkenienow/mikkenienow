@@ -105,3 +105,29 @@ backends:
     request_model: jeff-latest
     option_lang: en
     gate: true
+
+  # ---------------- decider-0.8b com cache de schema (opções primeiro; prefixo calculado 1x) ----------------
+  decider-0.8b-schema:
+    type: systemone
+    model: Mapika/decider-0.8b (PyTorch CPU, schema cache)
+    url: http://127.0.0.1:8821
+    port: 8821
+    option_lang: en
+  decider-0.8b-schema-pt:
+    type: systemone
+    model: Mapika/decider-0.8b (PyTorch CPU, schema cache)
+    url: http://127.0.0.1:8821
+    port: 8821
+    option_lang: pt
+
+  # ---------------- cascatas (estágio 1 barato; escala abaixo de τ) ----------------
+  cascade-e5-decider:
+    type: cascade
+    first: e5-logreg
+    second: decider-0.8b-schema
+    threshold: 0.3
+  cascade-e5-4b:
+    type: cascade
+    first: e5-logreg
+    second: qwen3.5-4b-chat
+    threshold: 0.3
