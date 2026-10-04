@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Apuração Lula × Flávio</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #f6f7f9; --card: #ffffff; --text: #16181d; --muted: #5f6673; --border: #e2e5ea;
+    --lula: #c8102e; --flavio: #1f4fbf; --diff: #7a7f8a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0f1115; --card: #181b21; --text: #eceef2; --muted: #9aa1ad; --border: #2a2e36;
+            --lula: #ff5a6e; --flavio: #6b94ff; --diff: #a3a9b4; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 960px; margin: 0 auto; padding: 24px 16px 48px; }
+  h1 { font-size: 1.4rem; margin: 0 0 4px; }
+  .sub { color: var(--muted); font-size: .9rem; margin-bottom: 20px; }
+  .status { display: inline-flex; align-items: center; gap: 6px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: #2a9d4b; }
+  .dot.err { background: #d97706; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+  .cand .name { font-weight: 600; font-size: 1.05rem; }
+  .cand .pct { font-size: 2.2rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .cand .votes { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .lula { border-top: 4px solid var(--lula); } .lula .pct { color: var(--lula); }
+  .flavio { border-top: 4px solid var(--flavio); } .flavio .pct { color: var(--flavio); }
+  .bar { display: flex; height: 14px; border-radius: 7px; overflow: hidden; margin: 16px 0 6px; background: var(--border); }
+  .bar div { transition: width .6s ease; }
+  .diff { margin-top: 12px; text-align: center; }
+  .diff .big { font-size: 1.6rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .diff .lead { color: var(--muted); }
+  .progress { color: var(--muted); font-size: .9rem; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px; }
+  .chart-card { margin-top: 12px; }
+  .chart-card h2 { font-size: 1rem; margin: 0 0 8px; }
+  .chart-wrap { position: relative; height: 320px; }
+  footer { color: var(--muted); font-size: .8rem; margin-top: 16px; }
+  @media (max-width: 560px) {
+    .grid { grid-template-columns: 1fr; }
+    .cand .pct { font-size: 1.8rem; }
+    .chart-wrap { height: 260px; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1>Apuração Presidente 2026 · 1º turno</h1>
+  <div class="sub">
+    <span class="status"><span class="dot" id="dot"></span><span id="status">Conectando ao TSE…</span></span>
+  </div>
+
+  <div class="grid">
+    <div class="card cand lula">
+      <div class="name" id="lula-name">Lula</div>
+      <div class="pct" id="lula-pct">–</div>
+      <div class="votes" id="lula-votes">–</div>
+    </div>
+    <div class="card cand flavio">
+      <div class="name" id="flavio-name">Flávio Bolsonaro</div>
+      <div class="pct" id="flavio-pct">–</div>
+      <div class="votes" id="flavio-votes">–</div>
+    </div>
+  </div>
+
+  <div class="card diff">
+    <div class="lead" id="lead">Diferença</div>
+    <div class="big" id="diff">–</div>
+    <div class="bar"><div id="bar-lula" style="background:var(--lula);width:50%"></div><div id="bar-flavio" style="background:var(--flavio);width:50%"></div></div>
+    <div class="progress">
+      <span id="secoes">Seções totalizadas: –</span>
+      <span id="hora">Última totalização: –</span>
+    </div>
+  </div>
+
+  <div class="card chart-card">
+    <h2>Evolução por % de seções apuradas (% dos votos válidos)</h2>
+    <div class="chart-wrap"><canvas id="chart"></canvas></div>
+  </div>
+  <div class="card chart-card">
+    <h2>Diferença de votos (Flávio − Lula)</h2>
+    <div class="chart-wrap"><canvas id="chartDiff"></canvas></div>
+  </div>
+
+  <footer>
+    Fonte: resultados oficiais do TSE (resultados.tse.jus.br). Atualiza a cada 30 s; um novo ponto entra no gráfico
+    a cada nova totalização divulgada.
+  </footer>
+</main>
+
+<script>
+const URL_TSE = "https://resultados.tse.jus.br/oficial/ele2026/6257/dados/br/br-c0001-e006257-u.json";
+const INTERVALO_MS = 30000;
+const STORAGE_KEY = "apuracao-2026-t1-historico";
+
+const fmtInt = n => n.toLocaleString("pt-BR");
+const fmtPct = n => n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "%";
+const num = s => parseFloat(String(s).replace(/\./g, "").replace(",", "."));
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const $ = id => document.getElementById(id);
+
+let historico = [];
+try { historico = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch (e) { historico = []; }
+
+function acharCandidatos(dados) {
+  const cands = [];
+  for (const cargo of dados.carg || [])
+    for (const agr of cargo.agr || [])
+      for (const par of agr.par || [])
+        for (const c of par.cand || []) cands.push(c);
+  const norm = s => (s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toUpperCase();
+  const lula = cands.find(c => c.n === "13" || norm(c.nmu).includes("LULA"));
+  const flavio = cands.find(c => norm(c.nmu).includes("FLAVIO") || norm(c.nm).includes("FLAVIO NANTES"));
+  return { lula, flavio };
+}
+
+const opcoesBase = () => ({
+  responsive: true, maintainAspectRatio: false, animation: { duration: 400 },
+  interaction: { mode: "index", intersect: false },
+  plugins: { legend: { labels: { color: css("--text") } } },
+  scales: {
+    x: { type: "linear", title: { display: true, text: "% seções totalizadas", color: css("--muted") },
+         ticks: { color: css("--muted"), callback: v => v + "%" }, grid: { color: css("--border") } },
+    y: { ticks: { color: css("--muted") }, grid: { color: css("--border") } }
+  }
+});
+
+const chart = new Chart($("chart"), {
+  type: "line",
+  data: { datasets: [
+    { label: "Lula", data: [], borderColor: css("--lula"), backgroundColor: css("--lula"), tension: .25, pointRadius: 3 },
+    { label: "Flávio", data: [], borderColor: css("--flavio"), backgroundColor: css("--flavio"), tension: .25, pointRadius: 3 }
+  ]},
+  options: (() => { const o = opcoesBase();
+    o.scales.y.ticks.callback = v => v + "%";
+    o.plugins.tooltip = { callbacks: { label: c => `${c.dataset.label}: ${fmtPct(c.parsed.y)}`,
+                                       title: i => `${fmtPct(i[0].parsed.x)} das seções` } };
+    return o; })()
+});
+
+const chartDiff = new Chart($("chartDiff"), {
+  type: "bar",
+  data: { datasets: [{ label: "Flávio − Lula (votos)", data: [], backgroundColor: [] }] },
+  options: (() => { const o = opcoesBase();
+    o.plugins.legend.display = false;
+    o.scales.y.ticks.callback = v => fmtInt(v);
+    o.plugins.tooltip = { callbacks: { label: c => `${c.parsed.y >= 0 ? "Flávio" : "Lula"} à frente por ${fmtInt(Math.abs(c.parsed.y))} votos`,
+                                       title: i => `${fmtPct(i[0].parsed.x)} das seções` } };
+    return o; })()
+});
+
+function desenharGraficos() {
+  chart.data.datasets[0].data = historico.map(p => ({ x: p.secoes, y: p.lulaPct }));
+  chart.data.datasets[1].data = historico.map(p => ({ x: p.secoes, y: p.flavioPct }));
+  chart.update();
+  const d = historico.map(p => ({ x: p.secoes, y: p.flavioVotos - p.lulaVotos }));
+  chartDiff.data.datasets[0].data = d;
+  chartDiff.data.datasets[0].backgroundColor = d.map(p => p.y >= 0 ? css("--flavio") : css("--lula"));
+  chartDiff.update();
+}
+
+function render(p) {
+  $("lula-pct").textContent = fmtPct(p.lulaPct);
+  $("lula-votes").textContent = fmtInt(p.lulaVotos) + " votos";
+  $("flavio-pct").textContent = fmtPct(p.flavioPct);
+  $("flavio-votes").textContent = fmtInt(p.flavioVotos) + " votos";
+
+  const dif = p.flavioVotos - p.lulaVotos;
+  const difPct = p.flavioPct - p.lulaPct;
+  if (dif === 0) { $("lead").textContent = "Empate"; $("diff").textContent = "0 votos"; $("diff").style.color = ""; }
+  else {
+    const lider = dif > 0 ? "Flávio" : "Lula";
+    $("lead").textContent = `${lider} à frente por`;
+    $("diff").textContent = `${fmtInt(Math.abs(dif))} votos (${fmtPct(Math.abs(difPct)).replace("%", " p.p.")})`;
+    $("diff").style.color = css(dif > 0 ? "--flavio" : "--lula");
+  }
+  const soma = p.lulaVotos + p.flavioVotos || 1;
+  $("bar-lula").style.width = (p.lulaVotos / soma * 100) + "%";
+  $("bar-flavio").style.width = (p.flavioVotos / soma * 100) + "%";
+  $("secoes").textContent = `Seções totalizadas: ${fmtPct(p.secoes)}`;
+  $("hora").textContent = `Última totalização: ${p.hora}`;
+}
+
+async function atualizar() {
+  try {
+    const r = await fetch(URL_TSE + "?t=" + Date.now(), { cache: "no-store" });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    const dados = await r.json();
+    const { lula, flavio } = acharCandidatos(dados);
+    if (!lula || !flavio) throw new Error("candidatos não encontrados");
+
+    const p = {
+      secoes: num(dados.s.pstn),
+      hora: `${dados.dg} ${dados.hg}`,
+      lulaVotos: parseInt(lula.vap, 10), lulaPct: num(lula.pvapn),
+      flavioVotos: parseInt(flavio.vap, 10), flavioPct: num(flavio.pvapn)
+    };
+    $("lula-name").textContent = lula.nmu === "LULA" ? "Lula" : lula.nmu;
+    $("flavio-name").textContent = "Flávio Bolsonaro";
+
+    const ultimo = historico[historico.length - 1];
+    if (!ultimo || ultimo.hora !== p.hora || ultimo.secoes !== p.secoes) {
+      historico.push(p);
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(historico)); } catch (e) {}
+      desenharGraficos();
+    }
+    render(p);
+    $("dot").classList.remove("err");
+    $("status").textContent = (dados.s && dados.tf === "s" ? "Apuração encerrada" : "Ao vivo") +
+      ` · verificado às ${new Date().toLocaleTimeString("pt-BR")}`;
+  } catch (e) {
+    $("dot").classList.add("err");
+    $("status").textContent = `Falha ao consultar o TSE (${e.message}). Tentando de novo em ${INTERVALO_MS / 1000} s…`;
+  }
+}
+
+if (historico.length) { desenharGraficos(); render(historico[historico.length - 1]); }
+atualizar();
+setInterval(atualizar, INTERVALO_MS);
+</script>
+</body>
+</html>
