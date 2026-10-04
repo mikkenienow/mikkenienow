@@ -62,12 +62,14 @@
       </select>
       <button id="demo">▶ stream de demonstração</button>
       <button id="mic" title="Web Speech API do navegador (prévia da Fase 4)">🎤 microfone</button>
+      <button id="ping" title="Fase 3: 20 requisições vazias para medir só a rede até o PC">📶 medir rede</button>
     </div>
     <div id="feed"></div>
   </section>
   <aside class="side">
     <div class="panel"><h2>Casa (simulada)</h2><div id="home"><span class="ts">nenhum dispositivo alterado</span></div></div>
     <div class="panel"><h2>Estatísticas</h2><div id="stats"></div></div>
+    <div class="panel"><h2>Rede (por dispositivo)</h2><div class="ts">ida e volta p50 · acréscimo sobre a decisão</div><div id="net"></div></div>
   </aside>
 </main>
 <script>
@@ -132,8 +134,42 @@ async function send(text, source = "ui") {
   if (!text.trim()) return;
   const body = { input: text, backend: $("backend").value, min_confidence: parseFloat($("thr").value),
                  low_confidence: $("low").value, source };
+  const t0 = performance.now();
   const r = await fetch("/v1/route", { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body) });
-  if (!r.ok) alert(await r.text());
+  if (!r.ok) { alert(await r.text()); return; }
+  const rec = await r.json();
+  const roundTrip = performance.now() - t0;
+  // Fase 3: quanto este dispositivo esperou (rede + servidor + decisão) vs. só a decisão
+  reportTiming({ kind: "route", round_trip_ms: roundTrip, decision_ms: rec.latency_ms, decision_id: rec.id });
+  annotate(rec.id, `ida e volta neste dispositivo: ${roundTrip.toFixed(0)} ms (decisão ${rec.latency_ms.toFixed(0)} ms + ${(roundTrip - rec.latency_ms).toFixed(0)} ms de rede/servidor)`);
+}
+
+function annotate(id, text, tries = 20) {  // a entrada chega pelo SSE; pode vir depois da resposta do POST
+  const div = entries[id];
+  if (!div) { if (tries > 0) setTimeout(() => annotate(id, text, tries - 1), 100); return; }
+  const a = document.createElement("div");
+  a.className = "ts"; a.textContent = text;
+  div.appendChild(a);
+}
+
+async function reportTiming(t) {
+  await fetch("/v1/client_timing", { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(t) });
+  refreshNet();
+}
+
+async function refreshNet() {
+  const s = await (await fetch("/v1/client_timings")).json();
+  $("net").innerHTML = Object.entries(s).map(([k, v]) =>
+    `<div class="kv"><span>${esc(k)} (n=${v.n})</span><b>${v.round_trip_p50_ms} ms · +${v.overhead_p50_ms} ms</b></div>`).join("")
+    || '<span class="ts">sem medições</span>';
+}
+
+async function pingNet(n = 20) {  // só a rede: GET /health, sem modelo
+  for (let i = 0; i < n; i++) {
+    const t0 = performance.now();
+    await fetch("/health", { cache: "no-store" });
+    await reportTiming({ kind: "ping", round_trip_ms: performance.now() - t0 });
+  }
 }
 
 async function init() {
@@ -145,7 +181,7 @@ async function init() {
     $("backend").appendChild(o);
   }
   renderHome(await (await fetch("/v1/state")).json());
-  refreshStats();
+  refreshStats(); refreshNet();
   const es = new EventSource("/v1/events");
   es.onmessage = (m) => {
     const ev = JSON.parse(m.data);
@@ -159,6 +195,7 @@ $("send").onclick = () => { send($("text").value); $("text").value = ""; };
 $("text").addEventListener("keydown", (e) => { if (e.key === "Enter") $("send").click(); });
 $("thr").oninput = () => $("thrv").textContent = parseFloat($("thr").value).toFixed(2);
 $("demo").onclick = async () => { for (const t of DEMO) { await send(t, "demo"); } };
+$("ping").onclick = () => pingNet();
 
 // Prévia da Fase 4: reconhecimento de voz contínuo do navegador (Chrome/Edge). O áudio é processado
 // pelo serviço de voz do navegador, NÃO localmente; o STT local (whisper.cpp) é um próximo passo.

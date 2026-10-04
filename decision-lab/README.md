@@ -49,7 +49,8 @@ Documentação:
 | [docs/01-pesquisa.md](docs/01-pesquisa.md) | Etapa 1: panorama dos modelos de decisão abertos (Jeff, decider, Julia-1, Laya, Kev, OpenJev, Clef…) e alternativas |
 | [docs/02-ambiente.md](docs/02-ambiente.md) | Etapa 2: o que foi instalado, comandos, arquitetura, problemas encontrados |
 | [docs/03-resultados.md](docs/03-resultados.md) | Etapas 3–7: benchmarks, comparação, router + LLM, respostas às perguntas do experimento |
-| [runs/bench/REPORT.md](runs/bench/REPORT.md) | Tabelas completas geradas pelos scripts |
+| [runs/bench/REPORT.md](runs/bench/REPORT.md) | Tabelas completas geradas pelos scripts (VM da nuvem); [runs/bench-local/REPORT.md](runs/bench-local/REPORT.md) = máquina local |
+| [docs/04-fase3.md](docs/04-fase3.md) | Fase 3 (celular ↔ PC): instrumentação, medições a partir do host, como concluir |
 
 ## Uso rápido
 

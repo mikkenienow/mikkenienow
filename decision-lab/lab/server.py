@@ -5,6 +5,7 @@
 POST /v1/decide  {"input": "...", "options": [...]|{...}?, "question": "..."?, "backend": "..."?}
 POST /v1/route   {"input": "...", "backend"?, "min_confidence"?, "low_confidence"?, "execute"?: true}
 GET  /v1/backends | /v1/state | /v1/log?limit= | /v1/stats | /v1/events (SSE) | /  (UI)
+POST /v1/client_timing | GET /v1/client_timings   (Fase 3: ida-e-volta medida no cliente)
 """
 
 from __future__ import annotations
@@ -18,7 +19,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel
 from starlette.concurrency import run_in_threadpool
@@ -44,6 +45,7 @@ _stats: dict[str, Any] = {"decisions": 0, "routes": {}, "llm_calls": 0, "llm_cal
 _subscribers: set[asyncio.Queue[str]] = set()
 _loop: asyncio.AbstractEventLoop | None = None
 _started = time.time()
+_client_timings: list[dict[str, Any]] = []
 
 
 def get_backend(name: str | None) -> Backend:
@@ -191,6 +193,45 @@ def stats() -> dict[str, Any]:
     n = max(1, _stats["decisions"])
     return {**_stats, "mean_decision_ms": round(_stats["decision_ms_total"] / n, 1),
             "mean_llm_ms": round(_stats["llm_ms_total"] / max(1, _stats["llm_calls"]), 1)}
+
+
+class ClientTiming(BaseModel):
+    kind: str = "route"  # route: uma fala enviada pela UI | ping: GET /health, só a rede
+    round_trip_ms: float
+    decision_ms: float = 0.0
+    decision_id: str | None = None
+
+
+@app.post("/v1/client_timing")
+def client_timing(timing: ClientTiming, request: Request) -> dict[str, Any]:
+    """Fase 3: o cliente (celular) informa quanto esperou; a diferença para o tempo de decisão é rede + servidor."""
+    record = {"type": "client_timing", "ts": datetime.now(timezone.utc).isoformat(timespec="milliseconds"),
+              "client": request.client.host if request.client else "?",
+              "user_agent": request.headers.get("user-agent", "")[:160], **timing.model_dump(),
+              "overhead_ms": round(timing.round_trip_ms - timing.decision_ms, 2)}
+    _client_timings.append(record)
+    log(record)
+    return record
+
+
+@app.get("/v1/client_timings")
+def client_timings() -> dict[str, Any]:
+    """Resumo por cliente e tipo: mediana e p95 da ida-e-volta e do acréscimo sobre o tempo de decisão."""
+    groups: dict[str, list[dict[str, Any]]] = {}
+    for r in _client_timings:
+        groups.setdefault(f"{r['client']} {r['kind']}", []).append(r)
+
+    def pct(values: list[float], q: float) -> float:
+        values = sorted(values)
+        return round(values[min(len(values) - 1, int(q * len(values)))], 1)
+
+    return {key: {"n": len(rows), "user_agent": rows[-1]["user_agent"],
+                  "round_trip_p50_ms": pct([r["round_trip_ms"] for r in rows], 0.5),
+                  "round_trip_p95_ms": pct([r["round_trip_ms"] for r in rows], 0.95),
+                  "decision_p50_ms": pct([r["decision_ms"] for r in rows], 0.5),
+                  "overhead_p50_ms": pct([r["overhead_ms"] for r in rows], 0.5),
+                  "overhead_p95_ms": pct([r["overhead_ms"] for r in rows], 0.95)}
+            for key, rows in groups.items()}
 
 
 @app.get("/v1/log")
