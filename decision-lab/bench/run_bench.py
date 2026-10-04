@@ -30,7 +30,9 @@ OUT = ROOT / "runs" / "bench"
 
 def load_test(limit: int | None = None) -> list[dict[str, Any]]:
     rows = [json.loads(line) for line in (ROOT / "data" / "test.jsonl").read_text().splitlines()]
-    return rows[::max(1, len(rows) // limit)][:limit] if limit else rows  # amostra espalhada
+    if not limit or limit >= len(rows):
+        return rows
+    return [rows[i * len(rows) // limit] for i in range(limit)]  # amostra uniforme sobre todas as classes
 
 
 def perturb(text: str) -> str:

@@ -17,6 +17,26 @@ política (limiar)  ──►  rota: NONE | HOME_AUTOMATION | MEDIA | TIMERS | L
    └─► LLM local (Qwen3.5-2B / 4B via llama.cpp) só quando a rota pede
 ```
 
+![UI do laboratório: stream de demonstração roteado pela cascata e5 → decider](docs/img/ui-demo.png)
+
+## Estado
+
+**Fase 1 concluída** (critério do enunciado): entrada chega ao PC → modelo local decide → decisão volta pela
+API (`/v1/decide`, `/v1/route`) e pela UI → registrada em `runs/decisions.jsonl` com latência → consumida por
+outros componentes (executores da casa simulada, LLM local, UI via SSE) → benchmark comparando 18 backends.
+**Fase 2 executada** (porteiro na frente de LLMs locais, medido ponta a ponta). Fases 3–5 preparadas, não iniciadas.
+
+Principais achados (detalhes em [docs/03-resultados.md](docs/03-resultados.md)):
+
+- A especialização em decisão vale **+31 pontos** de acurácia sobre o mesmo modelo-base (Qwen3.5-0.8B → Jeff), sem custo extra.
+- O difícil não é a intenção (91–98% para os bons modelos) e sim **saber se a fala é dirigida ao assistente**:
+  modelos de decisão zero-shot classificam o tema e ativam em 38–45% das falas irrelevantes.
+- Na CPU, o **layout com cache de schema** (decider) foi 5,6× mais rápido que o Jeff com a mesma qualidade, e com
+  latência constante de 2 a 32 opções.
+- Melhor custo/benefício medido: **cascata** classificador minúsculo treinado no domínio → modelo de decisão
+  (89–91% de acurácia, 6–8% de falsa ativação, ~120 ms de média nesta VM de 4 vCPUs).
+- Como porteiro de LLM: 75% das chamadas evitadas, 0 perguntas perdidas; usar o próprio LLM 4B como router custa 5,6× mais tempo.
+
 Documentação:
 
 | Documento | Conteúdo |

@@ -4,7 +4,7 @@
 # option_lang: idioma das descrições da taxonomia enviadas ao modelo (pt|en). Modelos treinados só
 # em inglês (Jeff, Laya, decider) podem ir melhor com descrições em inglês mesmo com fala em português.
 
-default_backend: jeff-0.8b
+default_backend: cascade-e5-decider   # melhor custo/benefício medido (docs/03-resultados.md)
 llm_executor: qwen3.5-2b-chat      # quem responde as rotas LLM / LLM_LARGE
 llm_large_executor: qwen3.5-4b-chat
 
