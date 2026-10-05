@@ -25,6 +25,9 @@ wait_for() {  # porta, padrão esperado no /health
 llama() {  # nome porta modelo [args extras]
   local name=$1 port=$2 model=$3; shift 3
   if curl -s "localhost:$port/health" >/dev/null 2>&1; then echo "  :$port já rodando ($name)"; return; fi
+  [ -x "$LLAMA" ] || { echo "  llama-server não encontrado em $LLAMA (rode scripts/setup.sh nesta pasta)"; exit 1; }
+  [ -f "$LAB/models/gguf/$model" ] || { echo "  modelo não encontrado: models/gguf/$model"; exit 1; }
+  echo "  subindo $name em :$port ..."
   nohup "$LLAMA" -m "$LAB/models/gguf/$model" --port "$port" -t "$THREADS" --no-webui --cache-ram 0 "$@" > "$LOGS/$name.log" 2>&1 &
   wait_for "$port" ok
 }
