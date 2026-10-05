@@ -1,0 +1,188 @@
+{
+  "n": 159,
+  "accuracy": 0.8238993710691824,
+  "accuracy_strict": 0.779874213836478,
+  "intent_accuracy_when_addressed": 0.9381443298969072,
+  "negatives": 53,
+  "positives": 99,
+  "false_activation_rate": 0.37735849056603776,
+  "missed_rate": 0.020202020202020204,
+  "latency_ms": {
+    "mean": 2907.364106433958,
+    "p50": 2863.960263000081,
+    "p95": 3248.104829199928,
+    "max": 3515.847026999836
+  },
+  "score_kind": [
+    "probability"
+  ],
+  "ece": 0.15541870720830916,
+  "auroc_confidence": 0.6957470010905126,
+  "by_tag": {
+    "ambiguous": {
+      "n": 11,
+      "accuracy": 1.0
+    },
+    "asr": {
+      "n": 13,
+      "accuracy": 0.7692307692307693
+    },
+    "background": {
+      "n": 5,
+      "accuracy": 0.2
+    },
+    "casual": {
+      "n": 28,
+      "accuracy": 0.6785714285714286
+    },
+    "clear": {
+      "n": 91,
+      "accuracy": 0.9120879120879121
+    },
+    "command": {
+      "n": 82,
+      "accuracy": 0.9024390243902439
+    },
+    "english": {
+      "n": 5,
+      "accuracy": 1.0
+    },
+    "hard": {
+      "n": 28,
+      "accuracy": 0.42857142857142855
+    },
+    "long": {
+      "n": 9,
+      "accuracy": 0.8888888888888888
+    },
+    "mentions_wake": {
+      "n": 6,
+      "accuracy": 0.3333333333333333
+    },
+    "near_wake": {
+      "n": 2,
+      "accuracy": 1.0
+    },
+    "no_wake": {
+      "n": 9,
+      "accuracy": 0.8888888888888888
+    },
+    "question": {
+      "n": 37,
+      "accuracy": 0.8648648648648649
+    },
+    "short": {
+      "n": 19,
+      "accuracy": 0.8947368421052632
+    },
+    "to_human": {
+      "n": 13,
+      "accuracy": 0.6153846153846154
+    }
+  },
+  "by_label": {
+    "complex": {
+      "n": 15,
+      "accuracy": 0.9333333333333333
+    },
+    "home_control": {
+      "n": 32,
+      "accuracy": 0.9375
+    },
+    "ignore": {
+      "n": 58,
+      "accuracy": 0.6551724137931034
+    },
+    "knowledge": {
+      "n": 21,
+      "accuracy": 0.9047619047619048
+    },
+    "media": {
+      "n": 18,
+      "accuracy": 1.0
+    },
+    "timer_alarm": {
+      "n": 15,
+      "accuracy": 0.8
+    }
+  },
+  "llm": {
+    "llm_calls": 40,
+    "llm_calls_if_no_router": 159,
+    "calls_avoided_pct": 0.7484276729559749,
+    "llm_needed": 36,
+    "llm_missed": 4,
+    "llm_wasted": 5
+  },
+  "threshold_sweep": [
+    {
+      "threshold": 0.0,
+      "accuracy": 0.8238993710691824,
+      "false_activation_rate": 0.37735849056603776,
+      "missed_rate": 0.020202020202020204
+    },
+    {
+      "threshold": 0.3,
+      "accuracy": 0.8301886792452831,
+      "false_activation_rate": 0.33962264150943394,
+      "missed_rate": 0.04040404040404041
+    },
+    {
+      "threshold": 0.4,
+      "accuracy": 0.8427672955974843,
+      "false_activation_rate": 0.2830188679245283,
+      "missed_rate": 0.06060606060606061
+    },
+    {
+      "threshold": 0.5,
+      "accuracy": 0.8364779874213837,
+      "false_activation_rate": 0.22641509433962265,
+      "missed_rate": 0.1111111111111111
+    },
+    {
+      "threshold": 0.6,
+      "accuracy": 0.8050314465408805,
+      "false_activation_rate": 0.22641509433962265,
+      "missed_rate": 0.18181818181818182
+    },
+    {
+      "threshold": 0.7,
+      "accuracy": 0.7987421383647799,
+      "false_activation_rate": 0.16981132075471697,
+      "missed_rate": 0.23232323232323232
+    },
+    {
+      "threshold": 0.8,
+      "accuracy": 0.7610062893081762,
+      "false_activation_rate": 0.16981132075471697,
+      "missed_rate": 0.29292929292929293
+    },
+    {
+      "threshold": 0.9,
+      "accuracy": 0.6792452830188679,
+      "false_activation_rate": 0.1320754716981132,
+      "missed_rate": 0.4444444444444444
+    },
+    {
+      "threshold": 0.95,
+      "accuracy": 0.6163522012578616,
+      "false_activation_rate": 0.03773584905660377,
+      "missed_rate": 0.5959595959595959
+    }
+  ],
+  "perturbation_agreement": 0.9056603773584906,
+  "accuracy_perturbed": 0.7861635220125787,
+  "backend": "jeff-0.8b-pt",
+  "kind": "decision-model",
+  "model": "mstrasser/Jeff-Qwen3.5-0.8B@v1.2 (PyTorch fp32, CPU)",
+  "option_lang": "pt",
+  "load_seconds": 0.7107644470002015,
+  "cpu_seconds_per_decision": 8.184276729559746,
+  "wall_seconds_per_decision": 2.90741925691824,
+  "cpu_cores_busy": 2.8149626890188473,
+  "rss_mb": {
+    "server": 3903,
+    "lab_process_delta": 17
+  },
+  "timestamp": "2026-10-04T10:51:17"
+}

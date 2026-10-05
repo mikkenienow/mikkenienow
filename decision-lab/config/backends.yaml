@@ -1,0 +1,165 @@
+# Backends de decisão do laboratório. Trocar de modelo = editar este arquivo.
+# Servidores externos (portas) são iniciados por scripts/services.sh.
+#
+# option_lang: idioma das descrições da taxonomia enviadas ao modelo (pt|en). Modelos treinados só
+# em inglês (Jeff, Laya, decider) podem ir melhor com descrições em inglês mesmo com fala em português.
+
+default_backend: cascade-e5-decider   # melhor custo/benefício medido (docs/03-resultados.md)
+llm_executor: qwen3.5-2b-chat      # quem responde as rotas LLM / LLM_LARGE
+llm_large_executor: qwen3.5-4b-chat
+
+backends:
+  # ---------------- C) modelos especializados em decisão ----------------
+  jeff-0.8b:
+    type: systemone
+    model: mstrasser/Jeff-Qwen3.5-0.8B@v1.2 (PyTorch fp32, CPU)
+    url: http://127.0.0.1:8765
+    port: 8765
+    request_model: jeff-latest
+    option_lang: en
+  jeff-0.8b-pt:
+    type: systemone
+    model: mstrasser/Jeff-Qwen3.5-0.8B@v1.2 (PyTorch fp32, CPU)
+    url: http://127.0.0.1:8765
+    port: 8765
+    request_model: jeff-latest
+    option_lang: pt
+  julia-1:
+    type: systemone
+    model: SupersonicLabs/Julia-1 (GGUF Q8_0, llama.cpp)
+    url: http://127.0.0.1:8811
+    port: 8811
+    option_lang: en
+  julia-1-pt:
+    type: systemone
+    model: SupersonicLabs/Julia-1 (GGUF Q8_0, llama.cpp)
+    url: http://127.0.0.1:8811
+    port: 8811
+    option_lang: pt
+  laya:
+    type: systemone
+    model: convaiinnovations/laya (GGUF Q8_0, llama.cpp)
+    url: http://127.0.0.1:8812
+    port: 8812
+    option_lang: en
+  # Exemplo: Jev hospedado (TypeSafe/OpenRouter). Requer credencial; não usado nos benchmarks locais.
+  # jev-hosted:
+  #   type: systemone
+  #   model: typesafe/jev
+  #   url: https://api.typesafe.ai
+  #   api_key_env: TYPESAFE_API_KEY
+  #   request_model: jev
+
+  # ---------------- D) LLM pequeno genérico, mesmo prompt/readout do Jeff ----------------
+  qwen3.5-0.8b-logprob:
+    type: llm_logprob
+    model: Qwen/Qwen3.5-0.8B (GGUF Q8_0, llama.cpp) - sem especialização
+    url: http://127.0.0.1:8801
+    port: 8801
+    option_lang: en
+
+  # ---------------- A) LLM generativo convencional (decisão como JSON) ----------------
+  qwen3.5-0.8b-chat:
+    type: llm_generative
+    model: Qwen/Qwen3.5-0.8B (GGUF Q8_0)
+    url: http://127.0.0.1:8801
+    port: 8801
+  qwen3.5-2b-chat:
+    type: llm_generative
+    model: Qwen/Qwen3.5-2B (GGUF Q4_K_M)
+    url: http://127.0.0.1:8802
+    port: 8802
+  qwen3.5-4b-chat:
+    type: llm_generative
+    model: Qwen/Qwen3.5-4B (GGUF Q4_K_M)
+    url: http://127.0.0.1:8803
+    port: 8803
+
+  # ---------------- zero-shot clássicos ----------------
+  nli-mdeberta:
+    type: nli
+    model: MoritzLaurer/mDeBERTa-v3-base-xnli-multilingual-nli-2mil7
+  gliclass-edge:
+    type: gliclass
+    model: knowledgator/gliclass-multilang-edge
+  e5-zeroshot:
+    type: embed_zeroshot
+    model: intfloat/multilingual-e5-small
+
+  # ---------------- B) classificadores tradicionais (treinados em data/train.jsonl) ----------------
+  tfidf-logreg:
+    type: tfidf
+  e5-logreg:
+    type: embed_logreg
+    model: intfloat/multilingual-e5-small
+  e5-knn-router:
+    type: embed_knn
+    model: intfloat/multilingual-e5-small
+
+  # ---------------- variantes: pergunta extra "é dirigido ao assistente?" (noul) ----------------
+  jeff-0.8b-gate:
+    type: systemone
+    model: mstrasser/Jeff-Qwen3.5-0.8B@v1.2 (PyTorch fp32, CPU) + noul gate
+    url: http://127.0.0.1:8765
+    port: 8765
+    request_model: jeff-latest
+    option_lang: en
+    gate: true
+
+  # ---------------- decider-0.8b com cache de schema (opções primeiro; prefixo calculado 1x) ----------------
+  decider-0.8b-schema:
+    type: systemone
+    model: Mapika/decider-0.8b (PyTorch CPU, schema cache)
+    url: http://127.0.0.1:8821
+    port: 8821
+    option_lang: en
+  decider-0.8b-schema-pt:
+    type: systemone
+    model: Mapika/decider-0.8b (PyTorch CPU, schema cache)
+    url: http://127.0.0.1:8821
+    port: 8821
+    option_lang: pt
+
+  # ---------------- cascatas (estágio 1 barato; escala abaixo de τ) ----------------
+  cascade-e5-decider:
+    type: cascade
+    first: e5-logreg
+    second: decider-0.8b-schema
+    threshold: 0.3
+  cascade-e5-4b:
+    type: cascade
+    first: e5-logreg
+    second: qwen3.5-4b-chat
+    threshold: 0.3
+
+  # ---------------- decider-0.8b em GGUF no llama-server (kernels CPU do llama.cpp + prefixo de schema) ----------------
+  # scripts/services.sh start decider-gguf  (GGUF convertido localmente: scripts/convert_decider_gguf.sh)
+  decider-0.8b-gguf:            # sem cache: recalcula prefixo + fala a cada requisição
+    type: decider_llama
+    model: Mapika/decider-0.8b (GGUF Q8_0, llama.cpp, sem cache de prefixo)
+    url: http://127.0.0.1:8822
+    port: 8822
+    tokenizer: models/decider-0.8b
+    prefix_cache: none
+    option_lang: en
+  decider-0.8b-gguf-slot:       # cache_prompt do slot
+    type: decider_llama
+    model: Mapika/decider-0.8b (GGUF Q8_0, llama.cpp, cache de prefixo no slot)
+    url: http://127.0.0.1:8822
+    port: 8822
+    tokenizer: models/decider-0.8b
+    prefix_cache: slot
+    option_lang: en
+  decider-0.8b-gguf-restore:    # estado do prefixo salvo em arquivo e restaurado (/slots save|restore)
+    type: decider_llama
+    model: Mapika/decider-0.8b (GGUF Q8_0, llama.cpp, prefixo restaurado de arquivo)
+    url: http://127.0.0.1:8822
+    port: 8822
+    tokenizer: models/decider-0.8b
+    prefix_cache: restore
+    option_lang: en
+  cascade-e5-decider-gguf:      # a cascata padrão, com o 2º estágio no llama.cpp (1 GB de RAM em vez de 3,5 GB)
+    type: cascade
+    first: e5-logreg
+    second: decider-0.8b-gguf-restore
+    threshold: 0.3
