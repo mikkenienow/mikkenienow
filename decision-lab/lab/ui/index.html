@@ -2,74 +2,107 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Decision Lab</title>
 <style>
   :root { --bg:#f6f7f9; --panel:#fff; --text:#1c2024; --muted:#68707a; --line:#e2e5e9;
-          --accent:#2457d6; --ok:#1f8a4c; --warn:#b26a00; --none:#8a929b; --llm:#7b3fc4; }
+          --accent:#2457d6; --ok:#1f8a4c; --warn:#b26a00; --none:#8a929b; --llm:#7b3fc4; --err:#c0392b; }
   @media (prefers-color-scheme: dark) {
     :root { --bg:#111316; --panel:#1a1d21; --text:#e6e8eb; --muted:#9aa2ab; --line:#2a2f35;
-            --accent:#6f9bff; --ok:#4cc27e; --warn:#e3a33a; --none:#6c747d; --llm:#b38cff; }
+            --accent:#6f9bff; --ok:#4cc27e; --warn:#e3a33a; --none:#6c747d; --llm:#b38cff; --err:#ff7b6b; }
   }
   * { box-sizing:border-box; }
+  html { -webkit-text-size-adjust:100%; }
   body { margin:0; background:var(--bg); color:var(--text); font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif; }
-  header { padding:14px 16px; border-bottom:1px solid var(--line); display:flex; gap:12px; align-items:baseline; flex-wrap:wrap; }
-  header h1 { font-size:18px; margin:0; }
-  header span { color:var(--muted); font-size:13px; }
-  main { display:grid; grid-template-columns: minmax(0,1fr) 300px; gap:16px; padding:16px; max-width:1200px; margin:0 auto; }
-  @media (max-width: 820px) { main { grid-template-columns: minmax(0,1fr); } }
-  .panel { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:14px; }
-  .controls { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:12px; }
-  input[type=text] { flex:1 1 260px; min-width:0; padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:var(--bg); color:var(--text); font-size:15px; }
-  select, button { padding:9px 12px; border-radius:8px; border:1px solid var(--line); background:var(--bg); color:var(--text); font-size:14px; cursor:pointer; }
-  button.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
-  button.rec { border-color:#c33; color:#c33; }
-  label.small { font-size:13px; color:var(--muted); display:flex; gap:6px; align-items:center; }
-  #feed { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:13.5px; max-height:70vh; overflow-y:auto; }
-  .entry { border-top:1px solid var(--line); padding:10px 2px; }
-  .entry:first-child { border-top:none; }
-  .ts { color:var(--muted); }
-  .route { font-weight:600; }
+  header { padding:10px 16px; border-bottom:1px solid var(--line); display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  header h1 { font-size:17px; margin:0; }
+  #status { margin-left:auto; font-size:13px; padding:4px 10px; border-radius:999px; border:1px solid var(--line); color:var(--muted); white-space:nowrap; }
+  #status.busy { color:var(--accent); border-color:var(--accent); }
+  #status.ok { color:var(--ok); border-color:var(--ok); }
+  #status.err { color:var(--err); border-color:var(--err); }
+  main { display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:16px; padding:16px; max-width:1200px; margin:0 auto; }
+  .panel { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:14px; }
+  .composer { display:flex; gap:8px; }
+  input[type=text] { flex:1 1 auto; min-width:0; padding:12px; border:1px solid var(--line); border-radius:10px; background:var(--bg); color:var(--text); font-size:16px; }
+  select, button { min-height:44px; padding:10px 14px; border-radius:10px; border:1px solid var(--line); background:var(--bg); color:var(--text); font-size:15px; cursor:pointer; touch-action:manipulation; }
+  select { max-width:100%; }
+  button.primary { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600; }
+  button:disabled { opacity:.5; cursor:default; }
+  button.rec { border-color:var(--err); color:var(--err); }
+  .chips { display:flex; gap:8px; overflow-x:auto; padding:10px 0 2px; scrollbar-width:none; }
+  .chips::-webkit-scrollbar { display:none; }
+  .chip { flex:0 0 auto; min-height:36px; padding:6px 12px; border-radius:999px; font-size:13.5px; white-space:nowrap; }
+  .actions { display:flex; flex-wrap:wrap; gap:8px; margin:10px 0 4px; }
+  .actions button { flex:1 1 auto; }
+  details.settings { margin-top:8px; border-top:1px solid var(--line); padding-top:8px; }
+  details.settings summary { color:var(--muted); font-size:13.5px; cursor:pointer; padding:6px 0; }
+  .field { display:flex; flex-direction:column; gap:4px; margin:8px 0; font-size:13px; color:var(--muted); }
+  .field input[type=range] { width:100%; }
+  #msg { font-size:13.5px; color:var(--muted); min-height:20px; margin:8px 0 0; }
+  #msg.err { color:var(--err); }
+  #feed { margin-top:6px; }
+  .entry { border:1px solid var(--line); border-radius:10px; padding:10px 12px; margin-top:10px; background:var(--bg); }
+  .entry .said { font-size:15px; }
+  .entry .verdict { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:6px; }
+  .tag { font-weight:700; font-size:13px; padding:3px 9px; border-radius:999px; border:1px solid currentColor; }
   .r-NONE { color:var(--none); } .r-HOME_AUTOMATION, .r-MEDIA, .r-TIMERS { color:var(--ok); }
   .r-LLM, .r-LLM_LARGE { color:var(--llm); } .r-CLARIFY, .r-ESCALATE { color:var(--warn); }
-  .bar { display:inline-block; height:8px; background:var(--accent); border-radius:4px; vertical-align:middle; margin-right:6px; }
-  .scores { color:var(--muted); font-size:12px; margin-top:2px; word-break:break-word; }
-  .answer { margin-top:6px; padding:8px 10px; border-left:3px solid var(--llm); background:var(--bg); font-family:system-ui,sans-serif; white-space:pre-wrap; }
-  h2 { font-size:14px; margin:0 0 8px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; }
-  .kv { display:flex; justify-content:space-between; font-size:13.5px; padding:2px 0; gap:8px; }
-  .kv b { font-weight:600; text-align:right; word-break:break-all; }
+  .ts { color:var(--muted); font-size:12.5px; }
+  .meter { flex:1 1 60px; max-width:120px; height:6px; background:var(--line); border-radius:3px; overflow:hidden; }
+  .meter i { display:block; height:100%; background:var(--accent); }
+  .entry details { margin-top:4px; }
+  .entry summary { color:var(--muted); font-size:12.5px; cursor:pointer; }
+  .scores { color:var(--muted); font-size:12.5px; word-break:break-word; font-family:ui-monospace,Menlo,Consolas,monospace; }
+  .answer { margin-top:8px; padding:8px 10px; border-left:3px solid var(--llm); background:var(--panel); white-space:pre-wrap; font-size:14px; }
+  h2 { font-size:13px; margin:0 0 8px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; }
+  .kv { display:flex; justify-content:space-between; font-size:13.5px; padding:3px 0; gap:8px; }
+  .kv b { font-weight:600; text-align:right; word-break:break-word; }
   .side .panel { margin-bottom:16px; }
   .on { color:var(--ok); } .off { color:var(--none); }
+  .empty { color:var(--muted); font-size:14px; padding:18px 4px; text-align:center; }
+
+  /* celular: uma coluna, campo de fala fixo embaixo (ao alcance do polegar) */
+  @media (max-width: 820px) {
+    main { grid-template-columns:minmax(0,1fr); padding:10px 10px 96px; gap:10px; }
+    .panel { padding:12px; }
+    .composer { position:fixed; left:0; right:0; bottom:0; z-index:5; padding:10px 10px calc(10px + env(safe-area-inset-bottom));
+                background:var(--panel); border-top:1px solid var(--line); }
+    .side .panel { margin-bottom:10px; }
+  }
 </style>
 </head>
 <body>
 <header>
   <h1>Decision Lab</h1>
-  <span>fala/texto → modelo de decisão → rota → ação | LLM</span>
+  <span id="status">conectando…</span>
 </header>
 <main>
   <section class="panel">
-    <div class="controls">
-      <input id="text" type="text" placeholder='Ex.: "Alexa, acende a luz da sala"' autocomplete="off">
+    <div class="composer">
+      <input id="text" type="text" placeholder="Digite uma fala…" autocomplete="off" enterkeyhint="send">
       <button class="primary" id="send">Enviar</button>
     </div>
-    <div class="controls">
-      <select id="backend" title="backend de decisão"></select>
-      <label class="small">limiar <input id="thr" type="range" min="0" max="0.95" step="0.05" value="0"><span id="thrv">0.00</span></label>
-      <select id="low" title="o que fazer com baixa confiança">
-        <option value="ignore">baixa confiança → ignorar</option>
-        <option value="clarify">baixa confiança → perguntar</option>
-      </select>
-      <button id="demo">▶ stream de demonstração</button>
-      <button id="mic" title="Web Speech API do navegador (prévia da Fase 4)">🎤 microfone</button>
-      <button id="ping" title="Fase 3: 20 requisições vazias para medir só a rede até o PC">📶 medir rede</button>
+    <div class="chips" id="chips"></div>
+    <div class="actions">
+      <button id="demo">▶ Demonstração</button>
+      <button id="ping" title="20 requisições vazias: mede só a rede até o PC">📶 Medir rede</button>
+      <button id="mic" title="Reconhecimento de voz do navegador (prévia da Fase 4)">🎤 Voz</button>
     </div>
-    <div id="feed"></div>
+    <details class="settings">
+      <summary>Configurações (modelo, limiar)</summary>
+      <label class="field">Modelo de decisão<select id="backend"></select></label>
+      <label class="field">Confiança mínima para agir: <span id="thrv">0.00</span>
+        <input id="thr" type="range" min="0" max="0.95" step="0.05" value="0"></label>
+      <label class="field">Abaixo do limiar
+        <select id="low"><option value="ignore">ignorar</option><option value="clarify">perguntar</option></select></label>
+    </details>
+    <div id="msg"></div>
+    <div id="feed"><div class="empty" id="empty">Toque numa frase acima ou digite uma fala.<br>O modelo decide se é com o assistente e o que fazer.</div></div>
   </section>
   <aside class="side">
     <div class="panel"><h2>Casa (simulada)</h2><div id="home"><span class="ts">nenhum dispositivo alterado</span></div></div>
-    <div class="panel"><h2>Estatísticas</h2><div id="stats"></div></div>
     <div class="panel"><h2>Rede (por dispositivo)</h2><div class="ts">ida e volta p50 · acréscimo sobre a decisão</div><div id="net"></div></div>
+    <div class="panel"><h2>Estatísticas</h2><div id="stats"></div></div>
   </aside>
 </main>
 <script>
@@ -83,23 +116,33 @@ const DEMO = [
   "Alexa, pesquisa pra mim quais são os melhores filmes de ficção científica", "tá bom, já vou",
   "Alexa, apaga todas as luzes", "Alexandre, vem jantar!", "Alexa, escreve um email pro meu chefe pedindo férias",
 ];
+const CHIPS = ["Alexa, acende a luz da sala", "Alexa, timer de 10 minutos", "Você viu o jogo ontem?",
+               "Alexa, toca Djavan", "Alexa, qual a capital da Austrália?", "Alexandre, vem jantar!"];
+const ROUTE_LABEL = { NONE: "ignorado", HOME_AUTOMATION: "casa", MEDIA: "mídia", TIMERS: "timer", LLM: "LLM",
+                      LLM_LARGE: "LLM grande", CLARIFY: "perguntar", ESCALATE: "escalar" };
+let pending = 0;
 
-function fmtT(t) { const m = Math.floor(t / 60), s = (t % 60).toFixed(3).padStart(6, "0"); return `${String(m).padStart(2,"0")}:${s}`; }
 function esc(s) { return String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function setStatus(text, cls = "") { const s = $("status"); s.textContent = text; s.className = cls; }
+function setMsg(text, err = false) { const m = $("msg"); m.textContent = text; m.className = err ? "err" : ""; }
 
 function render(ev) {
+  const empty = $("empty"); if (empty) empty.remove();
   const div = document.createElement("div");
   div.className = "entry";
-  const conf = ev.confidence == null ? "—" : ev.confidence.toFixed(2);
-  const width = ev.confidence == null ? 0 : Math.round(ev.confidence * 80);
-  const scores = ev.scores ? Object.entries(ev.scores).sort((a,b)=>b[1]-a[1]).slice(0,4)
-      .map(([k,v]) => `${k} ${v.toFixed(2)}`).join(" · ") : "";
-  div.innerHTML = `<div class="ts">[${fmtT(ev.t)}] ${esc(ev.backend)} · ${ev.latency_ms.toFixed(0)} ms · ${esc(ev.source||"")}</div>
-    <div>Input: “${esc(ev.input)}”</div>
-    <div>Decision: <b>${esc(ev.decision.toUpperCase())}</b></div>
-    <div>Confidence: <span class="bar" style="width:${width}px"></span>${conf} <span class="ts">(${esc(ev.score_kind)})</span></div>
-    <div>Route: <span class="route r-${esc(ev.route)}">${esc(ev.route)}</span> <span class="ts">${esc(ev.route_reason||"")}</span></div>
-    ${scores ? `<div class="scores">${esc(scores)}</div>` : ""}`;
+  const conf = ev.confidence == null ? null : ev.confidence;
+  const scores = ev.scores ? Object.entries(ev.scores).sort((a,b)=>b[1]-a[1]).map(([k,v]) => `${k} ${v.toFixed(2)}`).join(" · ") : "";
+  div.innerHTML = `<div class="said">“${esc(ev.input)}”</div>
+    <div class="verdict">
+      <span class="tag r-${esc(ev.route)}">${esc(ROUTE_LABEL[ev.route] || ev.route)}</span>
+      <b>${esc(ev.decision)}</b>
+      ${conf == null ? "" : `<span class="meter"><i style="width:${Math.round(conf * 100)}%"></i></span><span class="ts">${conf.toFixed(2)}</span>`}
+      <span class="ts">${ev.latency_ms.toFixed(0)} ms</span>
+    </div>
+    <div class="ts timing"></div>
+    <details><summary>detalhes</summary>
+      <div class="scores">${esc(ev.backend)} · ${esc(ev.score_kind)} · ${esc(ev.route_reason || "")} · ${esc(ev.source || "")}</div>
+      ${scores ? `<div class="scores">${esc(scores)}</div>` : ""}</details>`;
   feed.prepend(div);
   entries[ev.id] = div;
 }
@@ -122,39 +165,49 @@ function renderHome(s) {
 
 async function refreshStats() {
   const s = await (await fetch("/v1/stats")).json();
-  const routes = Object.entries(s.routes).map(([k,v]) => `<div class="kv"><span class="r-${esc(k)}">${esc(k)}</span><b>${v}</b></div>`).join("");
+  const routes = Object.entries(s.routes).map(([k,v]) => `<div class="kv"><span class="r-${esc(k)}">${esc(ROUTE_LABEL[k] || k)}</span><b>${v}</b></div>`).join("");
   $("stats").innerHTML = `<div class="kv"><span>decisões</span><b>${s.decisions}</b></div>
-    <div class="kv"><span>latência média decisão</span><b>${s.mean_decision_ms} ms</b></div>
+    <div class="kv"><span>latência média da decisão</span><b>${s.mean_decision_ms} ms</b></div>
     <div class="kv"><span>chamadas ao LLM</span><b>${s.llm_calls}</b></div>
     <div class="kv"><span>chamadas ao LLM evitadas</span><b>${s.llm_calls_avoided}</b></div>
-    <div class="kv"><span>latência média LLM</span><b>${(s.mean_llm_ms/1000).toFixed(1)} s</b></div>${routes}`;
+    <div class="kv"><span>latência média do LLM</span><b>${(s.mean_llm_ms/1000).toFixed(1)} s</b></div>${routes}`;
 }
 
 async function send(text, source = "ui") {
   if (!text.trim()) return;
   const body = { input: text, backend: $("backend").value, min_confidence: parseFloat($("thr").value),
                  low_confidence: $("low").value, source };
+  pending++; setStatus("decidindo…", "busy"); setMsg("");
+  const slow = setTimeout(() => setMsg("Ainda esperando… a primeira decisão de um modelo pode levar ~20 s (carregando)."), 2500);
   const t0 = performance.now();
-  const r = await fetch("/v1/route", { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body) });
-  if (!r.ok) { alert(await r.text()); return; }
-  const rec = await r.json();
-  const roundTrip = performance.now() - t0;
-  // Fase 3: quanto este dispositivo esperou (rede + servidor + decisão) vs. só a decisão
-  reportTiming({ kind: "route", round_trip_ms: roundTrip, decision_ms: rec.latency_ms, decision_id: rec.id });
-  annotate(rec.id, `ida e volta neste dispositivo: ${roundTrip.toFixed(0)} ms (decisão ${rec.latency_ms.toFixed(0)} ms + ${(roundTrip - rec.latency_ms).toFixed(0)} ms de rede/servidor)`);
+  try {
+    const r = await fetch("/v1/route", { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body) });
+    if (!r.ok) throw new Error(`o servidor respondeu ${r.status}: ${(await r.text()).slice(0, 200)}`);
+    const rec = await r.json();
+    const roundTrip = performance.now() - t0;
+    // Fase 3: quanto este dispositivo esperou (rede + servidor + decisão) vs. só a decisão
+    reportTiming({ kind: "route", round_trip_ms: roundTrip, decision_ms: rec.latency_ms, decision_id: rec.id });
+    annotate(rec.id, `neste dispositivo: ${roundTrip.toFixed(0)} ms (decisão ${rec.latency_ms.toFixed(0)} + rede/servidor ${(roundTrip - rec.latency_ms).toFixed(0)})`);
+    setMsg("");
+  } catch (e) {
+    setMsg(`Falhou: ${e.message}. Confira se o modelo escolhido está no ar (scripts/services.sh status).`, true);
+  } finally {
+    clearTimeout(slow);
+    if (--pending === 0) setStatus("pronto", "ok");
+  }
 }
 
-function annotate(id, text, tries = 20) {  // a entrada chega pelo SSE; pode vir depois da resposta do POST
+function annotate(id, text, tries = 30) {  // a entrada chega pelo SSE; pode vir depois da resposta do POST
   const div = entries[id];
   if (!div) { if (tries > 0) setTimeout(() => annotate(id, text, tries - 1), 100); return; }
-  const a = document.createElement("div");
-  a.className = "ts"; a.textContent = text;
-  div.appendChild(a);
+  div.querySelector(".timing").textContent = text;
 }
 
 async function reportTiming(t) {
-  await fetch("/v1/client_timing", { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(t) });
-  refreshNet();
+  try {
+    await fetch("/v1/client_timing", { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(t) });
+    refreshNet();
+  } catch (e) { /* medição é acessória */ }
 }
 
 async function refreshNet() {
@@ -165,14 +218,39 @@ async function refreshNet() {
 }
 
 async function pingNet(n = 20) {  // só a rede: GET /health, sem modelo
-  for (let i = 0; i < n; i++) {
-    const t0 = performance.now();
-    await fetch("/health", { cache: "no-store" });
-    await reportTiming({ kind: "ping", round_trip_ms: performance.now() - t0 });
+  $("ping").disabled = true;
+  const times = [];
+  try {
+    for (let i = 0; i < n; i++) {
+      const t0 = performance.now();
+      await fetch("/health", { cache: "no-store" });
+      times.push(performance.now() - t0);
+      await reportTiming({ kind: "ping", round_trip_ms: times[i] });
+      setMsg(`medindo rede… ${i + 1}/${n}`);
+    }
+    times.sort((a, b) => a - b);
+    setMsg(`Rede até o PC: ${times[n >> 1].toFixed(0)} ms (mediana de ${n}), pior ${times[n - 1].toFixed(0)} ms.`);
+  } catch (e) { setMsg(`Falha ao medir a rede: ${e.message}`, true); }
+  $("ping").disabled = false;
+}
+
+async function waitReady() {  // o servidor pré-carrega o modelo padrão ao subir
+  for (;;) {
+    try {
+      const h = await (await fetch("/health", { cache: "no-store" })).json();
+      if (!h.preloading) { if (pending === 0) setStatus("pronto", "ok"); return; }
+      setStatus("carregando modelo…", "busy");
+    } catch (e) { setStatus("sem conexão", "err"); }
+    await new Promise(r => setTimeout(r, 1500));
   }
 }
 
 async function init() {
+  for (const t of CHIPS) {
+    const b = document.createElement("button");
+    b.className = "chip"; b.textContent = t; b.onclick = () => send(t);
+    $("chips").appendChild(b);
+  }
   const b = await (await fetch("/v1/backends")).json();
   for (const [name, spec] of Object.entries(b.backends)) {
     const o = document.createElement("option");
@@ -181,7 +259,7 @@ async function init() {
     $("backend").appendChild(o);
   }
   renderHome(await (await fetch("/v1/state")).json());
-  refreshStats(); refreshNet();
+  refreshStats(); refreshNet(); waitReady();
   const es = new EventSource("/v1/events");
   es.onmessage = (m) => {
     const ev = JSON.parse(m.data);
@@ -189,12 +267,14 @@ async function init() {
     else if (ev.type === "llm_answer") { renderAnswer(ev); refreshStats(); }
     else if (ev.type === "state") renderHome(ev);
   };
+  es.onerror = () => setStatus("reconectando…", "err");
+  es.onopen = () => { if (pending === 0) waitReady(); };
 }
 
-$("send").onclick = () => { send($("text").value); $("text").value = ""; };
+$("send").onclick = () => { const t = $("text").value; $("text").value = ""; send(t); };
 $("text").addEventListener("keydown", (e) => { if (e.key === "Enter") $("send").click(); });
 $("thr").oninput = () => $("thrv").textContent = parseFloat($("thr").value).toFixed(2);
-$("demo").onclick = async () => { for (const t of DEMO) { await send(t, "demo"); } };
+$("demo").onclick = async () => { $("demo").disabled = true; for (const t of DEMO) { await send(t, "demo"); } $("demo").disabled = false; };
 $("ping").onclick = () => pingNet();
 
 // Prévia da Fase 4: reconhecimento de voz contínuo do navegador (Chrome/Edge). O áudio é processado
@@ -202,14 +282,15 @@ $("ping").onclick = () => pingNet();
 let rec = null;
 $("mic").onclick = () => {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) { alert("Este navegador não tem Web Speech API (use Chrome/Edge)."); return; }
+  if (!SR) { setMsg("Este navegador não tem reconhecimento de voz (use Chrome/Edge).", true); return; }
+  if (!window.isSecureContext) { setMsg("O microfone só funciona em HTTPS ou em localhost (fica para a Fase 4).", true); return; }
   if (rec) { rec.stop(); rec = null; $("mic").classList.remove("rec"); return; }
   rec = new SR(); rec.lang = "pt-BR"; rec.continuous = true; rec.interimResults = false;
   rec.onresult = (e) => { for (let i = e.resultIndex; i < e.results.length; i++) if (e.results[i].isFinal) send(e.results[i][0].transcript, "voice"); };
   rec.onend = () => { if (rec) rec.start(); };
   rec.start(); $("mic").classList.add("rec");
 };
-init();
+init().catch(e => { setStatus("sem conexão", "err"); setMsg(`Não consegui falar com o servidor: ${e.message}`, true); });
 </script>
 </body>
 </html>

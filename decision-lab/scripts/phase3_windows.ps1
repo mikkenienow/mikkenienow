@@ -16,9 +16,11 @@ if ($Action -eq "on") {
   if (-not $wslIp) { throw "não consegui o IP do WSL ($Distro)" }
   netsh interface portproxy delete v4tov4 listenport=$Port listenaddress=0.0.0.0 | Out-Null
   netsh interface portproxy add v4tov4 listenport=$Port listenaddress=0.0.0.0 connectport=$Port connectaddress=$wslIp
-  if (-not (Get-NetFirewallRule -DisplayName $rule -ErrorAction SilentlyContinue)) {
-    New-NetFirewallRule -DisplayName $rule -Direction Inbound -Action Allow -Protocol TCP -LocalPort $Port -Profile Private | Out-Null
-  }
+  # Qualquer perfil de rede (o Windows costuma marcar a Ethernet/Wi-Fi de casa como "Pública", e uma regra só
+  # "Privada" não vale nela), mas só para quem está na mesma sub-rede ou na tailnet (Tailscale, 100.64.0.0/10).
+  Get-NetFirewallRule -DisplayName $rule -ErrorAction SilentlyContinue | Remove-NetFirewallRule
+  New-NetFirewallRule -DisplayName $rule -Direction Inbound -Action Allow -Protocol TCP -LocalPort $Port -Profile Any `
+    -RemoteAddress LocalSubnet, "100.64.0.0/10" | Out-Null
   "encaminhando 0.0.0.0:$Port -> ${wslIp}:$Port"
   "no WSL: HOST=0.0.0.0 scripts/lab.sh"
   Get-NetIPAddress -AddressFamily IPv4 | Where-Object { $_.PrefixOrigin -in "Dhcp", "Manual" -and $_.InterfaceAlias -notlike "vEthernet*" } |

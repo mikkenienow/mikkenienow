@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 import threading
 import time
 import uuid
@@ -32,6 +33,11 @@ from lab.taxonomy import ROOT, Taxonomy
 from lab.types import normalize_options
 
 CONFIG = registry.load_config()
+# LAB_BACKEND troca o backend padrão sem editar o YAML (ex.: cascade-e5-decider-gguf quando só o decider GGUF está no ar)
+if os.environ.get("LAB_BACKEND"):
+    if os.environ["LAB_BACKEND"] not in CONFIG["backends"]:
+        raise SystemExit(f"LAB_BACKEND={os.environ['LAB_BACKEND']}: backend desconhecido (config/backends.yaml)")
+    CONFIG["default_backend"] = os.environ["LAB_BACKEND"]
 TAXONOMY = Taxonomy.load()
 LOG_PATH = ROOT / "runs" / "decisions.jsonl"
 LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -46,6 +52,7 @@ _subscribers: set[asyncio.Queue[str]] = set()
 _loop: asyncio.AbstractEventLoop | None = None
 _started = time.time()
 _client_timings: list[dict[str, Any]] = []
+_preload_state: dict[str, Any] = {"status": "off"}
 
 
 def get_backend(name: str | None) -> Backend:
@@ -115,11 +122,27 @@ def _record(req_input: str, decision: Any, route: str, reason: str, extra: dict[
 async def startup() -> None:
     global _loop
     _loop = asyncio.get_running_loop()
+    if os.environ.get("LAB_PRELOAD", "1") == "1":
+        threading.Thread(target=_preload, daemon=True).start()
+
+
+def _preload() -> None:
+    """Carrega e aquece o backend padrão ao subir: sem isso a 1ª fala espera ~20 s (modelo + fit + cache de schema)."""
+    _preload_state["status"] = "loading"
+    try:
+        backend = get_backend(None)
+        options, question = TAXONOMY.options(backend.option_lang), TAXONOMY.question(backend.option_lang)
+        for text in ("Alexa, acende a luz da sala", "hum, sei lá", "hum, sei lá"):  # a 2ª escala a cascata
+            backend.decide(text, options, question)
+        _preload_state["status"] = "ready"
+    except Exception as error:  # servidor do modelo fora do ar: a API sobe mesmo assim e o erro aparece no /health
+        _preload_state.update(status="failed", error=repr(error)[:300])
 
 
 @app.get("/health")
 def health() -> dict[str, Any]:
-    return {"status": "ok", "default_backend": CONFIG["default_backend"], "loaded": sorted(_backends)}
+    return {"status": "ok", "default_backend": CONFIG["default_backend"], "loaded": sorted(_backends),
+            "preloading": _preload_state["status"] == "loading", "preload": _preload_state}
 
 
 @app.get("/v1/backends")
