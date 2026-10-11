@@ -1,6 +1,7 @@
 {
   "gold+rules": {
     "selector": "rules",
+    "scope": "route",
     "router": "rota-ouro",
     "n": 75,
     "outcome_accuracy": 0.8533333333333334,
@@ -17,7 +18,7 @@
     "n_sensitive": 7,
     "router_accuracy": null,
     "decide_ms_p50": null,
-    "act_ms_p50": 0.05500000042957254,
+    "act_ms_p50": 0.04454999907466117,
     "selection_ms_p50": null,
     "n_model_selections": 0,
     "by_tag": {
@@ -205,138 +206,11 @@
         ]
       }
     ],
-    "timestamp": "2026-10-11T20:00:08"
-  },
-  "gold+model": {
-    "selector": "model",
-    "router": "rota-ouro",
-    "n": 75,
-    "outcome_accuracy": 0.9333333333333333,
-    "tool_accuracy_addressed": 0.9402985074626866,
-    "tool_accuracy_multi_tool_routes": 0.9230769230769231,
-    "n_multi": 52,
-    "args_accuracy_when_tool_ok": 0.9666666666666667,
-    "n_with_args": 30,
-    "status_accuracy": 0.9466666666666667,
-    "acted_when_not_addressed": 0,
-    "n_not_addressed": 8,
-    "asked_confirmation_when_not_addressed": 0,
-    "sensitive_executed_without_confirmation": 0,
-    "n_sensitive": 7,
-    "router_accuracy": null,
-    "decide_ms_p50": null,
-    "act_ms_p50": 257.90863199927117,
-    "selection_ms_p50": 272.8,
-    "n_model_selections": 52,
-    "by_tag": {
-      "asr": {
-        "n": 2,
-        "ok": 1.0
-      },
-      "clear": {
-        "n": 29,
-        "ok": 1.0
-      },
-      "hard": {
-        "n": 8,
-        "ok": 0.75
-      },
-      "incomplete": {
-        "n": 2,
-        "ok": 1.0
-      },
-      "not_addressed": {
-        "n": 8,
-        "ok": 1.0
-      },
-      "paraphrase": {
-        "n": 17,
-        "ok": 1.0
-      },
-      "sensitive": {
-        "n": 7,
-        "ok": 1.0
-      },
-      "trap": {
-        "n": 3,
-        "ok": 0.0
-      }
-    },
-    "errors": [
-      {
-        "text": "Alexa, quantas horas tem uma semana?",
-        "gold": [
-          "llm.answer",
-          "answering"
-        ],
-        "got": [
-          "info.date",
-          "executed"
-        ],
-        "args": {},
-        "why": null
-      },
-      {
-        "text": "Alexa, que dia foi a proclamação da república?",
-        "gold": [
-          "llm.answer",
-          "answering"
-        ],
-        "got": [
-          "info.date",
-          "executed"
-        ],
-        "args": {},
-        "why": null
-      },
-      {
-        "text": "Alexa, quanto de memória RAM eu preciso pra rodar um jogo pesado?",
-        "gold": [
-          "llm.answer",
-          "answering"
-        ],
-        "got": [
-          "info.system_status",
-          "executed"
-        ],
-        "args": {},
-        "why": null
-      },
-      {
-        "text": "Alexa, tá muito alto isso aí",
-        "gold": [
-          "media.set_volume",
-          "executed"
-        ],
-        "got": [
-          "media.set_volume",
-          "needs_info"
-        ],
-        "args": {},
-        "why": [
-          "faltou dizer o volume (um número, mais alto ou mais baixo)"
-        ]
-      },
-      {
-        "text": "Alexa, chega de música",
-        "gold": [
-          "media.pause",
-          "executed"
-        ],
-        "got": [
-          "media.play",
-          "executed"
-        ],
-        "args": {
-          "query": "chega de música"
-        },
-        "why": null
-      }
-    ],
-    "timestamp": "2026-10-11T20:00:37"
+    "timestamp": "2026-10-11T20:19:37"
   },
   "gold+hybrid": {
     "selector": "hybrid",
+    "scope": "route",
     "router": "rota-ouro",
     "n": 75,
     "outcome_accuracy": 0.92,
@@ -353,9 +227,9 @@
     "n_sensitive": 7,
     "router_accuracy": null,
     "decide_ms_p50": null,
-    "act_ms_p50": 0.06792500062147155,
-    "selection_ms_p50": 257.25,
-    "n_model_selections": 22,
+    "act_ms_p50": 0.0749829996493645,
+    "selection_ms_p50": 213.55,
+    "n_model_selections": 18,
     "by_tag": {
       "asr": {
         "n": 2,
@@ -476,10 +350,140 @@
         ]
       }
     ],
-    "timestamp": "2026-10-11T20:00:49"
+    "timestamp": "2026-10-11T20:19:47"
+  },
+  "gold+model": {
+    "selector": "model",
+    "scope": "route",
+    "router": "rota-ouro",
+    "n": 75,
+    "outcome_accuracy": 0.9333333333333333,
+    "tool_accuracy_addressed": 0.9402985074626866,
+    "tool_accuracy_multi_tool_routes": 0.9230769230769231,
+    "n_multi": 52,
+    "args_accuracy_when_tool_ok": 0.9666666666666667,
+    "n_with_args": 30,
+    "status_accuracy": 0.9466666666666667,
+    "acted_when_not_addressed": 0,
+    "n_not_addressed": 8,
+    "asked_confirmation_when_not_addressed": 0,
+    "sensitive_executed_without_confirmation": 0,
+    "n_sensitive": 7,
+    "router_accuracy": null,
+    "decide_ms_p50": null,
+    "act_ms_p50": 216.4584649999597,
+    "selection_ms_p50": 222.5,
+    "n_model_selections": 52,
+    "by_tag": {
+      "asr": {
+        "n": 2,
+        "ok": 1.0
+      },
+      "clear": {
+        "n": 29,
+        "ok": 1.0
+      },
+      "hard": {
+        "n": 8,
+        "ok": 0.75
+      },
+      "incomplete": {
+        "n": 2,
+        "ok": 1.0
+      },
+      "not_addressed": {
+        "n": 8,
+        "ok": 1.0
+      },
+      "paraphrase": {
+        "n": 17,
+        "ok": 1.0
+      },
+      "sensitive": {
+        "n": 7,
+        "ok": 1.0
+      },
+      "trap": {
+        "n": 3,
+        "ok": 0.0
+      }
+    },
+    "errors": [
+      {
+        "text": "Alexa, quantas horas tem uma semana?",
+        "gold": [
+          "llm.answer",
+          "answering"
+        ],
+        "got": [
+          "info.date",
+          "executed"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, que dia foi a proclamação da república?",
+        "gold": [
+          "llm.answer",
+          "answering"
+        ],
+        "got": [
+          "info.date",
+          "executed"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, quanto de memória RAM eu preciso pra rodar um jogo pesado?",
+        "gold": [
+          "llm.answer",
+          "answering"
+        ],
+        "got": [
+          "info.system_status",
+          "executed"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, tá muito alto isso aí",
+        "gold": [
+          "media.set_volume",
+          "executed"
+        ],
+        "got": [
+          "media.set_volume",
+          "needs_info"
+        ],
+        "args": {},
+        "why": [
+          "faltou dizer o volume (um número, mais alto ou mais baixo)"
+        ]
+      },
+      {
+        "text": "Alexa, chega de música",
+        "gold": [
+          "media.pause",
+          "executed"
+        ],
+        "got": [
+          "media.play",
+          "executed"
+        ],
+        "args": {
+          "query": "chega de música"
+        },
+        "why": null
+      }
+    ],
+    "timestamp": "2026-10-11T20:20:05"
   },
   "cascade-e5-decider-gguf+rules": {
     "selector": "rules",
+    "scope": "route",
     "router": "cascade-e5-decider-gguf",
     "n": 75,
     "outcome_accuracy": 0.7466666666666667,
@@ -495,8 +499,8 @@
     "sensitive_executed_without_confirmation": 0,
     "n_sensitive": 7,
     "router_accuracy": 0.88,
-    "decide_ms_p50": 24.494596000295132,
-    "act_ms_p50": 0.08699150021129753,
+    "decide_ms_p50": 19.6287510007096,
+    "act_ms_p50": 0.07828350044292165,
     "selection_ms_p50": null,
     "n_model_selections": 0,
     "by_tag": {
@@ -801,10 +805,11 @@
         "why": null
       }
     ],
-    "timestamp": "2026-10-11T20:02:06"
+    "timestamp": "2026-10-11T20:20:54"
   },
   "cascade-e5-decider-gguf+hybrid": {
     "selector": "hybrid",
+    "scope": "route",
     "router": "cascade-e5-decider-gguf",
     "n": 75,
     "outcome_accuracy": 0.8,
@@ -820,10 +825,10 @@
     "sensitive_executed_without_confirmation": 0,
     "n_sensitive": 7,
     "router_accuracy": 0.88,
-    "decide_ms_p50": 22.812789999989036,
-    "act_ms_p50": 0.269316500180139,
-    "selection_ms_p50": 242.55,
-    "n_model_selections": 22,
+    "decide_ms_p50": 18.249992999699316,
+    "act_ms_p50": 0.16701649929018458,
+    "selection_ms_p50": 208.15,
+    "n_model_selections": 20,
     "by_tag": {
       "asr": {
         "n": 2,
@@ -1070,10 +1075,11 @@
         "why": null
       }
     ],
-    "timestamp": "2026-10-11T20:02:28"
+    "timestamp": "2026-10-11T20:21:09"
   },
   "cascade-e5-decider-gguf+model": {
     "selector": "model",
+    "scope": "route",
     "router": "cascade-e5-decider-gguf",
     "n": 75,
     "outcome_accuracy": 0.8133333333333334,
@@ -1089,9 +1095,9 @@
     "sensitive_executed_without_confirmation": 0,
     "n_sensitive": 7,
     "router_accuracy": 0.88,
-    "decide_ms_p50": 16.896443999939947,
-    "act_ms_p50": 174.21258700051112,
-    "selection_ms_p50": 209.0,
+    "decide_ms_p50": 19.40590900085226,
+    "act_ms_p50": 208.24041749983735,
+    "selection_ms_p50": 216.64999999999998,
     "n_model_selections": 48,
     "by_tag": {
       "asr": {
@@ -1324,7 +1330,7 @@
         "why": null
       }
     ],
-    "timestamp": "2026-10-11T20:02:51"
+    "timestamp": "2026-10-11T20:21:28"
   },
   "gold+rules+all": {
     "selector": "rules",
@@ -1345,7 +1351,7 @@
     "n_sensitive": 7,
     "router_accuracy": null,
     "decide_ms_p50": null,
-    "act_ms_p50": 0.056741000662441365,
+    "act_ms_p50": 0.05225000131758861,
     "selection_ms_p50": null,
     "n_model_selections": 0,
     "by_tag": {
@@ -1546,7 +1552,7 @@
         "why": null
       }
     ],
-    "timestamp": "2026-10-11T20:08:02"
+    "timestamp": "2026-10-11T20:21:31"
   },
   "gold+hybrid+all": {
     "selector": "hybrid",
@@ -1567,8 +1573,8 @@
     "n_sensitive": 7,
     "router_accuracy": null,
     "decide_ms_p50": null,
-    "act_ms_p50": 0.3047909995075315,
-    "selection_ms_p50": 219.25,
+    "act_ms_p50": 0.1861750006355578,
+    "selection_ms_p50": 218.05,
     "n_model_selections": 22,
     "by_tag": {
       "asr": {
@@ -1690,7 +1696,7 @@
         ]
       }
     ],
-    "timestamp": "2026-10-11T20:12:39"
+    "timestamp": "2026-10-11T20:21:42"
   },
   "gold+model+all": {
     "selector": "model",
@@ -1711,8 +1717,8 @@
     "n_sensitive": 7,
     "router_accuracy": null,
     "decide_ms_p50": null,
-    "act_ms_p50": 222.86660100053268,
-    "selection_ms_p50": 219.0,
+    "act_ms_p50": 222.3338359999616,
+    "selection_ms_p50": 222.0,
     "n_model_selections": 67,
     "by_tag": {
       "asr": {
@@ -1839,28 +1845,28 @@
         ]
       }
     ],
-    "timestamp": "2026-10-11T20:08:37"
+    "timestamp": "2026-10-11T20:22:01"
   },
   "cascade-e5-decider-gguf+rules+all": {
     "selector": "rules",
     "scope": "all",
     "router": "cascade-e5-decider-gguf",
     "n": 75,
-    "outcome_accuracy": 0.7733333333333333,
-    "tool_accuracy_addressed": 0.7611940298507462,
-    "tool_accuracy_multi_tool_routes": 0.6923076923076923,
+    "outcome_accuracy": 0.7866666666666666,
+    "tool_accuracy_addressed": 0.7761194029850746,
+    "tool_accuracy_multi_tool_routes": 0.7115384615384616,
     "n_multi": 52,
     "args_accuracy_when_tool_ok": 1.0,
-    "n_with_args": 26,
-    "status_accuracy": 0.8133333333333334,
+    "n_with_args": 27,
+    "status_accuracy": 0.8266666666666667,
     "acted_when_not_addressed": 1,
     "n_not_addressed": 8,
     "asked_confirmation_when_not_addressed": 0,
     "sensitive_executed_without_confirmation": 1,
     "n_sensitive": 7,
     "router_accuracy": 0.88,
-    "decide_ms_p50": 19.635901000583544,
-    "act_ms_p50": 0.09670800045569194,
+    "decide_ms_p50": 14.287795998825459,
+    "act_ms_p50": 0.09716650038171792,
     "selection_ms_p50": null,
     "n_model_selections": 0,
     "by_tag": {
@@ -1886,7 +1892,7 @@
       },
       "paraphrase": {
         "n": 17,
-        "ok": 0.7647058823529411
+        "ok": 0.8235294117647058
       },
       "sensitive": {
         "n": 7,
@@ -2102,19 +2108,6 @@
         "why": null
       },
       {
-        "text": "Alexa, cria um lembrete pra tirar o lixo",
-        "gold": [
-          "note.add",
-          "executed"
-        ],
-        "got": [
-          "llm.answer_large",
-          "answering"
-        ],
-        "args": {},
-        "why": null
-      },
-      {
         "text": "A Alexa da vizinha toca música o dia inteiro",
         "gold": [
           null,
@@ -2130,7 +2123,7 @@
         "why": null
       }
     ],
-    "timestamp": "2026-10-11T20:09:30"
+    "timestamp": "2026-10-11T20:22:49"
   },
   "cascade-e5-decider-gguf+hybrid+all": {
     "selector": "hybrid",
@@ -2150,9 +2143,9 @@
     "sensitive_executed_without_confirmation": 0,
     "n_sensitive": 7,
     "router_accuracy": 0.88,
-    "decide_ms_p50": 19.42488399981812,
-    "act_ms_p50": 0.9119914998336753,
-    "selection_ms_p50": 219.6,
+    "decide_ms_p50": 20.614533001207747,
+    "act_ms_p50": 0.4227205008646706,
+    "selection_ms_p50": 236.8,
     "n_model_selections": 27,
     "by_tag": {
       "asr": {
@@ -2315,7 +2308,7 @@
         "why": null
       }
     ],
-    "timestamp": "2026-10-11T20:13:41"
+    "timestamp": "2026-10-11T20:23:06"
   },
   "cascade-e5-decider-gguf+model+all": {
     "selector": "model",
@@ -2335,9 +2328,9 @@
     "sensitive_executed_without_confirmation": 0,
     "n_sensitive": 7,
     "router_accuracy": 0.88,
-    "decide_ms_p50": 18.309484999917913,
-    "act_ms_p50": 221.85350249992553,
-    "selection_ms_p50": 220.6,
+    "decide_ms_p50": 21.194416000071215,
+    "act_ms_p50": 225.42946199973812,
+    "selection_ms_p50": 225.3,
     "n_model_selections": 66,
     "by_tag": {
       "asr": {
@@ -2505,6 +2498,6 @@
         "why": null
       }
     ],
-    "timestamp": "2026-10-11T20:10:18"
+    "timestamp": "2026-10-11T20:23:33"
   }
 }

@@ -179,6 +179,8 @@
           <input id="thr" type="range" min="0" max="0.95" step="0.05" value="0"></label>
         <label class="field">Quando a confiança é baixa
           <select id="low"><option value="ignore">ignorar a fala</option><option value="clarify">pedir para repetir</option></select></label>
+        <label class="field" style="display:flex;align-items:center;gap:10px;color:var(--text)">
+          <input id="speak" type="checkbox" style="width:22px;height:22px"> Falar as respostas (voz do próprio aparelho)</label>
       </div>
       <h2>Seus julgamentos (👍 / 👎)</h2>
       <div class="card" id="fbStats"></div>
@@ -231,6 +233,11 @@ function esc(s) { return String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&l
 function el(tag, cls, html) { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
 function median(a) { if (!a.length) return null; const s = [...a].sort((x, y) => x - y); return s[s.length >> 1]; }
 function setStatus(text, cls = "") { $("status").className = cls; $("status").lastElementChild.textContent = text; }
+function speak(text) {  // prévia da saída de voz: síntese do próprio navegador, sem servidor
+  if (!$("speak").checked || !window.speechSynthesis || !text) return;
+  const u = new SpeechSynthesisUtterance(text); u.lang = "pt-BR";
+  speechSynthesis.speak(u);
+}
 function toBottom() { const s = $("chatScroll"); requestAnimationFrame(() => s.scrollTop = s.scrollHeight); }
 function post(path, body) { return fetch(path, { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body) }); }
 
@@ -308,6 +315,7 @@ function addCard(rec, roundTrip) {
   card.querySelector(".more").onclick = (e) => { const open = card.querySelector(".detail").classList.toggle("open"); e.target.textContent = open ? "detalhes ▴" : "detalhes ▾"; toBottomIfLast(card); };
   $("chat").appendChild(card);
   cards[rec.id] = card;
+  if (tool.say && !["ignored", "answering"].includes(tool.status)) speak(tool.say);
   if (d.llm) setTimeout(() => { const a = card.querySelector(".answer.wait"); if (a) a.textContent = "sem resposta do LLM (o servidor do modelo está no ar?)"; }, 120000);
   return card;
 }
@@ -319,7 +327,7 @@ function addAnswer(ev) {
   const a = card.querySelector(".answer");
   if (!a) return;
   a.classList.remove("wait");
-  a.textContent = ev.answer;
+  a.textContent = ev.answer; speak(ev.answer);
   a.appendChild(el("div", "sub", `${esc((ev.llm || "").split(" ")[0])} · ${(ev.llm_latency_ms / 1000).toFixed(1)} s`));
   toBottomIfLast(card);
 }
@@ -341,6 +349,8 @@ async function send(text) {
     const rec = await r.json();
     const roundTrip = performance.now() - t0;
     typing.remove();
+    if (rec.route === "CONFIRM")   // respondeu por fala a um pedido de confirmação: o cartão antigo não vale mais
+      document.querySelectorAll(".bot.ask").forEach(c => { const b = c.querySelector(".confirm"); if (b) { b.remove(); c.classList.remove("ask"); c.querySelector(".sub").textContent = "respondido por fala"; } });
     addCard(rec, roundTrip);
     const serverMs = rec.total_ms != null ? rec.total_ms : rec.latency_ms;   // decisão + ferramenta
     mine.route.push(roundTrip); mine.decision.push(serverMs); renderMine();
@@ -401,7 +411,7 @@ function timerFired(ev) {
   const t = ev.timer || {};
   $("chat").appendChild(el("div", "bot done", `<div class="head"><div class="ico">⏰</div><div><div class="what">Timer terminou: ${esc(t.label || "timer")}</div>
     <div class="sub">criado às ${esc(t.created || "")} · ${t.seconds} s · evento real disparado pelo PC</div></div></div>`));
-  toBottom();
+  toBottom(); speak(`O timer ${t.label && t.label !== "timer" ? "de " + t.label + " " : ""}terminou.`);
   if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 400]);
   if (!$("tab-chat").classList.contains("active")) document.querySelector('nav button[data-tab="chat"]').classList.add("dot");
 }
@@ -501,6 +511,9 @@ $("text").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preven
 $("text").addEventListener("focus", () => setTimeout(toBottom, 250));
 $("thr").oninput = () => $("thrv").textContent = Math.round(parseFloat($("thr").value) * 100) + "%";
 $("ping").onclick = () => pingNet();
+try { $("speak").checked = localStorage.getItem("speak") === "1"; } catch (e) { /* armazenamento bloqueado: segue desligado */ }
+$("speak").onchange = () => { try { localStorage.setItem("speak", $("speak").checked ? "1" : "0"); } catch (e) { /* idem */ }
+  if ($("speak").checked) speak("Vou falar as respostas."); };
 $("demo2").onclick = runDemo;
 $("clear").onclick = () => { $("chat").querySelectorAll(".me,.bot,.sys,.typing").forEach(n => n.remove()); show("chat"); };
 

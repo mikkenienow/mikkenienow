@@ -6,3 +6,4 @@ runs/decisions.jsonl
 __pycache__/
 *.pyc
 runs/slots/
+runs/notes.jsonl
