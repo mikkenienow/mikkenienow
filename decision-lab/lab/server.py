@@ -6,6 +6,7 @@ POST /v1/decide  {"input": "...", "options": [...]|{...}?, "question": "..."?, "
 POST /v1/route   {"input": "...", "backend"?, "min_confidence"?, "low_confidence"?, "execute"?: true}
 GET  /v1/backends | /v1/state | /v1/log?limit= | /v1/stats | /v1/events (SSE) | /  (UI)
 POST /v1/client_timing | GET /v1/client_timings   (Fase 3: ida-e-volta medida no cliente)
+POST /v1/feedback | GET /v1/feedback               (julgamento humano de cada decisão, pela UI)
 """
 
 from __future__ import annotations
@@ -53,6 +54,7 @@ _loop: asyncio.AbstractEventLoop | None = None
 _started = time.time()
 _client_timings: list[dict[str, Any]] = []
 _preload_state: dict[str, Any] = {"status": "off"}
+_feedback: dict[str, dict[str, Any]] = {}
 
 
 def get_backend(name: str | None) -> Backend:
@@ -216,6 +218,34 @@ def stats() -> dict[str, Any]:
     n = max(1, _stats["decisions"])
     return {**_stats, "mean_decision_ms": round(_stats["decision_ms_total"] / n, 1),
             "mean_llm_ms": round(_stats["llm_ms_total"] / max(1, _stats["llm_calls"]), 1)}
+
+
+class Feedback(BaseModel):
+    decision_id: str
+    correct: bool
+    expected: str | None = None  # a classe certa, quando o usuário marca que o modelo errou
+    input: str | None = None
+    decision: str | None = None
+    backend: str | None = None
+
+
+@app.post("/v1/feedback")
+def feedback(item: Feedback, request: Request) -> dict[str, Any]:
+    """Julgamento humano de uma decisão (👍/👎 na UI). Vira dado rotulado real em runs/decisions.jsonl."""
+    record = {"type": "feedback", "ts": datetime.now(timezone.utc).isoformat(timespec="milliseconds"),
+              "client": request.client.host if request.client else "?", **item.model_dump()}
+    _feedback[item.decision_id] = record  # o último julgamento de uma decisão substitui o anterior
+    log(record)
+    return feedback_summary()
+
+
+@app.get("/v1/feedback")
+def feedback_summary() -> dict[str, Any]:
+    rows = list(_feedback.values())
+    wrong = [r for r in rows if not r["correct"]]
+    return {"n": len(rows), "correct": len(rows) - len(wrong), "wrong": len(wrong),
+            "false_activations": sum(r.get("expected") == "ignore" for r in wrong),
+            "missed": sum(r.get("decision") == "ignore" for r in wrong)}
 
 
 class ClientTiming(BaseModel):
