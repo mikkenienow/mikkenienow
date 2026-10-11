@@ -4,6 +4,8 @@
 
 POST /v1/decide  {"input": "...", "options": [...]|{...}?, "question": "..."?, "backend": "..."?}
 POST /v1/route   {"input": "...", "backend"?, "min_confidence"?, "low_confidence"?, "execute"?: true}
+POST /v1/act     {"input": "...", "client"?}   decisão -> ferramenta permitida -> resultado (lab/actions.py)
+POST /v1/act/confirm {"token", "approve"}     confirma ou recusa uma ação sensível | GET /v1/tools
 GET  /v1/backends | /v1/state | /v1/log?limit= | /v1/stats | /v1/events (SSE) | /  (UI)
 POST /v1/client_timing | GET /v1/client_timings   (Fase 3: ida-e-volta medida no cliente)
 POST /v1/feedback | GET /v1/feedback               (julgamento humano de cada decisão, pela UI)
@@ -27,10 +29,12 @@ from pydantic import BaseModel
 from starlette.concurrency import run_in_threadpool
 
 from lab import backends as registry
+from lab.actions import ActionEngine, ActionPolicy, Planner
 from lab.backends.base import Backend
 from lab.executors import Home, LlmExecutor
 from lab.router import LLM_ROUTES, Policy, route_decision
 from lab.taxonomy import ROOT, Taxonomy
+from lab.tools.builtin import ToolContext, build_registry
 from lab.types import normalize_options
 
 CONFIG = registry.load_config()
@@ -48,13 +52,16 @@ _backends: dict[str, Backend] = {}
 _backend_lock = threading.Lock()
 _home = Home()
 _stats: dict[str, Any] = {"decisions": 0, "routes": {}, "llm_calls": 0, "llm_calls_avoided": 0,
-                          "decision_ms_total": 0.0, "llm_ms_total": 0.0}
+                          "decision_ms_total": 0.0, "llm_ms_total": 0.0, "tools": {}}
 _subscribers: set[asyncio.Queue[str]] = set()
 _loop: asyncio.AbstractEventLoop | None = None
 _started = time.time()
 _client_timings: list[dict[str, Any]] = []
 _preload_state: dict[str, Any] = {"status": "off"}
 _feedback: dict[str, dict[str, Any]] = {}
+_engine: ActionEngine | None = None
+_engine_lock = threading.Lock()
+_log_lock = threading.Lock()
 
 
 def get_backend(name: str | None) -> Backend:
@@ -76,8 +83,10 @@ def publish(event: dict[str, Any]) -> None:
 
 
 def log(record: dict[str, Any]) -> None:
-    with LOG_PATH.open("a") as f:
-        f.write(json.dumps(record, ensure_ascii=False) + "\n")
+    line = json.dumps(record, ensure_ascii=False) + "\n"
+    with _log_lock:  # decisões, respostas do LLM e timers gravam de threads diferentes
+        with LOG_PATH.open("a", encoding="utf-8") as f:
+            f.write(line)
 
 
 class DecideRequest(BaseModel):
@@ -136,6 +145,9 @@ def _preload() -> None:
         options, question = TAXONOMY.options(backend.option_lang), TAXONOMY.question(backend.option_lang)
         for text in ("Alexa, acende a luz da sala", "hum, sei lá", "hum, sei lá"):  # a 2ª escala a cascata
             backend.decide(text, options, question)
+        engine = get_engine()  # e o schema da escolha de ferramenta (um prefixo novo = segundos na 1ª vez)
+        for route in ("LLM", "MEDIA", "TIMERS", "HOME_AUTOMATION"):
+            engine.planner.select("hum, sei lá", route)
         _preload_state["status"] = "ready"
     except Exception as error:  # servidor do modelo fora do ar: a API sobe mesmo assim e o erro aparece no /health
         _preload_state.update(status="failed", error=repr(error)[:300])
@@ -205,6 +217,123 @@ async def route(req: RouteRequest) -> dict[str, Any]:
         record.update(outcome)
         if outcome.get("action") not in (None, "llm_called_async", "llm_answered"):
             publish({"type": "state", **_home.snapshot()})
+    return record
+
+
+# ----------------------------------------------------------------------------- ações reais (lab/actions.py)
+class ActRequest(BaseModel):
+    input: str
+    backend: str | None = None
+    min_confidence: float = 0.0
+    low_confidence: str = "ignore"
+    client: str | None = None   # identifica quem pediu (para a confirmação); padrão: IP
+    source: str = "api"
+
+
+class ConfirmRequest(BaseModel):
+    token: str
+    approve: bool = True
+    client: str | None = None
+
+
+def _llm_answer(text: str, large: bool, record_id: str) -> None:
+    spec = CONFIG["backends"][CONFIG["llm_large_executor" if large else "llm_executor"]]
+    executor = LlmExecutor(spec["url"], spec["model"])
+
+    def run() -> None:
+        try:
+            result = executor.answer(text)
+        except Exception as error:  # servidor do LLM fora do ar: avisa a UI em vez de deixar "pensando…" para sempre
+            result = {"answer": "Não consegui responder: o modelo de linguagem não está no ar.", "llm": spec["model"],
+                      "llm_latency_ms": 0, "error": repr(error)[:200]}
+        _stats["llm_calls"] += 1
+        _stats["llm_ms_total"] += result["llm_latency_ms"]
+        log({"type": "llm_answer", "decision_id": record_id, **result})
+        publish({"type": "llm_answer", "decision_id": record_id, **result})
+
+    threading.Thread(target=run, daemon=True).start()
+
+
+def get_engine() -> ActionEngine:
+    global _engine
+    with _engine_lock:
+        if _engine is None:
+            settings = CONFIG.get("tools", {})
+            selector = os.environ.get("LAB_TOOL_SELECTOR", settings.get("selector", "rules"))
+            backend = get_backend(settings.get("selector_backend")) if selector != "rules" else None
+            registry = build_registry()
+            ctx = ToolContext(home=_home, notes_path=ROOT / "runs" / "notes.jsonl", publish=publish, log=log)
+            scope = os.environ.get("LAB_TOOL_SCOPE", settings.get("scope", "route"))
+            _engine = ActionEngine(registry, Planner(registry, selector, backend, settings.get("min_confidence", 0.5), scope),
+                                   ctx, set(TAXONOMY.keys), llm=_llm_answer,
+                                   policy=ActionPolicy(confirm_ttl=settings.get("confirm_ttl", 60)))
+        return _engine
+
+
+def _finish_action(record: dict[str, Any]) -> dict[str, Any]:
+    status = record["tool"]["status"]
+    _stats["tools"][status] = _stats["tools"].get(status, 0) + 1
+    log(record)
+    publish({"type": "decision", **record})
+    if status == "executed":
+        publish({"type": "state", **_home.snapshot()})
+    return record
+
+
+@app.get("/v1/tools")
+def list_tools() -> dict[str, Any]:
+    engine = get_engine()
+    return {"selector": engine.planner.selector, "scope": engine.planner.scope, "tools": engine.registry.describe()}
+
+
+@app.get("/v1/notes")
+def notes() -> dict[str, Any]:
+    return get_engine().registry.get("note.list").handler({}, get_engine().ctx)
+
+
+@app.post("/v1/act")
+async def act(req: ActRequest, request: Request) -> dict[str, Any]:
+    """entrada -> roteador -> validação -> ferramenta permitida -> resultado -> log."""
+    if req.low_confidence not in ("ignore", "clarify", "escalate"):
+        raise HTTPException(422, "low_confidence: ignore|clarify|escalate")
+    client = req.client or (request.client.host if request.client else "?")
+    record_id = uuid.uuid4().hex[:12]
+    base = {"id": record_id, "ts": datetime.now(timezone.utc).isoformat(timespec="milliseconds"),
+            "t": round(time.time() - _started, 3), "input": req.input, "source": req.source, "client": client}
+    engine = await run_in_threadpool(get_engine)
+    # "sim" / "cancela" respondendo a uma ação sensível pendente deste cliente: não passa pelo roteador
+    spoken = await run_in_threadpool(engine.spoken_confirmation, req.input, client, record_id)
+    if spoken is not None:
+        return _finish_action({**base, "decision": "confirmation", "confidence": None, "scores": None, "score_kind": "none",
+                               "latency_ms": 0.0, "backend": "-", "model": "-", "metadata": {}, "route": "CONFIRM",
+                               "route_reason": "resposta a um pedido de confirmação", "tool": spoken, "total_ms": 0.0})
+    backend, decision, _ = await run_in_threadpool(_decide, DecideRequest(input=req.input, backend=req.backend))
+    result = route_decision(decision, TAXONOMY, Policy(req.min_confidence, req.low_confidence))
+    started = time.perf_counter()
+    tool = await run_in_threadpool(engine.act, req.input, decision.decision, result.route, client, record_id)
+    action_ms = (time.perf_counter() - started) * 1000
+    _stats["decisions"] += 1
+    _stats["routes"][result.route] = _stats["routes"].get(result.route, 0) + 1
+    _stats["decision_ms_total"] += decision.latency_ms
+    if result.route not in LLM_ROUTES or tool["status"] != "answering":
+        _stats["llm_calls_avoided"] += 1
+    return _finish_action({**base, **decision.to_dict(), "route": result.route, "route_reason": result.reason,
+                           "tool": tool, "action_ms": round(action_ms, 2),
+                           "total_ms": round(decision.latency_ms + action_ms, 2)})
+
+
+@app.post("/v1/act/confirm")
+async def act_confirm(req: ConfirmRequest, request: Request) -> dict[str, Any]:
+    client = req.client or (request.client.host if request.client else "?")
+    record_id = uuid.uuid4().hex[:12]
+    engine = await run_in_threadpool(get_engine)
+    tool = await run_in_threadpool(engine.confirm, req.token, req.approve, client, record_id)
+    record = {"type": "tool_confirmation", "id": record_id, "ts": datetime.now(timezone.utc).isoformat(timespec="milliseconds"),
+              "client": client, "approve": req.approve, "tool": tool}
+    _stats["tools"][tool["status"]] = _stats["tools"].get(tool["status"], 0) + 1
+    log(record)
+    if tool["status"] == "executed":
+        publish({"type": "state", **_home.snapshot()})
     return record
 
 

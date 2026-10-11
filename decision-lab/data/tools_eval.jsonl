@@ -1,0 +1,75 @@
+{"text": "Alexa, que horas são?", "decision": "knowledge", "tool": "info.time", "status": "executed", "tags": ["clear"]}
+{"text": "Alexa, me diz as horas", "decision": "knowledge", "tool": "info.time", "status": "executed", "tags": ["paraphrase"]}
+{"text": "Alexa, já deu meio-dia?", "decision": "knowledge", "tool": "info.time", "status": "executed", "tags": ["hard"]}
+{"text": "Alexa, tá que horas agora?", "decision": "knowledge", "tool": "info.time", "status": "executed", "tags": ["paraphrase"]}
+{"text": "alexa que hora e agora", "decision": "knowledge", "tool": "info.time", "status": "executed", "tags": ["asr"]}
+{"text": "Alexa, que dia é hoje?", "decision": "knowledge", "tool": "info.date", "status": "executed", "tags": ["clear"]}
+{"text": "Alexa, hoje é que dia da semana?", "decision": "knowledge", "tool": "info.date", "status": "executed", "tags": ["clear"]}
+{"text": "Alexa, qual a data de hoje?", "decision": "knowledge", "tool": "info.date", "status": "executed", "tags": ["clear"]}
+{"text": "Alexa, estamos em que mês?", "decision": "knowledge", "tool": "info.date", "status": "executed", "tags": ["hard"]}
+{"text": "Alexa, hoje é sexta?", "decision": "knowledge", "tool": "info.date", "status": "executed", "tags": ["hard"]}
+{"text": "Alexa, como está o uso de CPU do computador?", "decision": "knowledge", "tool": "info.system_status", "status": "executed", "tags": ["clear"]}
+{"text": "Alexa, quanta memória RAM o PC está usando?", "decision": "knowledge", "tool": "info.system_status", "status": "executed", "tags": ["paraphrase"]}
+{"text": "Alexa, o computador tá muito carregado?", "decision": "knowledge", "tool": "info.system_status", "status": "executed", "tags": ["hard"]}
+{"text": "Alexa, quanto espaço livre tem no disco?", "decision": "knowledge", "tool": "info.system_status", "status": "executed", "tags": ["paraphrase"]}
+{"text": "Alexa, o servidor tá aguentando?", "decision": "knowledge", "tool": "info.system_status", "status": "executed", "tags": ["hard"]}
+{"text": "Alexa, qual a capital do Canadá?", "decision": "knowledge", "tool": "llm.answer", "status": "answering", "tags": ["clear"]}
+{"text": "Alexa, quanto é 17 vezes 23?", "decision": "knowledge", "tool": "llm.answer", "status": "answering", "tags": ["clear"]}
+{"text": "Alexa, quantas horas tem uma semana?", "decision": "knowledge", "tool": "llm.answer", "status": "answering", "tags": ["trap"]}
+{"text": "Alexa, que dia foi a proclamação da república?", "decision": "knowledge", "tool": "llm.answer", "status": "answering", "tags": ["trap"]}
+{"text": "Alexa, quanto de memória RAM eu preciso pra rodar um jogo pesado?", "decision": "knowledge", "tool": "llm.answer", "status": "answering", "tags": ["trap"]}
+{"text": "Alexa, vai chover amanhã em Curitiba?", "decision": "knowledge", "tool": "llm.answer", "status": "answering", "tags": ["clear"]}
+{"text": "Alexa, como se fala bom dia em alemão?", "decision": "knowledge", "tool": "llm.answer", "status": "answering", "tags": ["clear"]}
+{"text": "Alexa, escreve um poema curto sobre o mar", "decision": "complex", "tool": "llm.answer_large", "status": "answering", "tags": ["clear"]}
+{"text": "Alexa, monta um cardápio pra semana com pouco carboidrato", "decision": "complex", "tool": "llm.answer_large", "status": "answering", "tags": ["clear"]}
+{"text": "Alexa, acende a luz da cozinha", "decision": "home_control", "tool": "home.set_device", "args": {"device": "luz", "rooms": ["cozinha"], "state": "on"}, "status": "executed", "tags": ["clear"]}
+{"text": "Alexa, desliga o ventilador do quarto", "decision": "home_control", "tool": "home.set_device", "args": {"device": "ventilador", "rooms": ["quarto"], "state": "off"}, "status": "executed", "tags": ["clear"]}
+{"text": "Alexa, desliga as luzes da casa toda", "decision": "home_control", "tool": "home.set_device", "args": {"device": "luz", "rooms": ["*"], "state": "off"}, "status": "executed", "tags": ["clear"]}
+{"text": "Alexa, liga a TV da sala", "decision": "home_control", "tool": "home.set_device", "args": {"device": "tv", "rooms": ["sala"], "state": "on"}, "status": "executed", "tags": ["clear"]}
+{"text": "Alexa, fecha a cortina do escritório", "decision": "home_control", "tool": "home.set_device", "args": {"device": "cortina", "rooms": ["escritorio"], "state": "off"}, "status": "executed", "tags": ["clear"]}
+{"text": "Alexa, tá muito escuro aqui na varanda", "decision": "home_control", "tool": "home.set_device", "args": {"device": "luz", "rooms": ["varanda"], "state": "on"}, "status": "executed", "tags": ["hard"]}
+{"text": "Alexa, liga o ar do quarto", "decision": "home_control", "tool": "home.set_device", "args": {"device": "clima", "rooms": ["quarto"], "state": "on"}, "status": "executed", "tags": ["clear"]}
+{"text": "Alexa, abre o portão da garagem", "decision": "home_control", "tool": "home.set_device", "args": {"device": "portao", "rooms": ["garagem"], "state": "on"}, "status": "needs_confirmation", "tags": ["sensitive"]}
+{"text": "Alexa, destranca a porta da frente", "decision": "home_control", "tool": "home.set_device", "args": {"device": "porta", "rooms": ["frente"], "state": "on"}, "status": "needs_confirmation", "tags": ["sensitive"]}
+{"text": "Alexa, pode trancar a porta da frente", "decision": "home_control", "tool": "home.set_device", "args": {"device": "porta", "rooms": ["frente"], "state": "off"}, "status": "executed", "tags": ["clear"]}
+{"text": "Alexa, a luz do corredor", "decision": "home_control", "tool": "home.set_device", "status": "needs_info", "tags": ["incomplete"]}
+{"text": "alexa acende a lus do banheiro", "decision": "home_control", "tool": "home.set_device", "args": {"device": "luz", "rooms": ["banheiro"], "state": "on"}, "status": "executed", "tags": ["asr"]}
+{"text": "Alexa, pode desligar a cafeteira da cozinha, por favor?", "decision": "home_control", "tool": "home.set_device", "args": {"device": "cafeteira", "rooms": ["cozinha"], "state": "off"}, "status": "executed", "tags": ["paraphrase"]}
+{"text": "Alexa, toca Caetano Veloso", "decision": "media", "tool": "media.play", "args": {"query": "Caetano Veloso"}, "status": "executed", "tags": ["clear"]}
+{"text": "Alexa, quero ouvir um podcast de história", "decision": "media", "tool": "media.play", "args": {"query": "um podcast de história"}, "status": "executed", "tags": ["paraphrase"]}
+{"text": "Alexa, pausa aí o som", "decision": "media", "tool": "media.pause", "status": "executed", "tags": ["clear"]}
+{"text": "Alexa, para de tocar", "decision": "media", "tool": "media.pause", "status": "executed", "tags": ["paraphrase"]}
+{"text": "Alexa, sobe o volume", "decision": "media", "tool": "media.set_volume", "args": {"change": "up"}, "status": "executed", "tags": ["clear"]}
+{"text": "Alexa, volume 3", "decision": "media", "tool": "media.set_volume", "args": {"level": 3}, "status": "executed", "tags": ["clear"]}
+{"text": "Alexa, tá muito alto isso aí", "decision": "media", "tool": "media.set_volume", "args": {"change": "down"}, "status": "executed", "tags": ["hard"]}
+{"text": "Alexa, abaixa um pouco o som", "decision": "media", "tool": "media.set_volume", "args": {"change": "down"}, "status": "executed", "tags": ["paraphrase"]}
+{"text": "Alexa, coloca uma rádio de notícias", "decision": "media", "tool": "media.play", "args": {"query": "uma rádio de notícias"}, "status": "executed", "tags": ["paraphrase"]}
+{"text": "Alexa, deixa no mudo", "decision": "media", "tool": "media.set_volume", "args": {"level": 0}, "status": "executed", "tags": ["paraphrase"]}
+{"text": "Alexa, chega de música", "decision": "media", "tool": "media.pause", "status": "executed", "tags": ["hard"]}
+{"text": "Alexa, timer de 15 minutos", "decision": "timer_alarm", "tool": "timer.create", "args": {"seconds": 900}, "status": "executed", "tags": ["clear"]}
+{"text": "Alexa, me chama daqui a meia hora", "decision": "timer_alarm", "tool": "timer.create", "args": {"seconds": 1800}, "status": "executed", "tags": ["paraphrase"]}
+{"text": "Alexa, coloca um alarme de duas horas", "decision": "timer_alarm", "tool": "timer.create", "args": {"seconds": 7200}, "status": "executed", "tags": ["paraphrase"]}
+{"text": "Alexa, cronômetro de 90 segundos", "decision": "timer_alarm", "tool": "timer.create", "args": {"seconds": 90}, "status": "executed", "tags": ["clear"]}
+{"text": "Alexa, timer do forno de vinte minutos", "decision": "timer_alarm", "tool": "timer.create", "args": {"seconds": 1200, "label": "forno"}, "status": "executed", "tags": ["clear"]}
+{"text": "Alexa, me acorda em quarenta e cinco minutos", "decision": "timer_alarm", "tool": "timer.create", "args": {"seconds": 2700}, "status": "executed", "tags": ["paraphrase"]}
+{"text": "Alexa, falta quanto pro timer acabar?", "decision": "timer_alarm", "tool": "timer.list", "status": "executed", "tags": ["clear"]}
+{"text": "Alexa, tem algum alarme ativo?", "decision": "timer_alarm", "tool": "timer.list", "status": "executed", "tags": ["paraphrase"]}
+{"text": "Alexa, cancela os timers", "decision": "timer_alarm", "tool": "timer.cancel_all", "status": "needs_confirmation", "tags": ["sensitive"]}
+{"text": "Alexa, pode parar o alarme", "decision": "timer_alarm", "tool": "timer.cancel_all", "status": "needs_confirmation", "tags": ["sensitive"]}
+{"text": "Alexa, timer", "decision": "timer_alarm", "tool": "timer.create", "status": "needs_info", "tags": ["incomplete"]}
+{"text": "Alexa, me lembra de ligar pro dentista", "decision": "timer_alarm", "tool": "note.add", "args": {"text": "ligar pro dentista"}, "status": "executed", "tags": ["clear"]}
+{"text": "Alexa, anota aí: comprar ração do cachorro", "decision": "timer_alarm", "tool": "note.add", "args": {"text": "comprar ração do cachorro"}, "status": "executed", "tags": ["clear"]}
+{"text": "Alexa, não me deixa esquecer de pagar o boleto", "decision": "timer_alarm", "tool": "note.add", "args": {"text": "pagar o boleto"}, "status": "executed", "tags": ["paraphrase"]}
+{"text": "Alexa, o que eu tenho anotado?", "decision": "timer_alarm", "tool": "note.list", "status": "executed", "tags": ["clear"]}
+{"text": "Alexa, lê meus lembretes", "decision": "timer_alarm", "tool": "note.list", "status": "executed", "tags": ["paraphrase"]}
+{"text": "Alexa, apaga todos os meus lembretes", "decision": "timer_alarm", "tool": "note.clear", "status": "needs_confirmation", "tags": ["sensitive"]}
+{"text": "Alexa, limpa as anotações", "decision": "timer_alarm", "tool": "note.clear", "status": "needs_confirmation", "tags": ["sensitive"]}
+{"text": "Alexa, cria um lembrete pra tirar o lixo", "decision": "timer_alarm", "tool": "note.add", "args": {"text": "tirar o lixo"}, "status": "executed", "tags": ["paraphrase"]}
+{"text": "Nossa, que horas são essas de chegar?", "decision": "ignore", "tool": null, "status": "ignored", "tags": ["not_addressed"]}
+{"text": "O timer do micro-ondas tá quebrado faz tempo", "decision": "ignore", "tool": null, "status": "ignored", "tags": ["not_addressed"]}
+{"text": "Fala pra sua mãe apagar a luz quando sair", "decision": "ignore", "tool": null, "status": "ignored", "tags": ["not_addressed"]}
+{"text": "Ontem eu anotei tudo no caderno e perdi", "decision": "ignore", "tool": null, "status": "ignored", "tags": ["not_addressed"]}
+{"text": "A Alexa da vizinha toca música o dia inteiro", "decision": "ignore", "tool": null, "status": "ignored", "tags": ["not_addressed"]}
+{"text": "Que dia cansativo, hein", "decision": "ignore", "tool": null, "status": "ignored", "tags": ["not_addressed"]}
+{"text": "Gente, alguém viu meu carregador?", "decision": "ignore", "tool": null, "status": "ignored", "tags": ["not_addressed"]}
+{"text": "Pai, abre a porta pra mim!", "decision": "ignore", "tool": null, "status": "ignored", "tags": ["not_addressed", "sensitive"]}

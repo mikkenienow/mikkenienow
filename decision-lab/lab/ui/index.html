@@ -58,6 +58,11 @@
   .fb { min-width:46px; height:38px; border-radius:19px; border:1px solid var(--line); background:var(--soft); font-size:17px; }
   .fb.sel-ok { background:var(--ok); border-color:var(--ok); } .fb.sel-no { background:var(--err); border-color:var(--err); }
   .more { margin-left:auto; background:none; border:0; color:var(--muted); font-size:13px; padding:8px 4px; }
+  .bot.done { border-color:color-mix(in srgb, var(--ok) 55%, var(--line)); }
+  .bot.ask { border-color:var(--warn); } .bot.ask .what { color:var(--warn); }
+  .confirm { display:flex; gap:10px; margin-top:11px; }
+  .confirm button { flex:1; height:48px; border-radius:14px; font-size:16px; font-weight:600; border:1px solid var(--line); background:var(--soft); }
+  .confirm .yes { background:var(--warn); border-color:var(--warn); color:#fff; }
   .fix { display:none; flex-wrap:wrap; gap:6px; margin-top:9px; }
   .fix.open { display:flex; }
   .fix small { width:100%; color:var(--muted); font-size:13px; }
@@ -123,7 +128,8 @@
     <div class="scroll" id="chatScroll">
       <div id="chat">
         <div class="hello"><b>Fale como se estivesse em casa</b>
-          Mande uma frase — com ou sem “Alexa”. O modelo decide se é com o assistente e o que fazer.
+          Mande uma frase — com ou sem “Alexa”. O modelo decide se é com o assistente e o PC executa a ação:
+          hora, timer de verdade, anotação, casa simulada. Ações sensíveis pedem confirmação.
           Depois marque 👍 ou 👎 em cada resposta: isso vira dado de teste.</div>
       </div>
     </div>
@@ -142,8 +148,10 @@
       <div class="empty" id="noDevices">Nada foi ligado ainda.<br>Peça algo na aba Testar: “Alexa, acende a luz da sala”.</div>
       <h2>Mídia</h2>
       <div class="card" id="media"></div>
-      <h2>Timers e lembretes</h2>
+      <h2>Timers (reais)</h2>
       <div class="card" id="timers"></div>
+      <h2>Anotações (arquivo no PC)</h2>
+      <div class="card" id="notes"></div>
     </div>
   </section>
 
@@ -174,6 +182,9 @@
       </div>
       <h2>Seus julgamentos (👍 / 👎)</h2>
       <div class="card" id="fbStats"></div>
+      <h2>Ferramentas permitidas</h2>
+      <p class="note" id="toolSel" style="margin:0 4px 8px"></p>
+      <div class="card" id="toolList"></div>
       <h2>Sessão do servidor</h2>
       <div class="card" id="stats"></div>
       <h2>Ações</h2>
@@ -206,9 +217,10 @@ const DEMO = [
   "Alexa, pesquisa pra mim quais são os melhores filmes de ficção científica", "tá bom, já vou",
   "Alexa, apaga todas as luzes", "Alexandre, vem jantar!", "Alexa, escreve um email pro meu chefe pedindo férias",
 ];
-const CHIPS = ["Alexa, acende a luz da sala", "Alexa, timer de 10 minutos", "Você viu o jogo ontem?",
+const CHIPS = ["Alexa, que horas são?", "Alexa, acende a luz da sala", "Alexa, timer de 10 segundos", "Você viu o jogo ontem?",
+               "Alexa, me lembra de comprar pão", "Alexa, abre a porta da frente", "Alexa, como está o PC?",
                "A Alexa da minha tia não entende nada", "Alexa, toca Djavan", "Alexandre, vem jantar!",
-               "Alexa, qual a capital da Austrália?", "Pergunta pra Alexa se vai chover", "Alexa, apaga tudo"];
+               "Alexa, quais são meus lembretes?", "Alexa, qual a capital da Austrália?", "Alexa, cancela os timers"];
 const LABELS = { ignore: "Ignorar", home_control: "Casa", media: "Mídia", timer_alarm: "Timer", knowledge: "Pergunta", complex: "Tarefa complexa" };
 const DEVICE = { luz: ["💡", "Luz"], clima: ["❄️", "Ar / clima"], tv: ["📺", "TV"], cortina: ["🪟", "Cortina"], porta: ["🚪", "Porta"],
                  portao: ["🚧", "Portão"], ventilador: ["🌀", "Ventilador"], cafeteira: ["☕", "Cafeteira"], maquina: ["🧺", "Máquina"], tomada: ["🔌", "Tomada"] };
@@ -223,42 +235,69 @@ function toBottom() { const s = $("chatScroll"); requestAnimationFrame(() => s.s
 function post(path, body) { return fetch(path, { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body) }); }
 
 // ---------- o que o assistente "fez", em linguagem de gente ----------
+const TOOL_ICON = { "info.time": "🕒", "info.date": "📅", "info.system_status": "🖥️", "media.play": "🎵", "media.pause": "⏸️",
+                    "media.set_volume": "🎚️", "timer.create": "⏱️", "timer.list": "⏱️", "timer.cancel_all": "⏱️",
+                    "note.add": "📝", "note.list": "📝", "note.clear": "📝", "llm.answer": "💬", "llm.answer_large": "🧠" };
+
 function describe(rec) {
-  const a = rec.action, pct = rec.confidence == null ? "" : ` · ${Math.round(rec.confidence * 100)}% de confiança`;
-  const sub = `${LABELS[rec.decision] || rec.decision}${pct} · ${rec.latency_ms.toFixed(0)} ms`;
-  switch (rec.route) {
-    case "NONE":
+  const tool = rec.tool || { status: "ignored" };
+  const pct = rec.confidence == null ? "" : ` · ${Math.round(rec.confidence * 100)}%`;
+  const kind = tool.name ? ` · ${tool.name}${tool.name.startsWith("llm.") ? "" : tool.real ? " (real)" : " (simulado)"}` : "";
+  const ms = rec.total_ms != null ? rec.total_ms : rec.latency_ms;
+  const sub = `${LABELS[rec.decision] || rec.decision}${pct}${kind} · ${ms.toFixed(0)} ms`;
+  let ico = TOOL_ICON[tool.name] || "•";
+  if (tool.name === "home.set_device") ico = (DEVICE[tool.args.device] || ["🏠"])[0];
+  switch (tool.status) {
+    case "ignored":
       return rec.decision === "ignore" ? { ico: "🙈", what: "Ignorei — não era comigo", sub }
-                                       : { ico: "🤔", what: "Ignorei por baixa confiança", sub: `achei que era “${LABELS[rec.decision] || rec.decision}”${pct}` };
-    case "HOME_AUTOMATION": {
-      const d = DEVICE[a && a.device] || ["🏠", (a && a.device) || "Casa"];
-      const where = a && a.rooms ? (a.rooms[0] === "*" ? "casa toda" : a.rooms.join(", ")) : "";
-      return { ico: d[0], what: `${VERB[a && a.state] || "Ajustei"}: ${d[1].toLowerCase()}${where ? " · " + where : ""}`, sub };
-    }
-    case "MEDIA":
-      return a && a.playing ? { ico: "🎵", what: "Tocando música", sub: `volume ${a.volume} · ${sub}` }
-                            : { ico: "🎚️", what: `Mídia ajustada · volume ${a ? a.volume : "?"}`, sub };
-    case "TIMERS": return { ico: "⏱️", what: "Timer / lembrete criado", sub };
-    case "LLM": return { ico: "💬", what: "É uma pergunta → respondendo", sub, llm: true };
-    case "LLM_LARGE": return { ico: "🧠", what: "Tarefa complexa → modelo grande", sub, llm: true };
-    case "CLARIFY": return { ico: "❓", what: "Não tenho certeza — pediria para repetir", sub };
-    default: return { ico: "•", what: rec.route, sub };
+                                       : { ico: "🤔", what: "Ignorei por baixa confiança", sub };
+    case "executed": return { ico, what: tool.say, sub, cls: "done" };
+    case "answering": return { ico, what: rec.route === "LLM_LARGE" ? "Tarefa complexa → modelo grande" : "É uma pergunta → respondendo", sub, llm: true };
+    case "needs_confirmation": return { ico: "⚠️", what: tool.say, sub: `ação sensível — precisa da sua confirmação · ${sub}`, confirm: tool.confirm, cls: "ask" };
+    case "needs_info": return { ico: "🤷", what: tool.say, sub, cls: "ask" };
+    case "clarify": return { ico: "❓", what: tool.say, sub, cls: "ask" };
+    case "cancelled": return { ico: "✋", what: "Cancelado — não fiz nada", sub: "resposta à confirmação" };
+    case "expired": return { ico: "⌛", what: tool.say, sub: "resposta à confirmação" };
+    default: return { ico: "⛔", what: tool.say || "Não posso fazer isso", sub: `${tool.status} · ${sub}`, cls: "err" };
   }
 }
 
 function addCard(rec, roundTrip) {
   const d = describe(rec);
-  const card = el("div", `bot r-${rec.route}`);
+  const card = el("div", `bot r-${rec.route} ${d.cls || ""}`);
+  const tool = rec.tool || {};
+  const sel = tool.selection ? `escolha da ferramenta: ${tool.selection.method}${tool.selection.confidence != null ? " (" + Math.round(tool.selection.confidence * 100) + "%)" : ""}${tool.selection.ms ? " · " + tool.selection.ms.toFixed(0) + " ms" : ""}` : "";
+  const toolInfo = tool.name ? `<div style="margin-top:6px">ferramenta <b>${esc(tool.name)}</b> ${esc(JSON.stringify(tool.args || {}))}</div>
+      ${sel ? `<div>${esc(sel)}</div>` : ""}${tool.errors ? `<div>${esc(tool.errors.join("; "))}</div>` : ""}` : "";
   const scores = rec.scores ? Object.entries(rec.scores).sort((a, b) => b[1] - a[1]).map(([k, v]) =>
     `<div class="score"><span>${esc(LABELS[k] || k)}</span><div class="bar"><i style="width:${Math.round(v * 100)}%"></i></div><b>${Math.round(v * 100)}%</b></div>`).join("") : "";
   card.innerHTML = `<div class="head"><div class="ico">${d.ico}</div><div><div class="what">${esc(d.what)}</div><div class="sub">${esc(d.sub)}</div></div></div>
     ${d.llm ? '<div class="answer wait">pensando…</div>' : ""}
+    ${d.confirm ? '<div class="confirm"><button class="yes">Confirmar</button><button class="no">Cancelar</button></div>' : ""}
     <div class="foot"><button class="fb" data-v="1" aria-label="Acertou">👍</button><button class="fb" data-v="0" aria-label="Errou">👎</button>
       <button class="more">detalhes ▾</button></div>
     <div class="fix"><small>O certo era:</small>${Object.entries(LABELS).filter(([k]) => k !== rec.decision).map(([k, v]) => `<button data-k="${k}">${v}</button>`).join("")}</div>
     <div class="detail">${scores}
       <div style="margin-top:6px">esperei ${roundTrip.toFixed(0)} ms neste aparelho (decisão ${rec.latency_ms.toFixed(0)} + rede/servidor ${(roundTrip - rec.latency_ms).toFixed(0)})</div>
-      <div>${esc(rec.backend)}${rec.metadata && rec.metadata.stage ? " · estágio " + rec.metadata.stage : ""} · ${esc(rec.route_reason || "")}</div></div>`;
+      <div>${esc(rec.backend)}${rec.metadata && rec.metadata.stage ? " · estágio " + rec.metadata.stage : ""} · ${esc(rec.route_reason || "")}</div>${toolInfo}</div>`;
+  if (d.confirm) {
+    const box = card.querySelector(".confirm"), what = card.querySelector(".what"), sub = card.querySelector(".sub");
+    const answer = async (approve) => {
+      box.querySelectorAll("button").forEach(b => b.disabled = true);
+      try {
+        const out = (await (await post("/v1/act/confirm", { token: d.confirm.token, approve, client: SID })).json()).tool;
+        box.remove(); card.classList.remove("ask");
+        const ok = out.status === "executed";
+        card.querySelector(".ico").textContent = ok ? "✅" : out.status === "cancelled" ? "✋" : "⌛";
+        what.textContent = ok ? out.say : out.status === "cancelled" ? "Cancelado — não fiz nada" : out.say;
+        sub.textContent = ok ? `confirmado por você · ${out.name}${out.real ? " (real)" : " (simulado)"}` : "nada foi executado";
+        if (ok) card.classList.add("done");
+      } catch (e) { box.querySelectorAll("button").forEach(b => b.disabled = false); }
+    };
+    box.querySelector(".yes").onclick = () => answer(true);
+    box.querySelector(".no").onclick = () => answer(false);
+    setTimeout(() => { if (box.isConnected) { box.remove(); what.textContent = "A confirmação expirou — nada foi feito"; } }, d.confirm.expires_in * 1000);
+  }
   const [up, down] = card.querySelectorAll(".fb"), fix = card.querySelector(".fix");
   const sendFb = (correct, expected) => post("/v1/feedback", { decision_id: rec.id, correct, expected, input: rec.input, decision: rec.decision, backend: rec.backend })
     .then(r => r.json()).then(renderFeedback).catch(() => {});
@@ -294,18 +333,19 @@ async function send(text) {
   $("chat").appendChild(typing); toBottom();
   pending++; setStatus("decidindo…", "busy");
   const slow = setTimeout(() => typing.textContent = "ainda decidindo… (modelo carregando, pode levar ~20 s)", 3000);
-  const body = { input: text, backend: $("backend").value, min_confidence: parseFloat($("thr").value), low_confidence: $("low").value, source: SOURCE };
+  const body = { input: text, backend: $("backend").value, min_confidence: parseFloat($("thr").value), low_confidence: $("low").value, source: SOURCE, client: SID };
   const t0 = performance.now();
   try {
-    const r = await post("/v1/route", body);
+    const r = await post("/v1/act", body);   // decisão -> ferramenta permitida -> resultado
     if (!r.ok) throw new Error(`servidor respondeu ${r.status}: ${(await r.text()).slice(0, 160)}`);
     const rec = await r.json();
     const roundTrip = performance.now() - t0;
     typing.remove();
     addCard(rec, roundTrip);
-    mine.route.push(roundTrip); mine.decision.push(rec.latency_ms); renderMine();
-    post("/v1/client_timing", { kind: "route", round_trip_ms: roundTrip, decision_ms: rec.latency_ms, decision_id: rec.id }).then(refreshNet).catch(() => {});
-    if (navigator.vibrate && rec.route !== "NONE") navigator.vibrate(12);
+    const serverMs = rec.total_ms != null ? rec.total_ms : rec.latency_ms;   // decisão + ferramenta
+    mine.route.push(roundTrip); mine.decision.push(serverMs); renderMine();
+    post("/v1/client_timing", { kind: "route", round_trip_ms: roundTrip, decision_ms: serverMs, decision_id: rec.id }).then(refreshNet).catch(() => {});
+    if (navigator.vibrate && rec.tool && rec.tool.status !== "ignored") navigator.vibrate(12);
   } catch (e) {
     typing.remove();
     const card = el("div", "bot err", `<div class="head"><div class="ico">⚠️</div><div><div class="what">Não consegui decidir</div>
@@ -332,7 +372,7 @@ function show(name) {
   document.querySelectorAll("nav button").forEach(b => { const on = b.dataset.tab === name; b.classList.toggle("active", on); if (on) b.classList.remove("dot"); });
   if (name === "chat") toBottom();
   if (name === "net") refreshNet();
-  if (name === "cfg") { refreshStats(); fetch("/v1/feedback").then(r => r.json()).then(renderFeedback).catch(() => {}); }
+  if (name === "cfg") { refreshStats(); renderTools().catch(() => {}); fetch("/v1/feedback").then(r => r.json()).then(renderFeedback).catch(() => {}); }
   if (name === "home") fetch("/v1/state").then(r => r.json()).then(renderHome).catch(() => {});
 }
 
@@ -346,8 +386,31 @@ function renderHome(s) {
   $("devices").innerHTML = tiles.join("");
   $("noDevices").hidden = tiles.length > 0;
   $("media").innerHTML = `<div class="row"><span>tocando</span><b>${esc(s.media.playing || "nada")}</b></div><div class="row"><span>volume</span><b>${s.media.volume} / 10</b></div>`;
-  $("timers").innerHTML = s.timers.length ? s.timers.slice().reverse().map(t => `<div class="row"><span>${esc(t.request)}</span><b>${esc(t.created)}</b></div>`).join("")
-                                          : '<div class="empty" style="padding:6px">nenhum</div>';
+  const TS = { running: "rodando", fired: "tocou ⏰", cancelled: "cancelado" };
+  $("timers").innerHTML = s.timers.length ? s.timers.slice().reverse().map(t =>
+      `<div class="row"><span>${esc(t.label || t.request)}${t.seconds ? ` · ${t.seconds >= 60 ? Math.round(t.seconds / 60) + " min" : t.seconds + " s"}` : ""}</span>
+       <b>${esc(TS[t.status] || "")} ${esc(t.due || t.created)}</b></div>`).join("")
+    : '<div class="empty" style="padding:6px">nenhum timer</div>';
+  fetch("/v1/notes").then(r => r.json()).then(n => {
+    $("notes").innerHTML = n.notes.length ? n.notes.slice().reverse().map(x => `<div class="row"><span>${esc(x.text)}</span><b>${esc(x.ts.slice(11, 16))}</b></div>`).join("")
+                                          : '<div class="empty" style="padding:6px">nenhuma anotação</div>';
+  }).catch(() => {});
+}
+
+function timerFired(ev) {
+  const t = ev.timer || {};
+  $("chat").appendChild(el("div", "bot done", `<div class="head"><div class="ico">⏰</div><div><div class="what">Timer terminou: ${esc(t.label || "timer")}</div>
+    <div class="sub">criado às ${esc(t.created || "")} · ${t.seconds} s · evento real disparado pelo PC</div></div></div>`));
+  toBottom();
+  if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 400]);
+  if (!$("tab-chat").classList.contains("active")) document.querySelector('nav button[data-tab="chat"]').classList.add("dot");
+}
+
+async function renderTools() {
+  const t = await (await fetch("/v1/tools")).json();
+  $("toolList").innerHTML = t.tools.map(x => `<div class="row"><span><b style="font-weight:600;color:var(--text)">${esc(x.name)}</b><br>${esc(x.description)}</span>
+    <b>${x.name.startsWith("llm.") ? "LLM" : x.real ? "real" : "simulada"}${x.sensitive ? "<br>🔒 confirma" : ""}</b></div>`).join("");
+  $("toolSel").textContent = `Seletor: ${t.selector}. O modelo só escolhe entre estas ${t.tools.length}; não existe ferramenta de "rodar comando".`;
 }
 
 // ---------- Rede ----------
@@ -422,6 +485,7 @@ async function init() {
   es.onmessage = (m) => {
     const ev = JSON.parse(m.data);
     if (ev.type === "llm_answer") addAnswer(ev);
+    else if (ev.type === "timer_fired") timerFired(ev);
     else if (ev.type === "state") { renderHome(ev); if (!$("tab-home").classList.contains("active")) document.querySelector('nav button[data-tab="home"]').classList.add("dot"); }
     else if (ev.type === "decision" && ev.source !== SOURCE && !String(ev.source || "").startsWith("pipeline")) {
       $("chat").appendChild(el("div", "sys", `outro aparelho: “${esc(ev.input)}” → ${esc(LABELS[ev.decision] || ev.decision)}`)); toBottom();

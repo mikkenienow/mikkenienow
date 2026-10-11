@@ -8,6 +8,16 @@ default_backend: cascade-e5-decider   # melhor custo/benefício medido (docs/03-
 llm_executor: qwen3.5-2b-chat      # quem responde as rotas LLM / LLM_LARGE
 llm_large_executor: qwen3.5-4b-chat
 
+# Ações reais (lab/actions.py, POST /v1/act). O seletor escolhe a ferramenta DENTRO da rota já decidida.
+# rules = regex por ferramenta; model = modelo de decisão com as descrições das ferramentas; hybrid = regras, senão modelo.
+# Medição em runs/tools/ (bench/tools_eval.py). LAB_TOOL_SELECTOR troca sem editar o arquivo.
+tools:
+  selector: hybrid        # regras dentro da rota do roteador; se nenhuma casa, o modelo escolhe
+  scope: all              # ...entre TODAS as ferramentas (corrige intenção errada do roteador). Medido: 88% ponta a ponta
+  selector_backend: decider-0.8b-gguf-restore
+  min_confidence: 0.5
+  confirm_ttl: 60
+
 backends:
   # ---------------- C) modelos especializados em decisão ----------------
   jeff-0.8b:

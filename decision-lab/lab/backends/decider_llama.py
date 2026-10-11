@@ -97,10 +97,16 @@ class DeciderLlamaBackend(Backend):
         prefix = self.prefix_ids(options, question)
         suffix = self.enc("\n\nContext:\n") + self.enc(text)[:self.max_state_tokens] + self.enc("\n\nAnswer: (")
         meta: dict[str, Any] = {"prefix_tokens": len(prefix), "suffix_tokens": len(suffix)}
-        filename = "decider-" + hashlib.sha1(repr(prefix).encode()).hexdigest()[:16] + ".bin"
-        if self.prefix_cache == "restore" and filename not in self._saved:  # 1ª vez deste schema: calcula e salva
-            self._completion(prefix, 0, cache=True)
-            meta["saved"] = self._slot("save", filename).get("n_written")
+        filename = "decider-" + hashlib.sha1(repr((self.model, prefix)).encode()).hexdigest()[:16] + ".bin"
+        if self.prefix_cache == "restore" and filename not in self._saved:
+            # 1ª vez deste schema NESTE processo: o arquivo pode já existir de uma execução anterior (o estado
+            # do prefixo sobrevive a reinícios); só calcula e salva se o restore falhar.
+            try:
+                self._slot("restore", filename)
+                meta["reused_saved_prefix"] = True
+            except RuntimeError:
+                self._completion(prefix, 0, cache=True)
+                meta["saved"] = self._slot("save", filename).get("n_written")
             self._saved.add(filename)
         with Timer() as t:
             if self.prefix_cache == "restore":
