@@ -15,6 +15,9 @@ política (limiar)  ──►  rota: NONE | HOME_AUTOMATION | MEDIA | TIMERS | L
    │
    ├─► executores simulados (casa, mídia, timers)
    └─► LLM local (Qwen3.5-2B / 4B via llama.cpp) só quando a rota pede
+
+POST /v1/act: a mesma decisão, seguida de  validação ─► ferramenta de uma lista fechada ─► resultado ─► log
+              (lab/tools, lab/actions.py; ações sensíveis ficam pendentes até a pessoa confirmar)
 ```
 
 ![UI do laboratório: stream de demonstração roteado pela cascata e5 → decider](docs/img/ui-demo.png)
@@ -29,7 +32,14 @@ outros componentes (executores da casa simulada, LLM local, UI via SSE) → benc
 **Re-medido numa segunda máquina** (PC doméstico, i5 de 6 núcleos, sem GPU utilizável, WSL2): mesmas acurácias,
 latências parecidas com as da VM; resultados em `runs/bench-local/`. **Experimento 2 feito**: decider em GGUF no
 llama.cpp com o prefixo do schema restaurado — 204 ms por decisão (350 ms no PyTorch) com 1 GB de RAM.
-Próximo passo: Fase 3 (celular ↔ PC). O fine-tuning de destinatário (LoRA) segue bloqueado por falta de GPU.
+O fine-tuning de destinatário (LoRA) segue bloqueado por falta de GPU.
+
+**Ações reais (11/10/2026)**: o roteador agora termina numa ferramenta executada no PC — `POST /v1/act`:
+decisão → validação → ferramenta de uma lista fechada (15) → resultado → log. Hora, estado do PC, timers e
+anotações são reais; casa e mídia continuam simuladas; ações sensíveis pedem confirmação. Em 75 falas novas, 88% de
+desfecho correto ponta a ponta e nenhuma ação sensível sem confirmação ([docs/05-acoes.md](docs/05-acoes.md)).
+A interface de celular mostra o resultado da ferramenta ([docs/04-fase3.md](docs/04-fase3.md)). Voz local e Echo
+Dot estão levantados e documentados, não implementados ([docs/06-voz.md](docs/06-voz.md), [docs/07-echo-dot.md](docs/07-echo-dot.md)).
 
 Principais achados (detalhes em [docs/03-resultados.md](docs/03-resultados.md)):
 
@@ -50,7 +60,10 @@ Documentação:
 | [docs/02-ambiente.md](docs/02-ambiente.md) | Etapa 2: o que foi instalado, comandos, arquitetura, problemas encontrados |
 | [docs/03-resultados.md](docs/03-resultados.md) | Etapas 3–7: benchmarks, comparação, router + LLM, respostas às perguntas do experimento |
 | [runs/bench/REPORT.md](runs/bench/REPORT.md) | Tabelas completas geradas pelos scripts (VM da nuvem); [runs/bench-local/REPORT.md](runs/bench-local/REPORT.md) = máquina local |
-| [docs/04-fase3.md](docs/04-fase3.md) | Fase 3 (celular ↔ PC): instrumentação, medições a partir do host, como concluir |
+| [docs/04-fase3.md](docs/04-fase3.md) | Fase 3 (celular ↔ PC): interface de celular, medições de rede, verificação ponta a ponta, o que falta |
+| [docs/05-acoes.md](docs/05-acoes.md) | Do roteador a ações reais: adaptador de ferramentas, travas, avaliação em 75 falas |
+| [docs/06-voz.md](docs/06-voz.md) | Voz: o que existe (só prévias do navegador) e o trabalho para ligar STT/VAD ao roteador |
+| [docs/07-echo-dot.md](docs/07-echo-dot.md) | Echo Dot: o que a Amazon permite, proposta mínima com Custom Skill, requisitos e custos |
 
 ## Uso rápido
 

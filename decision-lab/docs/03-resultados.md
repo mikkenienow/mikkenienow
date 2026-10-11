@@ -354,3 +354,15 @@ LM head, então não há prefixo cacheável nem conversão direta).
    fala → ação e o efeito de erros reais de ASR. A UI já tem uma prévia com a Web Speech API do navegador.
 6. **Dataset maior e independente** (gravações reais, várias pessoas) para validar os limiares fora do conjunto
    em que foram escolhidos.
+
+## Atualização de 11/10/2026 — continuação em outros documentos
+
+- **Ações reais**: o roteador passou a terminar numa ferramenta executada no PC, com lista fechada, validação e
+  confirmação. Medição em 75 falas novas e conclusões em [05-acoes.md](05-acoes.md). Achado que interessa a este
+  documento: deixar o modelo de decisão escolher a ferramenta entre **todas** as permitidas corrige erros de intenção
+  do roteador (+6,7 pontos ponta a ponta) — outra evidência de que classes dinâmicas são o ponto forte desses modelos.
+- **Fase 3**: verificada ponta a ponta pelo caminho de rede do celular ([04-fase3.md](04-fase3.md)).
+- **Voz e Echo Dot**: levantamento em [06-voz.md](06-voz.md) e [07-echo-dot.md](07-echo-dot.md).
+- **Novo item para a lista acima**: no uso real pelo celular, pedidos sem a palavra "Alexa" foram ignorados
+  ("é com você, toque uma música"). O roteador herdou da taxonomia a ideia de palavra de ativação; em clientes de
+  texto isso é erro. Um modo "tudo é comigo" (pular o porteiro e ir à escolha da ferramenta) é barato de testar.

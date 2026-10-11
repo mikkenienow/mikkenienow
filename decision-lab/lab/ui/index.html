@@ -223,7 +223,7 @@ const CHIPS = ["Alexa, que horas são?", "Alexa, acende a luz da sala", "Alexa, 
                "Alexa, me lembra de comprar pão", "Alexa, abre a porta da frente", "Alexa, como está o PC?",
                "A Alexa da minha tia não entende nada", "Alexa, toca Djavan", "Alexandre, vem jantar!",
                "Alexa, quais são meus lembretes?", "Alexa, qual a capital da Austrália?", "Alexa, cancela os timers"];
-const LABELS = { ignore: "Ignorar", home_control: "Casa", media: "Mídia", timer_alarm: "Timer", knowledge: "Pergunta", complex: "Tarefa complexa" };
+const LABELS = { ignore: "Ignorar", home_control: "Casa", media: "Mídia", timer_alarm: "Timer", knowledge: "Pergunta", complex: "Tarefa complexa", confirmation: "Confirmação" };
 const DEVICE = { luz: ["💡", "Luz"], clima: ["❄️", "Ar / clima"], tv: ["📺", "TV"], cortina: ["🪟", "Cortina"], porta: ["🚪", "Porta"],
                  portao: ["🚧", "Portão"], ventilador: ["🌀", "Ventilador"], cafeteira: ["☕", "Cafeteira"], maquina: ["🧺", "Máquina"], tomada: ["🔌", "Tomada"] };
 const VERB = { on: "Liguei", off: "Desliguei", ajustar: "Ajustei" };
@@ -283,7 +283,7 @@ function addCard(rec, roundTrip) {
     ${d.confirm ? '<div class="confirm"><button class="yes">Confirmar</button><button class="no">Cancelar</button></div>' : ""}
     <div class="foot"><button class="fb" data-v="1" aria-label="Acertou">👍</button><button class="fb" data-v="0" aria-label="Errou">👎</button>
       <button class="more">detalhes ▾</button></div>
-    <div class="fix"><small>O certo era:</small>${Object.entries(LABELS).filter(([k]) => k !== rec.decision).map(([k, v]) => `<button data-k="${k}">${v}</button>`).join("")}</div>
+    <div class="fix"><small>O certo era:</small>${Object.entries(LABELS).filter(([k]) => k !== rec.decision && k !== "confirmation").map(([k, v]) => `<button data-k="${k}">${v}</button>`).join("")}</div>
     <div class="detail">${scores}
       <div style="margin-top:6px">esperei ${roundTrip.toFixed(0)} ms neste aparelho (decisão ${rec.latency_ms.toFixed(0)} + rede/servidor ${(roundTrip - rec.latency_ms).toFixed(0)})</div>
       <div>${esc(rec.backend)}${rec.metadata && rec.metadata.stage ? " · estágio " + rec.metadata.stage : ""} · ${esc(rec.route_reason || "")}</div>${toolInfo}</div>`;
