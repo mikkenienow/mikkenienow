@@ -8,12 +8,23 @@
 #
 # ATENÇÃO: a API do laboratório NÃO tem autenticação. Deixe ligado só durante o teste, numa rede em que você confia.
 # O IP do WSL muda a cada reinício da distro: rode "on" de novo depois de um `wsl --shutdown`.
-param([ValidateSet("on", "off", "status")][string]$Action = "status", [int]$Port = 8000, [string]$Distro = "Ubuntu")
+#
+# Se o `wsl` falhar neste PowerShell ("Não é possível o acesso ao arquivo pelo sistema"), passe o IP à mão:
+#   .\scripts\phase3_windows.ps1 on -WslIp 172.31.160.190      # o IP sai de `hostname -I` dentro do WSL
+param([ValidateSet("on", "off", "status")][string]$Action = "status", [int]$Port = 8000, [string]$Distro = "Ubuntu",
+      [string]$WslIp = "")
 $rule = "Decision Lab (fase 3) $Port"
+$admin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole(
+  [Security.Principal.WindowsBuiltInRole]::Administrator)
+if ($Action -ne "status" -and -not $admin) { Write-Host "Abra o PowerShell como Administrador para usar '$Action'." -ForegroundColor Red; exit 1 }
 
 if ($Action -eq "on") {
-  $wslIp = (wsl -d $Distro -- hostname -I).Trim().Split(" ")[0]
-  if (-not $wslIp) { throw "não consegui o IP do WSL ($Distro)" }
+  $wslIp = $WslIp
+  if (-not $wslIp) { try { $wslIp = "$(wsl -d $Distro -- hostname -I 2>$null)".Trim().Split(" ")[0] } catch { $wslIp = "" } }
+  if ($wslIp -notmatch '^\d{1,3}(\.\d{1,3}){3}$') {
+    Write-Host "Não consegui o IP do WSL. Rode 'hostname -I' dentro do WSL e use: .\scripts\phase3_windows.ps1 on -WslIp <ip>" -ForegroundColor Red
+    exit 1
+  }
   netsh interface portproxy delete v4tov4 listenport=$Port listenaddress=0.0.0.0 | Out-Null
   netsh interface portproxy add v4tov4 listenport=$Port listenaddress=0.0.0.0 connectport=$Port connectaddress=$wslIp
   # Qualquer perfil de rede (o Windows costuma marcar a Ethernet/Wi-Fi de casa como "Pública", e uma regra só
