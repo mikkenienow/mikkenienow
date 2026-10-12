@@ -419,10 +419,10 @@ def build_registry() -> ToolRegistry:
                       r"|(como esta|status|estado|uso) d[oa] (pc|computador|maquina|servidor)"),
         Tool("llm.answer", "LLM", "Responder a pergunta com o LLM local",
              "Answer any other question or look up general knowledge (facts, weather, math, definitions, how-to)",
-             _llm, none, lambda a, r: "Vou responder.", default=True),
+             _llm, none, lambda a, r: "Vou responder.", real=True, default=True),
         Tool("llm.answer_large", "LLM_LARGE", "Tarefa complexa: usar o LLM local maior",
              "Carry out a complex writing, planning, summarizing or comparison task",
-             _llm, none, lambda a, r: "Vou pensar nisso.", default=True),
+             _llm, none, lambda a, r: "Vou pensar nisso.", real=True, default=True),
 
         # --- casa (simulada) ---
         Tool("home.set_device", "HOME_AUTOMATION", "Ligar/desligar (ou abrir/fechar) um dispositivo da casa simulada",
