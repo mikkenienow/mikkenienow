@@ -35,8 +35,8 @@ llama.cpp com o prefixo do schema restaurado — 204 ms por decisão (350 ms no 
 O fine-tuning de destinatário (LoRA) segue bloqueado por falta de GPU.
 
 **Ações reais (11/10/2026)**: o roteador agora termina numa ferramenta executada no PC — `POST /v1/act`:
-decisão → validação → ferramenta de uma lista fechada (15) → resultado → log. Hora, estado do PC, timers e
-anotações são reais; casa e mídia continuam simuladas; ações sensíveis pedem confirmação. Em 75 falas novas, 88% de
+decisão → validação → ferramenta de uma lista fechada (18) → resultado → log. Hora, estado do PC, timers, música no PC e
+anotações são reais; **só a casa continua simulada**; pedido sem ferramenta recebe "entendi, mas não sei fazer isso"; ações sensíveis pedem confirmação. Em 75 falas novas, 88% de
 desfecho correto ponta a ponta e nenhuma ação sensível sem confirmação ([docs/05-acoes.md](docs/05-acoes.md)).
 A interface de celular mostra o resultado da ferramenta ([docs/04-fase3.md](docs/04-fase3.md)). Voz local e Echo
 Dot estão levantados e documentados, não implementados ([docs/06-voz.md](docs/06-voz.md), [docs/07-echo-dot.md](docs/07-echo-dot.md)).

@@ -14,6 +14,9 @@ llm_large_executor: qwen3.5-4b-chat
 tools:
   selector: hybrid        # regras dentro da rota do roteador; se nenhuma casa, o modelo escolhe
   scope: all              # ...entre TODAS as ferramentas (corrige intenção errada do roteador). Medido: 88% ponta a ponta
+  player: auto            # auto = toca de verdade pelo Windows (WSL2); null = sem som, só simula
+  music_dirs:             # pastas com .mp3/.wav/.m4a/.flac/.wma; vazio = só as melodias de demonstração (runs/music)
+    - /mnt/c/Users/Mikke/Music
   selector_backend: decider-0.8b-gguf-restore
   min_confidence: 0.5
   confirm_ttl: 60

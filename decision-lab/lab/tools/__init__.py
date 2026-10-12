@@ -39,6 +39,9 @@ class Tool:
     sensitive: bool | Callable[[dict[str, Any]], bool] = False
     confirm_text: Callable[[dict[str, Any]], str] | None = None
     check: Callable[[dict[str, Any]], str | None] | None = None  # regra entre parâmetros (ex.: "um ou outro")
+    kind: str = "tool"              # "unsupported": ferramenta-sentinela "isso eu não sei fazer"
+    examples: tuple[str, ...] = ()  # frases de exemplo (para a tela "o que eu posso pedir")
+    effect: str = ""                # o que ela faz de verdade, em uma frase
     keywords: str = ""              # regex (texto normalizado) usada pelo seletor por regras
     default: bool = False           # ferramenta padrão da rota quando nenhuma regra casa
 
@@ -78,6 +81,7 @@ class Tool:
 
     def describe(self) -> dict[str, Any]:
         return {"name": self.name, "route": self.route, "description": self.description_pt, "real": self.real,
+                "kind": self.kind, "examples": list(self.examples), "effect": self.effect,
                 "sensitive": "depende dos parâmetros" if callable(self.sensitive) else bool(self.sensitive),
                 "params": {k: {"type": p.type, "required": p.required, **({"choices": list(p.choices)} if p.choices else {}),
                                **({"min": p.min, "max": p.max} if p.type == "int" else {})}
@@ -86,6 +90,10 @@ class Tool:
 
 class ToolNotAllowed(KeyError):
     pass
+
+
+class NeedsInfo(Exception):
+    """A ferramenta entendeu o pedido mas falta algo (ou não achou); a mensagem é a pergunta para a pessoa."""
 
 
 class ToolRegistry:

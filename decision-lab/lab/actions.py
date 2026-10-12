@@ -29,10 +29,11 @@ from dataclasses import dataclass, field
 from typing import Any, Callable
 
 from lab.backends.base import Backend
-from lab.tools import Tool, ToolRegistry
+from lab.tools import NeedsInfo, Tool, ToolRegistry
 from lab.tools.builtin import WAKE, ToolContext, norm
 from lab.types import Option, Timer
 
+_QUESTION = r"\b(como|qual|quais|quem|quanto|quantos|quantas|quando|onde|porque|por que|o que e|o que sao|pra que|para que)\b"
 TOOL_QUESTION = ("A home voice assistant received this request (in Portuguese, automatic transcription, may contain "
                  "errors). Which action fulfils the request?")
 # Respostas curtas a um pedido de confirmação. Só valem quando há uma pendência do mesmo cliente; qualquer
@@ -79,6 +80,8 @@ class Planner:
 
     def _by_model(self, text: str, candidates: list[Tool], route: str) -> Selection:
         assert self.backend is not None
+        if re.search(_QUESTION, norm(text)):  # pergunta ("como faço pra...") nunca é pedido sem ferramenta
+            candidates = [t for t in candidates if t.kind != "unsupported"]
         options = [Option(t.name, t.description_en) for t in candidates]
         try:
             with Timer() as timer:
@@ -92,9 +95,17 @@ class Planner:
                              decision.scores, timer.ms)
         return Selection(chosen, "model", decision.confidence, decision.scores, timer.ms)
 
+    def unsupported_for(self, text: str) -> Tool | None:
+        """A fala pede algo de uma família que não existe (e-mail, ligação, compra, Spotify…)? Regra, não modelo."""
+        t = norm(text)
+        return next((x for x in self.registry.all() if x.kind == "unsupported" and x.keywords and re.search(x.keywords, t)), None)
+
     def select(self, text: str, route: str) -> Selection:
         if not self.registry.for_route(route):
             return Selection(None, "no-tool-for-route")
+        gap = self.unsupported_for(text)  # vale em qualquer rota: "não sei fazer" não depende da intenção do roteador
+        if gap is not None:
+            return Selection(gap, "rules-unsupported")
         candidates = self.registry.all() if self.scope == "all" else self.registry.for_route(route)
         if len(candidates) == 1:
             return Selection(candidates[0], "only")
@@ -137,6 +148,12 @@ class ActionEngine:
         if decision not in self.valid_decisions:
             return self._out("rejected", say="Não entendi o pedido.", errors=[f"decisão fora da taxonomia: {decision!r}"])
         if route == "NONE":
+            # O roteador disse "não é comigo". Mas se começa com "Alexa," (chamou pelo nome) e pede algo que não existe,
+            # a pessoa merece saber que eu entendi e não sei fazer, em vez de silêncio.
+            gap = self.planner.unsupported_for(text) if re.match(WAKE, text.strip(), flags=re.I) else None
+            if gap is not None:
+                return self._run(gap, {}, text, record_id, selection={"method": "rules-unsupported-addressed",
+                                                                      "confidence": None, "scores": None, "ms": 0.0})
             return self._out("ignored")
         if route in ("CLARIFY", "ESCALATE"):
             return self._out("clarify", say="Não tenho certeza do que você pediu. Pode repetir?")
@@ -168,10 +185,19 @@ class ActionEngine:
                 return self._out("failed", tool, args, say="O modelo de linguagem não está disponível.", **extra)
             self.llm(text, tool.name == "llm.answer_large", record_id)
             return self._out("answering", tool, args, say=tool.say(args, {}), **extra)
+        if tool.kind == "unsupported":  # entendi que era comigo, mas não existe ferramenta para isso
+            return self._out("unsupported", tool, args, say=(
+                f"Entendi que o pedido era para mim, mas ainda não sei fazer isso: “{text.strip()}”. "
+                "Pergunte “o que você sabe fazer?” para ver o que eu faço."), **extra)
         try:
             with Timer() as timer:
                 result = tool.handler(args, self.ctx)
-            return self._out("executed", tool, args, result=result, say=tool.say(args, result), ms=round(timer.ms, 2), **extra)
+            out = self._out("executed", tool, args, result=result, say=tool.say(args, result), ms=round(timer.ms, 2), **extra)
+            if isinstance(result, dict) and "real" in result:
+                out["real"] = bool(result["real"])  # o player pode estar no modo simulado mesmo com a ferramenta "real"
+            return out
+        except NeedsInfo as question:
+            return self._out("needs_info", tool, args, say=str(question), errors=[str(question)], **extra)
         except Exception as error:
             return self._out("failed", tool, args, say="Algo deu errado ao executar.", errors=[repr(error)[:300]], **extra)
 

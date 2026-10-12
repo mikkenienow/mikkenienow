@@ -54,7 +54,7 @@ def run(rows: list[dict[str, Any]], selector: str, router_name: str | None, sele
     taxonomy = Taxonomy.load()
     tools = build_registry()
     backend = registry.create(selector_backend, config) if selector != "rules" else None
-    ctx = ToolContext(home=Home(), notes_path=Path(tempfile.mkdtemp()) / "notes.jsonl")
+    ctx = ToolContext(home=Home(), notes_path=Path(tempfile.mkdtemp()) / "notes.jsonl", registry=tools)  # player: NullPlayer
     engine = ActionEngine(tools, Planner(tools, selector, backend, scope=scope), ctx, set(taxonomy.keys), llm=lambda t, large, rid: None)
     router = registry.create(router_name, config) if router_name else None
     if router:
@@ -124,9 +124,10 @@ def main() -> None:
     parser.add_argument("--router", default=None, help="backend do roteador para o modo ponta a ponta (padrão: rota-ouro)")
     parser.add_argument("--selector-backend", default=None)
     parser.add_argument("--scope", default="route", choices=["route", "all"])
+    parser.add_argument("--data", default="tools_eval.jsonl", help="arquivo em data/ (o padrão são as 75 falas originais)")
     args = parser.parse_args()
     config = registry.load_config()
-    rows = load("tools_eval.jsonl")
+    rows = load(args.data)
     frozen = {norm(r["text"]) for name in ("test.jsonl", "train.jsonl") for r in load(name)}
     leaked = [r["text"] for r in rows if norm(r["text"]) in frozen]
     if leaked:
@@ -136,7 +137,8 @@ def main() -> None:
     results = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
     selector_backend = args.selector_backend or config.get("tools", {}).get("selector_backend", "decider-0.8b-gguf-restore")
     for selector in args.selectors.split(","):
-        key = f"{args.router or 'gold'}+{selector}" + ("" if args.scope == "route" else f"+{args.scope}")
+        key = (f"{args.router or 'gold'}+{selector}" + ("" if args.scope == "route" else f"+{args.scope}")
+               + ("" if args.data == "tools_eval.jsonl" else f"@{Path(args.data).stem.removeprefix('tools_eval_')}"))
         preds, summary = run(rows, selector, args.router, selector_backend, config, args.scope)
         results[key] = summary
         (OUT / f"predictions-{key}.jsonl").write_text("".join(json.dumps(p, ensure_ascii=False) + "\n" for p in preds), encoding="utf-8")

@@ -32,9 +32,10 @@ from lab import backends as registry
 from lab.actions import ActionEngine, ActionPolicy, Planner
 from lab.backends.base import Backend
 from lab.executors import Home, LlmExecutor
-from lab.router import LLM_ROUTES, Policy, route_decision
+from lab.router import LLM_ROUTES, Policy, RouteResult, route_decision
 from lab.taxonomy import ROOT, Taxonomy
 from lab.tools.builtin import ToolContext, build_registry
+from lab.tools.player import Library, NullLibrary, NullPlayer, WindowsPlayer, make_demo_music
 from lab.types import normalize_options
 
 CONFIG = registry.load_config()
@@ -228,6 +229,9 @@ class ActRequest(BaseModel):
     low_confidence: str = "ignore"
     client: str | None = None   # identifica quem pediu (para a confirmação); padrão: IP
     source: str = "api"
+    # Modo direto: o cliente garante que a fala é para o assistente (chat digitado, botão de falar). O roteador não
+    # pode mais responder "não é comigo": se disser "ignorar", vale a 2ª melhor intenção. Padrão false = escuta ambiente.
+    addressed: bool = False
 
 
 class ConfirmRequest(BaseModel):
@@ -262,7 +266,15 @@ def get_engine() -> ActionEngine:
             selector = os.environ.get("LAB_TOOL_SELECTOR", settings.get("selector", "rules"))
             backend = get_backend(settings.get("selector_backend")) if selector != "rules" else None
             registry = build_registry()
-            ctx = ToolContext(home=_home, notes_path=ROOT / "runs" / "notes.jsonl", publish=publish, log=log)
+            music_dirs = [d for d in os.environ.get("LAB_MUSIC_DIRS", "").split(os.pathsep) if d] or settings.get("music_dirs", [])
+            if os.environ.get("LAB_PLAYER", settings.get("player", "auto")) != "null" and WindowsPlayer.available():
+                demo_dir = ROOT / "runs" / "music"
+                make_demo_music(demo_dir)   # melodias de domínio público: "toca uma música" sempre tem o que tocar
+                player, library = WindowsPlayer(ROOT / "runs" / "player.ps1"), Library(music_dirs, demo_dir)
+            else:  # fora do WSL2/Windows (ou LAB_PLAYER=null): fluxo igual, mas SEM som — e as respostas dizem isso
+                player, library = NullPlayer(), NullLibrary()
+            ctx = ToolContext(home=_home, notes_path=ROOT / "runs" / "notes.jsonl", publish=publish, log=log,
+                              player=player, library=library, registry=registry)
             scope = os.environ.get("LAB_TOOL_SCOPE", settings.get("scope", "route"))
             _engine = ActionEngine(registry, Planner(registry, selector, backend, settings.get("min_confidence", 0.5), scope),
                                    ctx, set(TAXONOMY.keys), llm=_llm_answer,
@@ -284,6 +296,20 @@ def _finish_action(record: dict[str, Any]) -> dict[str, Any]:
 def list_tools() -> dict[str, Any]:
     engine = get_engine()
     return {"selector": engine.planner.selector, "scope": engine.planner.scope, "tools": engine.registry.describe()}
+
+
+@app.get("/v1/player")
+async def player_status() -> dict[str, Any]:
+    """Estado do player de música do PC (real ou simulado) e quantas faixas a biblioteca tem."""
+    engine = await run_in_threadpool(get_engine)
+    status = await run_in_threadpool(engine.ctx.player.status)
+    return {**status, "library_tracks": engine.ctx.library.count(), "library_titles": engine.ctx.library.titles(8)}
+
+
+@app.on_event("shutdown")
+def stop_player() -> None:
+    if _engine is not None:
+        _engine.ctx.player.close()
 
 
 @app.get("/v1/notes")
@@ -309,8 +335,15 @@ async def act(req: ActRequest, request: Request) -> dict[str, Any]:
                                "route_reason": "resposta a um pedido de confirmação", "tool": spoken, "total_ms": 0.0})
     backend, decision, _ = await run_in_threadpool(_decide, DecideRequest(input=req.input, backend=req.backend))
     result = route_decision(decision, TAXONOMY, Policy(req.min_confidence, req.low_confidence))
+    acted_as, direct_as = decision.decision, None
+    if req.addressed and result.route in ("NONE", "CLARIFY", "ESCALATE"):
+        rest = {k: v for k, v in (decision.scores or {}).items() if k != "ignore"}
+        if rest:
+            direct_as = max(rest, key=rest.__getitem__)
+            acted_as = direct_as
+            result = RouteResult(TAXONOMY.route(direct_as), f"modo direto: o roteador disse “{decision.decision}”; usei {direct_as}")
     started = time.perf_counter()
-    tool = await run_in_threadpool(engine.act, req.input, decision.decision, result.route, client, record_id)
+    tool = await run_in_threadpool(engine.act, req.input, acted_as, result.route, client, record_id)
     action_ms = (time.perf_counter() - started) * 1000
     _stats["decisions"] += 1
     _stats["routes"][result.route] = _stats["routes"].get(result.route, 0) + 1
@@ -318,6 +351,7 @@ async def act(req: ActRequest, request: Request) -> dict[str, Any]:
     if result.route not in LLM_ROUTES or tool["status"] != "answering":
         _stats["llm_calls_avoided"] += 1
     return _finish_action({**base, **decision.to_dict(), "route": result.route, "route_reason": result.reason,
+                           "addressed": req.addressed, "direct_as": direct_as,
                            "tool": tool, "action_ms": round(action_ms, 2),
                            "total_ms": round(decision.latency_ms + action_ms, 2)})
 

@@ -7,3 +7,5 @@ __pycache__/
 *.pyc
 runs/slots/
 runs/notes.jsonl
+runs/music/
+runs/player.ps1

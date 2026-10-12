@@ -129,7 +129,8 @@
       <div id="chat">
         <div class="hello"><b>Fale como se estivesse em casa</b>
           Mande uma frase — com ou sem “Alexa”. O modelo decide se é com o assistente e o PC executa a ação:
-          hora, timer de verdade, anotação, casa simulada. Ações sensíveis pedem confirmação.
+          hora, timer de verdade, anotação, música no PC, casa simulada. Ações sensíveis pedem confirmação.
+          Pergunte <b style="display:inline">“o que você sabe fazer?”</b> para ver o que é real e o que é simulado.
           Depois marque 👍 ou 👎 em cada resposta: isso vira dado de teste.</div>
       </div>
     </div>
@@ -180,6 +181,9 @@
         <label class="field">Quando a confiança é baixa
           <select id="low"><option value="ignore">ignorar a fala</option><option value="clarify">pedir para repetir</option></select></label>
         <label class="field" style="display:flex;align-items:center;gap:10px;color:var(--text)">
+          <input id="direct" type="checkbox" checked style="width:22px;height:22px"> Tudo que eu digito é para o assistente
+          (sem precisar dizer “Alexa”)</label>
+        <label class="field" style="display:flex;align-items:center;gap:10px;color:var(--text)">
           <input id="speak" type="checkbox" style="width:22px;height:22px"> Falar as respostas (voz do próprio aparelho)</label>
       </div>
       <h2>Seus julgamentos (👍 / 👎)</h2>
@@ -219,7 +223,8 @@ const DEMO = [
   "Alexa, pesquisa pra mim quais são os melhores filmes de ficção científica", "tá bom, já vou",
   "Alexa, apaga todas as luzes", "Alexandre, vem jantar!", "Alexa, escreve um email pro meu chefe pedindo férias",
 ];
-const CHIPS = ["Alexa, que horas são?", "Alexa, acende a luz da sala", "Alexa, timer de 10 segundos", "Você viu o jogo ontem?",
+const CHIPS = ["O que você sabe fazer?", "Toca uma música", "O que está tocando?", "Pausa a música", "Volume 3",
+               "Manda um e-mail pro meu chefe", "Alexa, que horas são?", "Alexa, acende a luz da sala", "Alexa, timer de 10 segundos", "Você viu o jogo ontem?",
                "Alexa, me lembra de comprar pão", "Alexa, abre a porta da frente", "Alexa, como está o PC?",
                "A Alexa da minha tia não entende nada", "Alexa, toca Djavan", "Alexandre, vem jantar!",
                "Alexa, quais são meus lembretes?", "Alexa, qual a capital da Austrália?", "Alexa, cancela os timers"];
@@ -242,14 +247,14 @@ function toBottom() { const s = $("chatScroll"); requestAnimationFrame(() => s.s
 function post(path, body) { return fetch(path, { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body) }); }
 
 // ---------- o que o assistente "fez", em linguagem de gente ----------
-const TOOL_ICON = { "info.time": "🕒", "info.date": "📅", "info.system_status": "🖥️", "media.play": "🎵", "media.pause": "⏸️",
+const TOOL_ICON = { "media.status": "🎧", "system.help": "ℹ️", "system.cannot_do": "🚫", "info.time": "🕒", "info.date": "📅", "info.system_status": "🖥️", "media.play": "🎵", "media.pause": "⏸️",
                     "media.set_volume": "🎚️", "timer.create": "⏱️", "timer.list": "⏱️", "timer.cancel_all": "⏱️",
                     "note.add": "📝", "note.list": "📝", "note.clear": "📝", "llm.answer": "💬", "llm.answer_large": "🧠" };
 
-function describe(rec) {
+function describe(rec) {  // rec.tool.real: a ferramenta mexeu de verdade no PC? (o player pode estar em modo simulado)
   const tool = rec.tool || { status: "ignored" };
   const pct = rec.confidence == null ? "" : ` · ${Math.round(rec.confidence * 100)}%`;
-  const kind = tool.name ? ` · ${tool.name}${tool.name.startsWith("llm.") ? "" : tool.real ? " (real)" : " (simulado)"}` : "";
+  const kind = tool.name && tool.kind !== "unsupported" ? ` · ${tool.name}${tool.name.startsWith("llm.") ? "" : tool.real ? " (real)" : " (simulado)"}` : "";
   const ms = rec.total_ms != null ? rec.total_ms : rec.latency_ms;
   const sub = `${LABELS[rec.decision] || rec.decision}${pct}${kind} · ${ms.toFixed(0)} ms`;
   let ico = TOOL_ICON[tool.name] || "•";
@@ -262,6 +267,7 @@ function describe(rec) {
     case "answering": return { ico, what: rec.route === "LLM_LARGE" ? "Tarefa complexa → modelo grande" : "É uma pergunta → respondendo", sub, llm: true };
     case "needs_confirmation": return { ico: "⚠️", what: tool.say, sub: `ação sensível — precisa da sua confirmação · ${sub}`, confirm: tool.confirm, cls: "ask" };
     case "needs_info": return { ico: "🤷", what: tool.say, sub, cls: "ask" };
+    case "unsupported": return { ico: "🚫", what: tool.say, sub: `entendi, mas não tenho ferramenta para isso · ${sub}`, cls: "ask" };
     case "clarify": return { ico: "❓", what: tool.say, sub, cls: "ask" };
     case "cancelled": return { ico: "✋", what: "Cancelado — não fiz nada", sub: "resposta à confirmação" };
     case "expired": return { ico: "⌛", what: tool.say, sub: "resposta à confirmação" };
@@ -341,7 +347,7 @@ async function send(text) {
   $("chat").appendChild(typing); toBottom();
   pending++; setStatus("decidindo…", "busy");
   const slow = setTimeout(() => typing.textContent = "ainda decidindo… (modelo carregando, pode levar ~20 s)", 3000);
-  const body = { input: text, backend: $("backend").value, min_confidence: parseFloat($("thr").value), low_confidence: $("low").value, source: SOURCE, client: SID };
+  const body = { input: text, backend: $("backend").value, min_confidence: parseFloat($("thr").value), low_confidence: $("low").value, source: SOURCE, client: SID, addressed: $("direct").checked };
   const t0 = performance.now();
   try {
     const r = await post("/v1/act", body);   // decisão -> ferramenta permitida -> resultado
@@ -395,7 +401,13 @@ function renderHome(s) {
   });
   $("devices").innerHTML = tiles.join("");
   $("noDevices").hidden = tiles.length > 0;
-  $("media").innerHTML = `<div class="row"><span>tocando (simulado, sem som)</span><b>${esc(s.media.playing || "nada")}</b></div><div class="row"><span>volume</span><b>${s.media.volume} / 10</b></div>`;
+  fetch("/v1/player").then(r => r.json()).then(p => {
+    const real = p.real ? "no PC" : "SIMULADO, sem som";
+    const pos = p.title && p.duration_s ? ` · ${Math.floor(p.position_s / 60)}:${String(Math.floor(p.position_s % 60)).padStart(2, "0")} de ${Math.floor(p.duration_s / 60)}:${String(Math.floor(p.duration_s % 60)).padStart(2, "0")}` : "";
+    $("media").innerHTML = `<div class="row"><span>${p.paused ? "pausada" : p.ended ? "terminou" : p.playing ? "tocando" : "parado"} (${real})</span><b>${esc(p.title || "nada")}${pos}</b></div>
+      <div class="row"><span>volume do player</span><b>${p.volume} / 10</b></div>
+      <div class="row"><span>músicas encontradas neste PC</span><b>${p.library_tracks}</b></div>`;
+  }).catch(() => { $("media").innerHTML = '<div class="empty" style="padding:6px">sem informação do player</div>'; });
   const TS = { running: "rodando", fired: "tocou ⏰", cancelled: "cancelado" };
   $("timers").innerHTML = s.timers.length ? s.timers.slice().reverse().map(t =>
       `<div class="row"><span>${esc(t.label || t.request)}${t.seconds ? ` · ${t.seconds >= 60 ? Math.round(t.seconds / 60) + " min" : t.seconds + " s"}` : ""}</span>
@@ -418,8 +430,10 @@ function timerFired(ev) {
 
 async function renderTools() {
   const t = await (await fetch("/v1/tools")).json();
-  $("toolList").innerHTML = t.tools.map(x => `<div class="row"><span><b style="font-weight:600;color:var(--text)">${esc(x.name)}</b><br>${esc(x.description)}</span>
-    <b>${x.name.startsWith("llm.") ? "LLM" : x.real ? "real" : "simulada"}${x.sensitive ? "<br>🔒 confirma" : ""}</b></div>`).join("");
+  const tag = (x) => x.kind === "unsupported" ? "avisa que não sabe" : x.name.startsWith("llm.") ? "LLM local" : x.real ? "REAL" : "SIMULADA";
+  $("toolList").innerHTML = t.tools.map(x => `<div class="row"><span><b style="font-weight:600;color:var(--text)">${esc(x.name)}</b><br>${esc(x.effect || x.description)}
+    ${x.examples.length ? `<br><i>“${esc(x.examples.join("” · “"))}”</i>` : ""}</span>
+    <b style="color:${x.real ? "var(--ok)" : "var(--warn)"}">${tag(x)}${x.sensitive ? "<br>🔒 confirma" : ""}</b></div>`).join("");
   $("toolSel").textContent = `Seletor: ${t.selector}. O modelo só escolhe entre estas ${t.tools.length}; não existe ferramenta de "rodar comando".`;
 }
 
@@ -509,6 +523,8 @@ document.querySelectorAll("nav button").forEach(b => b.onclick = () => show(b.da
 $("send").onclick = () => { const t = $("text").value; $("text").value = ""; send(t); };
 $("text").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); $("send").click(); } });
 $("text").addEventListener("focus", () => setTimeout(toBottom, 250));
+try { $("direct").checked = localStorage.getItem("direct") !== "0"; } catch (e) { /* segue ligado */ }
+$("direct").onchange = () => { try { localStorage.setItem("direct", $("direct").checked ? "1" : "0"); } catch (e) { /* idem */ } };
 $("thr").oninput = () => $("thrv").textContent = Math.round(parseFloat($("thr").value) * 100) + "%";
 $("ping").onclick = () => pingNet();
 try { $("speak").checked = localStorage.getItem("speak") === "1"; } catch (e) { /* armazenamento bloqueado: segue desligado */ }

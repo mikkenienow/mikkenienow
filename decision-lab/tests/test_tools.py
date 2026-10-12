@@ -184,6 +184,103 @@ def test_confirmation_can_be_refused_spoken_and_expires() -> None:
     assert quick.confirm(token, True, "c1", "r")["status"] == "expired"
 
 
+# ------------------------------------------------------------------ música (player de mentira, biblioteca de verdade)
+def music_engine() -> ActionEngine:
+    from lab.tools.player import Library, NullPlayer
+
+    folder = Path(tempfile.mkdtemp())
+    for name in ("Linkin Park/Crawling (live).mp3", "Djavan/Oceano.mp3", "Djavan/Flor de Lis.mp3", "Cover/faixa 1.wav", "notas.txt"):
+        path = folder / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(b"x")
+    engine = make_engine()
+    engine.ctx.player, engine.ctx.library, engine.ctx.registry = NullPlayer(), Library([folder]), engine.registry
+    return engine
+
+
+def test_music_query_extraction() -> None:
+    from lab.tools.builtin import extract_music_query
+
+    cases = {"Alexa, toca uma música do Djavan": {"query": "Djavan"}, "toca Linkin Park": {"query": "Linkin Park"},
+             "bota Flor de Lis pra tocar": {"query": "Flor de Lis pra tocar"}, "Alexa, toca uma música": {},
+             "toca qualquer coisa": {}, "coloca uma música aleatória": {}, "toca algo": {}, "continua a música": {},
+             "quero ouvir Oceano": {"query": "Oceano"}, "toca": {}}
+    for text, expected in cases.items():
+        assert extract_music_query(text) == expected, (text, extract_music_query(text), expected)
+
+
+def test_music_play_finds_asks_or_picks() -> None:
+    engine = music_engine()
+    hit = act(engine, "Alexa, toca Oceano do Djavan", "media", "MEDIA")
+    assert (hit["name"], hit["status"], hit["result"]["title"]) == ("media.play", "executed", "Oceano"), hit
+    assert "Oceano" in hit["say"] and "simulado" in hit["say"]          # NullPlayer: a resposta admite que não tocou
+    assert engine.ctx.home.media["playing"] == "Oceano"
+    artist = act(engine, "toca Djavan", "media", "MEDIA")
+    assert artist["status"] == "executed" and artist["result"]["title"] in ("Oceano", "Flor de Lis")
+    random_pick = act(engine, "Alexa, toca uma música", "media", "MEDIA")
+    assert random_pick["status"] == "executed" and random_pick["result"]["random"] is True
+    assert "escolhi" in random_pick["say"]
+    miss = act(engine, "Alexa, toca Roberto Carlos", "media", "MEDIA")      # não existe: pergunta, não finge
+    assert miss["status"] == "needs_info" and "Roberto Carlos" in miss["say"] and "Oceano" in miss["say"] + " ".join(engine.ctx.library.titles(9))
+    assert engine.ctx.player.current.title != "Roberto Carlos"
+
+
+def test_music_pause_resume_volume_status() -> None:
+    engine = music_engine()
+    assert "nada tocando" in act(engine, "pausa a música", "media", "MEDIA")["say"]
+    act(engine, "toca Oceano", "media", "MEDIA")
+    assert "pausada" in act(engine, "pausa a música", "media", "MEDIA")["say"]
+    assert engine.ctx.player.paused and engine.ctx.home.media["playing"] is None
+    resumed = act(engine, "continua a música", "media", "MEDIA")
+    assert resumed["result"]["action"] == "resumed" and not engine.ctx.player.paused
+    assert act(engine, "volume 3", "media", "MEDIA")["result"]["volume"] == 3
+    assert act(engine, "aumenta o volume", "media", "MEDIA")["result"]["volume"] == 5
+    assert act(engine, "volume 99", "media", "MEDIA")["status"] == "needs_info"      # fora da faixa: não executa
+    assert "Oceano" in act(engine, "o que está tocando?", "media", "MEDIA")["say"]
+
+
+def test_unsupported_request_says_so_instead_of_pretending() -> None:
+    engine = music_engine()
+    # o seletor por regras não escolhe a sentinela; ela é escolhida pelo modelo. Aqui testamos o motor diretamente.
+    tool = engine.registry.get("system.cannot_do")
+    out = engine._run(tool, {}, "manda um e-mail pro meu chefe", "rec")
+    assert out["status"] == "unsupported" and "ainda não sei fazer" in out["say"] and "e-mail" in out["say"]
+    assert engine.ctx.home.devices == {}
+
+
+def test_unsupported_rule_replaces_silence_but_not_questions_or_neighbours() -> None:
+    engine = music_engine()
+    for text in ("Alexa, manda um e-mail pro meu chefe", "Alexa, pede uma pizza", "Alexa, abre o YouTube", "Alexa, liga pra minha mãe",
+                 "Alexa, toca Djavan no Spotify", "Alexa, liga o aspirador robô", "Alexa, posta uma foto no Instagram"):
+        for decision, route in (("complex", "LLM_LARGE"), ("media", "MEDIA"), ("home_control", "HOME_AUTOMATION"), ("ignore", "NONE")):
+            out = act(engine, text, decision, route)
+            assert out["status"] == "unsupported" and out["name"] == "system.cannot_do", (text, route, out["status"], out["name"])
+            assert "ainda não sei fazer" in out["say"]
+    # perguntas e pedidos que existem NÃO viram "não sei fazer"
+    for text, decision, route in (("Alexa, como faço pra mandar um e-mail com anexo?", "knowledge", "LLM"),
+                                  ("Alexa, quem inventou o telefone?", "knowledge", "LLM"),
+                                  ("Alexa, toca Djavan", "media", "MEDIA"), ("Alexa, acende a luz da sala", "home_control", "HOME_AUTOMATION"),
+                                  ("Alexa, timer de 5 minutos", "timer_alarm", "TIMERS")):
+        assert act(engine, text, decision, route)["status"] != "unsupported", text
+    # lembrete que MENCIONA uma ação sem ferramenta continua sendo só uma anotação
+    for text in ("Alexa, me lembra de ligar pro dentista", "Alexa, não me deixa esquecer de pagar o boleto",
+                 "Alexa, anota aí: mandar e-mail pro chefe"):
+        note = act(engine, text, "timer_alarm", "TIMERS")
+        assert (note["name"], note["status"]) == ("note.add", "executed"), (text, note["name"], note["status"])
+    # não chamado pelo nome + roteador disse "ignorar": segue ignorado (nada de responder a conversa alheia)
+    for text in ("Pedi uma pizza ontem e demorou", "Alexandre, manda um e-mail pro chefe", "Fala pra ela abrir o YouTube",
+                 "A Alexa da minha tia não liga pra nada"):
+        assert act(engine, text, "ignore", "NONE")["status"] == "ignored", text
+
+
+def test_help_lists_real_simulated_and_missing() -> None:
+    engine = music_engine()
+    out = act(engine, "o que você sabe fazer?", "knowledge", "LLM")
+    assert out["name"] == "system.help" and out["status"] == "executed", out
+    assert "media.play" in out["result"]["real"] and "home.set_device" in out["result"]["simulated"]
+    assert "enviar e-mail" in out["say"] and "SIMULADO" in out["say"] or "simulado" in out["say"]
+
+
 if __name__ == "__main__":
     failed = 0
     for name, fn in sorted(globals().items()):

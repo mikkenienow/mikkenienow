@@ -22,7 +22,8 @@ from pathlib import Path
 from typing import Any, Callable
 
 from lab.executors import Home
-from lab.tools import Param, Tool, ToolRegistry
+from lab.tools import NeedsInfo, Param, Tool, ToolRegistry
+from lab.tools.player import NullLibrary, NullPlayer, tokens
 
 
 def norm(text: str) -> str:
@@ -39,10 +40,13 @@ class ToolContext:
     log: Callable[[dict[str, Any]], None] = lambda record: None
     timers: dict[str, threading.Timer] = field(default_factory=dict)
     lock: threading.Lock = field(default_factory=threading.Lock)
+    player: Any = field(default_factory=NullPlayer)       # WindowsPlayer no servidor; NullPlayer em testes
+    library: Any = field(default_factory=NullLibrary)
+    registry: Any = None                                  # para a ferramenta "o que você sabe fazer?"
 
 
 # ----------------------------------------------------------------------------- extração de parâmetros
-WAKE = r"^\s*(o+|ei|hey|oi)?\s*,?\s*(alexa|alexia|alecsa)\s*[,.!?:]*\s*"
+WAKE = r"^\s*(o+|ei|hey|oi)?\s*,?\s*(alexa|alexia|alecsa)\b\s*[,.!?:]*\s*"   # \b: "Alexandre" não é a wake word
 POLITE = r"\b(por favor|por gentileza|pra mim|para mim|ai)\b"
 
 NUMBERS = {"zero": 0, "um": 1, "uma": 1, "dois": 2, "duas": 2, "tres": 3, "quatro": 4, "cinco": 5, "seis": 6, "sete": 7,
@@ -118,6 +122,30 @@ def extract_device(text: str) -> dict[str, Any]:
     return {"device": device, "rooms": rooms or ["sala"], "state": state}
 
 
+GENERIC_MUSIC = {"", "musica", "musicas", "uma musica", "algo", "alguma coisa", "qualquer coisa", "qualquer musica",
+                 "um som", "som", "uma musiquinha", "musiquinha", "aleatoria", "uma aleatoria", "uma musica aleatoria",
+                 "alguma musica", "uma boa", "uma musica boa", "musica boa", "algo pra ouvir", "o que quiser"}
+
+
+def extract_music_query(text: str) -> dict[str, Any]:
+    """"toca uma música do Djavan" -> {"query": "Djavan"}; "toca uma música" -> {} (qualquer uma)."""
+    if re.search(r"\b(continua|continue|retoma|retome|despausa|volta a tocar|segue)\b", norm(text)):
+        return {}  # continuar a faixa pausada
+    rest = strip_request(text, PLAY_VERBS)
+    plain = norm(rest)
+    if len(plain) == len(rest):  # corta "uma música do/da/de ..." no mesmo ponto do texto original
+        m = re.match(r"(?:(?:uma|um|alguma|algum|qualquer|aquela|aquele|essa|esse)\s+)?(?:musica|musicas|som|cancao|faixa|"
+                     r"playlist|album|disco)\s+(?:(?:do|da|de|dos|das)\s+)?", plain)
+        if m and m.end() < len(plain):
+            rest = rest[m.end():]
+    rest = rest.strip(" ,.!?:;")
+    return {} if norm(rest).strip() in GENERIC_MUSIC or not tokens(rest) else {"query": rest[:120]}
+
+
+PLAY_VERBS = (r"toca|tocar|toque|tocas|bota|botar|coloca|colocar|poe|pode tocar|pode colocar|play|quero ouvir|quero escutar|"
+              r"ouvir|escutar|reproduz|reproduzir|liga a musica|liga uma musica|inicia|iniciar|manda")
+
+
 def extract_volume(text: str) -> dict[str, Any]:
     t = norm(text)
     if m := re.search(rf"volume\s*(?:para|pra|em|no|n[oa]\s)?\s*({_NUM})\b", t):
@@ -165,26 +193,87 @@ def _set_device(args: dict[str, Any], ctx: ToolContext) -> dict[str, Any]:
     return {"device": args["device"], "rooms": args["rooms"], "state": args["state"]}
 
 
-def _media_play(args: dict[str, Any], ctx: ToolContext) -> dict[str, Any]:
+def _mirror_media(ctx: ToolContext, playing: str | None, volume: int | None = None) -> None:
+    """A aba Casa mostra o estado do player; espelha o que o player de verdade acabou de fazer."""
     with ctx.home.lock:
-        ctx.home.media["playing"] = args["query"]
-        return dict(ctx.home.media)
+        ctx.home.media["playing"] = playing
+        if volume is not None:
+            ctx.home.media["volume"] = volume
+
+
+def _media_play(args: dict[str, Any], ctx: ToolContext) -> dict[str, Any]:
+    query = args.get("query")
+    if not query:
+        if getattr(ctx.player, "paused", False):  # "toca" com a música pausada = continuar
+            resumed = ctx.player.resume()
+            _mirror_media(ctx, resumed.get("title"))
+            return {**resumed, "title": resumed.get("title"), "action": "resumed", "volume": ctx.player.volume}
+        track, chosen_at_random = ctx.library.random(), True
+        if track is None:
+            raise NeedsInfo("Não achei nenhuma música neste PC para tocar. Coloque arquivos .mp3 ou .wav na pasta de "
+                            "músicas configurada, ou diga o nome de uma.")
+    else:
+        found = ctx.library.find(query)
+        if not found:
+            titles = ctx.library.titles(4)
+            options = f" Algumas que eu tenho: {'; '.join(titles)}." if titles else ""
+            raise NeedsInfo(f"Não achei “{query}” nas músicas deste PC ({ctx.library.count()} faixas).{options} "
+                            f"Diga o nome de uma delas, ou peça “toca uma música” que eu escolho.")
+        track, chosen_at_random = found[0], False
+    played = ctx.player.play(track)
+    _mirror_media(ctx, played["title"], played["volume"])
+    return {**played, "action": "playing", "random": chosen_at_random, "demo": getattr(track, "demo", False)}
 
 
 def _media_pause(args: dict[str, Any], ctx: ToolContext) -> dict[str, Any]:
-    with ctx.home.lock:
-        ctx.home.media["playing"] = None
-        return dict(ctx.home.media)
+    paused = ctx.player.pause()
+    if paused.get("was_playing"):
+        _mirror_media(ctx, None)
+    return paused
 
 
 def _media_volume(args: dict[str, Any], ctx: ToolContext) -> dict[str, Any]:
-    with ctx.home.lock:
-        if "level" in args:
-            ctx.home.media["volume"] = args["level"]
-        else:
-            step = 2 if args["change"] == "up" else -2
-            ctx.home.media["volume"] = max(0, min(10, ctx.home.media["volume"] + step))
-        return dict(ctx.home.media)
+    level = args["level"] if "level" in args else max(0, min(10, ctx.player.volume + (2 if args["change"] == "up" else -2)))
+    result = ctx.player.set_volume(level)
+    _mirror_media(ctx, ctx.home.media.get("playing"), result["volume"])
+    return result
+
+
+def _media_status(args: dict[str, Any], ctx: ToolContext) -> dict[str, Any]:
+    return ctx.player.status()
+
+
+def _mmss(seconds: float) -> str:
+    return f"{int(seconds) // 60}:{int(seconds) % 60:02d}"
+
+
+def _say_play(args: dict[str, Any], r: dict[str, Any]) -> str:
+    sim = "" if r.get("real") else " (simulado: nenhum som foi iniciado)"
+    if r.get("action") == "resumed":
+        return f"Continuando “{r['title']}” no PC.{sim}" if r.get("title") else "Não havia música pausada."
+    dur = f" ({_mmss(r['duration_s'])})" if r.get("duration_s") else ""
+    pick = " Você não disse qual, escolhi uma." if r.get("random") else ""
+    demo = " É uma melodia de demonstração do laboratório; ponha seus arquivos na pasta de músicas." if r.get("demo") else ""
+    return f"Tocando “{r['title']}”{dur} no PC.{pick}{demo}{sim}"
+
+
+def _say_pause(args: dict[str, Any], r: dict[str, Any]) -> str:
+    return "Música pausada." if r.get("was_playing") else "Não há nada tocando agora."
+
+
+def _say_volume(args: dict[str, Any], r: dict[str, Any]) -> str:
+    sim = "" if r.get("real") else " (simulado)"
+    return f"Volume do player em {r['volume']} de 10 (só o do player, não o do Windows).{sim}"
+
+
+def _say_status(args: dict[str, Any], r: dict[str, Any]) -> str:
+    if not r.get("title"):
+        return "Não há nada tocando agora."
+    if r.get("ended"):
+        return f"“{r['title']}” terminou."
+    state = "pausada" if r.get("paused") else "tocando"
+    when = f" — {_mmss(r['position_s'])} de {_mmss(r['duration_s'])}" if r.get("duration_s") else ""
+    return f"“{r['title']}” {state}{when}."
 
 
 def _timer_fire(timer_id: str, ctx: ToolContext) -> None:
@@ -312,7 +401,7 @@ def _door_opening(args: dict[str, Any]) -> bool:
 
 def build_registry() -> ToolRegistry:
     none: Callable[[str], dict[str, Any]] = lambda text: {}
-    return ToolRegistry([
+    tools = ([
         # --- consultas locais (reais) ---
         Tool("info.time", "LLM", "Dizer a hora atual do PC", "Tell the current time of day (what time is it now)",
              _time, none, lambda a, r: f"São {r['time']}.", real=True,
@@ -346,20 +435,24 @@ def build_registry() -> ToolRegistry:
              confirm_text=lambda a: f"Abrir {DEVICE_NAMES[a['device']]} {_where(a['rooms'])}?",
              keywords=rf"({ON[2:]}|{OFF[2:]}).*({'|'.join(DEVICES)})", default=True),
 
-        # --- mídia (simulada) ---
-        Tool("media.pause", "MEDIA", "Pausar a música", "Pause or stop whatever is playing",
-             _media_pause, none, lambda a, r: "Pausa simulada: não há player de verdade.",
+        # --- música (REAL: toca no PC pelo Windows; ver lab/tools/player.py) ---
+        Tool("media.pause", "MEDIA", "Pausar a música que está tocando no PC", "Pause or stop whatever is playing",
+             _media_pause, none, _say_pause, real=True,
              keywords=r"\b(pausa|pausar|pause|para a musica|para o som|para de tocar|parar|stop)\b"),
-        Tool("media.set_volume", "MEDIA", "Mudar o volume (0 a 10)", "Change the volume: louder, quieter, mute, or a level",
-             _media_volume, extract_volume, lambda a, r: f"Volume simulado em {r['volume']}: nenhum som foi alterado.",
+        Tool("media.set_volume", "MEDIA", "Mudar o volume do player (0 a 10)", "Change the volume: louder, quieter, mute, or a level",
+             _media_volume, extract_volume, _say_volume, real=True,
              params={"level": Param("int", required=False, min=0, max=10, description="o volume"),
                      "change": Param("enum", required=False, choices=("up", "down"))},
              check=lambda a: None if ("level" in a) != ("change" in a) else "faltou dizer o volume (um número, mais alto ou mais baixo)",
              keywords=r"volume|aument|abaix|diminu|mais alto|mais baixo|\bmudo\b|sem som|silencia"),
-        Tool("media.play", "MEDIA", "Tocar música, rádio ou podcast", "Play music, a song, an artist, a radio or a podcast",
-             _media_play, lambda text: {"query": strip_request(text, r"toca|tocar|toque|bota|coloca|poe|play|quero ouvir|ouvir|liga")[:120] or None},
-             lambda a, r: f"Entendi: tocar “{a['query']}”. Ainda é simulado: nenhum som foi iniciado, não há player.",
-             params={"query": Param("str", max_len=120, description="o que tocar")}, default=True),
+        Tool("media.status", "MEDIA", "Dizer o que está tocando agora", "Tell what song is playing right now or if anything is playing",
+             _media_status, none, _say_status, real=True,
+             keywords=r"o que (esta|ta) tocando|qual (e )?a musica|que musica e essa|musica atual|tocando agora|(esta|ta) tocando (alguma|algo)"),
+        Tool("media.play", "MEDIA", "Tocar uma música deste PC (pelo nome; sem nome, uma aleatória)",
+             "Play a song or an artist from the computer's music library, or just play some music (any song)",
+             _media_play, extract_music_query, _say_play, real=True,
+             params={"query": Param("str", required=False, max_len=120, description="o que tocar")},
+             keywords=r"\b(continua|continue|retoma|retome|despausa|volta a tocar)\b", default=True),
 
         # --- timers (reais: disparam um evento na interface) ---
         Tool("timer.cancel_all", "TIMERS", "Cancelar todos os timers", "Cancel or stop the running timers or alarms",
@@ -391,12 +484,93 @@ def build_registry() -> ToolRegistry:
              lambda a, r: f"Anotei: {a['text']}.", real=True,
              params={"text": Param("str", max_len=200, description="o que anotar")},
              keywords=rf"^\s*(?:alexa\W+)?(?:{NOTE_VERBS})\b", default=True),
+
+        # --- meta: o que sei fazer / o que não sei ---
+        Tool("system.help", "LLM", "Dizer o que o assistente sabe fazer de verdade",
+             "The user asks about THIS assistant's own abilities: what it can do, which commands it understands, "
+             "what they can ask it. Not for how-to or general questions about other things",
+             _help, none, _say_help, real=True,
+             keywords=r"o que (voce|vc|tu|o assistente) (sabe|consegue|pode|faz)|o que (eu )?(posso|da pra|dá pra) (pedir|fazer|falar)|"
+                      r"quais (sao )?(os |seus )?(comandos|recursos|ferramentas|funcoes)|\bajuda\b|o que voce faz|lista de comandos"),
+        Tool("system.cannot_do", "LLM", "Pedido dirigido ao assistente para o qual não existe ferramenta",
+             "The user clearly asks the assistant to DO something that none of the other tools can do: send an email or a "
+             "message, call someone, order food or buy something, book an appointment, open an app or a website, post on "
+             "social media, or control a real appliance or the Alexa speaker itself",
+             _llm, none, lambda a, r: "Isso eu ainda não sei fazer.", kind="unsupported", keywords=UNSUPPORTED_RE),
     ])
+    for tool in tools:
+        tool.examples = EXAMPLES.get(tool.name, ())
+        tool.effect = EFFECTS.get(tool.name, "")
+    return ToolRegistry(tools)
 
 
+EXAMPLES: dict[str, tuple[str, ...]] = {
+    "info.time": ("que horas são?",), "info.date": ("que dia é hoje?",),
+    "info.system_status": ("como está o uso de CPU do PC?",),
+    "timer.create": ("timer de 10 minutos", "me avisa em meia hora"), "timer.list": ("quanto tempo falta no timer?",),
+    "timer.cancel_all": ("cancela os timers",),
+    "note.add": ("me lembra de comprar pão",), "note.list": ("quais são meus lembretes?",), "note.clear": ("apaga as anotações",),
+    "media.play": ("toca uma música", "toca Linkin Park"), "media.pause": ("pausa a música",),
+    "media.set_volume": ("volume 5", "aumenta o volume"), "media.status": ("o que está tocando?",),
+    "home.set_device": ("acende a luz da sala", "apaga todas as luzes"),
+    "llm.answer": ("qual a capital da Austrália?",), "llm.answer_large": ("escreve um poema sobre o mar",),
+    "system.help": ("o que você sabe fazer?",),
+}
+
+EFFECTS: dict[str, str] = {
+    "info.time": "lê o relógio do PC", "info.date": "lê o calendário do PC", "info.system_status": "lê CPU, memória e disco do PC",
+    "timer.create": "cria um timer de verdade; ao terminar, avisa na tela (e vibra o celular)",
+    "timer.list": "lista os timers rodando", "timer.cancel_all": "cancela os timers (pede confirmação)",
+    "note.add": "grava num arquivo do PC (runs/notes.jsonl)", "note.list": "lê esse arquivo",
+    "note.clear": "apaga esse arquivo (pede confirmação)",
+    "media.play": "toca de verdade nas caixas do PC (arquivos de áudio das pastas de música; sem nome, uma aleatória)",
+    "media.pause": "pausa a música do PC", "media.set_volume": "muda o volume do player (não o volume geral do Windows)",
+    "media.status": "diz o que está tocando e em que ponto",
+    "home.set_device": "SIMULADO: muda um estado em memória; nenhum aparelho de verdade é acionado "
+                       "(abrir porta/portão pede confirmação)",
+    "llm.answer": "responde com o modelo de linguagem local (Qwen 2B)", "llm.answer_large": "responde com o Qwen 4B",
+    "system.help": "lista o que eu sei fazer", "system.cannot_do": "avisa que o pedido era comigo mas não há ferramenta",
+}
+
+CANNOT_DO = ("enviar e-mail ou mensagem", "ligar para alguém", "comprar ou pedir comida", "marcar compromissos",
+             "abrir aplicativos ou sites", "controlar o Echo Dot ou aparelhos de verdade", "tocar música em serviços (Spotify, YouTube)")
+
+
+# Famílias de pedido que o laboratório NÃO atende (CANNOT_DO acima). A regra vale só para pedidos (verbo + coisa);
+# perguntas ("como faço pra mandar um e-mail?") seguem para o LLM. Escrita a partir da lista declarada e revisada
+# depois da primeira medição (docs/05-acoes.md): os números dessa regra são otimistas.
 NOTE_VERBS = (r"me lembra de|me lembra|me lembre de|me lembre|lembra de|lembra|lembrete de|lembrete para|lembrete pra|lembrete|"
               r"anota ai que|anota ai|anota que|anota|anote|cria um lembrete de|cria um lembrete para|cria um lembrete pra|"
               r"cria um lembrete|adiciona um lembrete de|adiciona|nao me deixa esquecer de|nao deixa eu esquecer de")
+
+
+_Q = r"\b(como|qual|quais|quem|quanto|quantos|quantas|quando|onde|porque|por que|o que e|o que sao|pra que|para que)\b"
+_V = (r"\b(manda|mande|mandar|envia|envie|enviar|abre|abra|abrir|chama|chame|chamar|pede|peca|pedir|compra|compre|comprar|"
+      r"marca|marque|marcar|reserva|reserve|reservar|posta|poste|postar|transfere|transfira|transferir|paga|pague|pagar|"
+      r"agenda|agende|agendar|toca|toque|tocar|coloca|poe|bota|quero ouvir)\b")
+_T = (r"\b(e-?mail|gmail|mensagem|msg|zap|whats\w*|telegram|sms|instagram|insta|facebook|twitter|tiktok|youtube|netflix|"
+      r"spotify|deezer|uber|ifood|rappi|pizza|comida|lanche|restaurante|mesa|consulta|dentista|medico|reuniao|compromisso|"
+      r"passagem|voo|hotel|pix|reais|boleto|saldo|internet|online|amazon|mercado livre|shopee)\b")
+UNSUPPORTED_RE = (rf"^(?!.*{_Q})(?!\s*(?:alexa\W+)?(?:{NOTE_VERBS})\b)(?:.*{_V}.*{_T}|.*\b(?:liga|ligar|telefona|telefonar)\s+(?:pra|para|pro)\b|"
+                  r".*\b(?:liga|ligar|desliga|desligar|ativa|ativar)\w*\s.*\b(?:aspirador|robo|geladeira|micro-?ondas|fogao|forno|camera|campainha)\b)")
+
+
+def _help(args: dict[str, Any], ctx: ToolContext) -> dict[str, Any]:
+    tools = [t for t in (ctx.registry.describe() if ctx.registry else []) if t["kind"] == "tool"]
+    return {"real": [t["name"] for t in tools if t["real"] and not t["name"].startswith("llm.")],
+            "simulated": [t["name"] for t in tools if not t["real"] and not t["name"].startswith("llm.")],
+            "cannot": list(CANNOT_DO), "music_files": ctx.library.count(), "player_real": getattr(ctx.player, "real", False)}
+
+
+def _say_help(args: dict[str, Any], r: dict[str, Any]) -> str:
+    music = ("tocar músicas deste PC (%d faixas), pausar, volume e dizer o que está tocando" % r["music_files"]
+             if r["player_real"] else "tocar música (SIMULADO neste servidor, sem som)")
+    return ("De verdade eu faço: dizer a hora e a data, o estado do PC, criar timers que avisam, guardar e ler anotações, "
+            f"{music}, e responder perguntas e tarefas com o modelo local. "
+            "Só simulado, sem efeito físico: ligar e desligar aparelhos da casa. "
+            "Não sei fazer ainda: " + "; ".join(r["cannot"]) + ".")
+
+
 
 
 def _timer_label(text: str) -> str | None:
