@@ -1,0 +1,188 @@
+{
+  "n": 159,
+  "accuracy": 0.8867924528301887,
+  "accuracy_strict": 0.8490566037735849,
+  "intent_accuracy_when_addressed": 0.9797979797979798,
+  "negatives": 53,
+  "positives": 99,
+  "false_activation_rate": 0.2830188679245283,
+  "missed_rate": 0.0,
+  "latency_ms": {
+    "mean": 10475.757496433913,
+    "p50": 10339.552166999965,
+    "p95": 11889.84008389998,
+    "max": 12707.278873999712
+  },
+  "score_kind": [
+    "token_probability"
+  ],
+  "ece": 0.07334644848679077,
+  "auroc_confidence": 0.7998423955870765,
+  "by_tag": {
+    "ambiguous": {
+      "n": 11,
+      "accuracy": 0.9090909090909091
+    },
+    "asr": {
+      "n": 13,
+      "accuracy": 1.0
+    },
+    "background": {
+      "n": 5,
+      "accuracy": 0.8
+    },
+    "casual": {
+      "n": 28,
+      "accuracy": 0.7857142857142857
+    },
+    "clear": {
+      "n": 91,
+      "accuracy": 0.9340659340659341
+    },
+    "command": {
+      "n": 82,
+      "accuracy": 0.9512195121951219
+    },
+    "english": {
+      "n": 5,
+      "accuracy": 1.0
+    },
+    "hard": {
+      "n": 28,
+      "accuracy": 0.6071428571428571
+    },
+    "long": {
+      "n": 9,
+      "accuracy": 0.8888888888888888
+    },
+    "mentions_wake": {
+      "n": 6,
+      "accuracy": 0.6666666666666666
+    },
+    "near_wake": {
+      "n": 2,
+      "accuracy": 1.0
+    },
+    "no_wake": {
+      "n": 9,
+      "accuracy": 0.6666666666666666
+    },
+    "question": {
+      "n": 37,
+      "accuracy": 0.8918918918918919
+    },
+    "short": {
+      "n": 19,
+      "accuracy": 1.0
+    },
+    "to_human": {
+      "n": 13,
+      "accuracy": 0.46153846153846156
+    }
+  },
+  "by_label": {
+    "complex": {
+      "n": 15,
+      "accuracy": 0.9333333333333333
+    },
+    "home_control": {
+      "n": 32,
+      "accuracy": 1.0
+    },
+    "ignore": {
+      "n": 58,
+      "accuracy": 0.7241379310344828
+    },
+    "knowledge": {
+      "n": 21,
+      "accuracy": 0.9523809523809523
+    },
+    "media": {
+      "n": 18,
+      "accuracy": 1.0
+    },
+    "timer_alarm": {
+      "n": 15,
+      "accuracy": 1.0
+    }
+  },
+  "llm": {
+    "llm_calls": 46,
+    "llm_calls_if_no_router": 159,
+    "calls_avoided_pct": 0.7106918238993711,
+    "llm_needed": 36,
+    "llm_missed": 2,
+    "llm_wasted": 8
+  },
+  "threshold_sweep": [
+    {
+      "threshold": 0.0,
+      "accuracy": 0.8867924528301887,
+      "false_activation_rate": 0.2830188679245283,
+      "missed_rate": 0.0
+    },
+    {
+      "threshold": 0.3,
+      "accuracy": 0.8930817610062893,
+      "false_activation_rate": 0.2830188679245283,
+      "missed_rate": 0.0
+    },
+    {
+      "threshold": 0.4,
+      "accuracy": 0.8805031446540881,
+      "false_activation_rate": 0.2830188679245283,
+      "missed_rate": 0.020202020202020204
+    },
+    {
+      "threshold": 0.5,
+      "accuracy": 0.8742138364779874,
+      "false_activation_rate": 0.2830188679245283,
+      "missed_rate": 0.04040404040404041
+    },
+    {
+      "threshold": 0.6,
+      "accuracy": 0.8805031446540881,
+      "false_activation_rate": 0.22641509433962265,
+      "missed_rate": 0.06060606060606061
+    },
+    {
+      "threshold": 0.7,
+      "accuracy": 0.8930817610062893,
+      "false_activation_rate": 0.18867924528301888,
+      "missed_rate": 0.06060606060606061
+    },
+    {
+      "threshold": 0.8,
+      "accuracy": 0.8679245283018868,
+      "false_activation_rate": 0.16981132075471697,
+      "missed_rate": 0.12121212121212122
+    },
+    {
+      "threshold": 0.9,
+      "accuracy": 0.8364779874213837,
+      "false_activation_rate": 0.1509433962264151,
+      "missed_rate": 0.18181818181818182
+    },
+    {
+      "threshold": 0.95,
+      "accuracy": 0.8113207547169812,
+      "false_activation_rate": 0.09433962264150944,
+      "missed_rate": 0.25252525252525254
+    }
+  ],
+  "perturbation_agreement": 0.9371069182389937,
+  "accuracy_perturbed": 0.8679245283018868,
+  "backend": "qwen3.5-4b-chat",
+  "kind": "llm-generative",
+  "model": "Qwen/Qwen3.5-4B (GGUF Q4_K_M)",
+  "option_lang": "pt",
+  "load_seconds": 0.852443530000528,
+  "cpu_seconds_per_decision": 43.529245283018874,
+  "wall_seconds_per_decision": 10.475851777591194,
+  "cpu_cores_busy": 4.155198661375862,
+  "rss_mb": {
+    "server": 4363,
+    "lab_process_delta": 18
+  },
+  "timestamp": "2026-10-04T12:05:00"
+}

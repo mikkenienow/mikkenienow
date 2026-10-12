@@ -1,0 +1,40 @@
+{
+  "name": "home_assistant_v1",
+  "description": "Assistente residencial com wake word 'Alexa'. Primeira taxonomia do laboratório.",
+  "question": {
+    "pt": "Um assistente de voz doméstico chamado Alexa ouviu esta fala (transcrição automática, pode conter erros). O que o assistente deve fazer?",
+    "en": "A home voice assistant named Alexa overheard this utterance (automatic transcription, may contain errors). What should the assistant do?"
+  },
+  "options": {
+    "ignore": {
+      "pt": "Ignorar: a fala não é um pedido para o assistente (conversa entre pessoas, TV ou rádio ao fundo, comentário, ou só menciona a Alexa sem pedir nada)",
+      "en": "Ignore: not a request to the assistant (people talking to each other, TV or radio in the background, a remark, or only mentions Alexa without asking it anything)",
+      "route": "NONE"
+    },
+    "home_control": {
+      "pt": "Controlar a casa: ligar, desligar ou ajustar luzes, ar-condicionado, TV, tomadas, cortinas, portas ou cenas",
+      "en": "Home control: turn on, turn off or adjust lights, air conditioning, TV, plugs, curtains, doors or scenes",
+      "route": "HOME_AUTOMATION"
+    },
+    "media": {
+      "pt": "Mídia: tocar, pausar ou trocar música, podcast ou rádio, ou mudar o volume",
+      "en": "Media: play, pause or change music, podcasts or radio, or change the volume",
+      "route": "MEDIA"
+    },
+    "timer_alarm": {
+      "pt": "Timer, alarme ou lembrete: criar, consultar, adiar ou cancelar",
+      "en": "Timer, alarm or reminder: create, check, snooze or cancel one",
+      "route": "TIMERS"
+    },
+    "knowledge": {
+      "pt": "Pergunta ou pesquisa: responder uma dúvida, buscar uma informação, clima, conta ou definição",
+      "en": "Question or lookup: answer a question, look up information, weather, a calculation or a definition",
+      "route": "LLM"
+    },
+    "complex": {
+      "pt": "Tarefa complexa: escrever, planejar, resumir, comparar ou executar várias etapas",
+      "en": "Complex task: write, plan, summarize, compare or carry out several steps",
+      "route": "LLM_LARGE"
+    }
+  }
+}

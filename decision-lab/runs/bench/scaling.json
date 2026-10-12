@@ -1,0 +1,344 @@
+{
+  "decider-0.8b-schema": {
+    "gate": {
+      "n_options": 2,
+      "accuracy": 0.7666666666666667,
+      "negatives": 19,
+      "positives": 38,
+      "false_activation_rate": 0.631578947368421,
+      "missed_rate": 0.05263157894736842,
+      "latency_p50_ms": 515.0408954996237,
+      "latency_p95_ms": 581.4558663999378,
+      "picked_distractor": 0.0
+    },
+    "n6": {
+      "n_options": 6,
+      "accuracy": 0.8,
+      "negatives": 19,
+      "positives": 38,
+      "false_activation_rate": 0.2631578947368421,
+      "missed_rate": 0.10526315789473684,
+      "latency_p50_ms": 527.2238280003876,
+      "latency_p95_ms": 579.3757728482888,
+      "picked_distractor": 0.0
+    },
+    "n12": {
+      "n_options": 12,
+      "accuracy": 0.8166666666666667,
+      "negatives": 19,
+      "positives": 38,
+      "false_activation_rate": 0.2631578947368421,
+      "missed_rate": 0.10526315789473684,
+      "latency_p50_ms": 522.9612299999644,
+      "latency_p95_ms": 604.3019588009884,
+      "picked_distractor": 0.0
+    },
+    "n20": {
+      "n_options": 20,
+      "accuracy": 0.8166666666666667,
+      "negatives": 19,
+      "positives": 38,
+      "false_activation_rate": 0.2631578947368421,
+      "missed_rate": 0.10526315789473684,
+      "latency_p50_ms": 517.135894000603,
+      "latency_p95_ms": 629.174114849684,
+      "picked_distractor": 0.0
+    },
+    "n32": {
+      "n_options": 32,
+      "accuracy": 0.7666666666666667,
+      "negatives": 19,
+      "positives": 38,
+      "false_activation_rate": 0.21052631578947367,
+      "missed_rate": 0.15789473684210525,
+      "latency_p50_ms": 542.054254499817,
+      "latency_p95_ms": 634.4528974509558,
+      "picked_distractor": 0.05
+    }
+  },
+  "julia-1": {
+    "gate": {
+      "n_options": 2,
+      "accuracy": 0.6833333333333333,
+      "negatives": 19,
+      "positives": 38,
+      "false_activation_rate": 1.0,
+      "missed_rate": 0.0,
+      "latency_p50_ms": 73.80144950093381,
+      "latency_p95_ms": 108.70385879979948,
+      "picked_distractor": 0.0
+    },
+    "n6": {
+      "n_options": 6,
+      "accuracy": 0.38333333333333336,
+      "negatives": 19,
+      "positives": 38,
+      "false_activation_rate": 1.0,
+      "missed_rate": 0.0,
+      "latency_p50_ms": 168.32412050098355,
+      "latency_p95_ms": 209.1447221995622,
+      "picked_distractor": 0.0
+    },
+    "n12": {
+      "n_options": 12,
+      "accuracy": 0.3,
+      "negatives": 19,
+      "positives": 38,
+      "false_activation_rate": 1.0,
+      "missed_rate": 0.0,
+      "latency_p50_ms": 196.95723750010075,
+      "latency_p95_ms": 238.5967693490784,
+      "picked_distractor": 0.016666666666666666
+    },
+    "n20": {
+      "n_options": 20,
+      "accuracy": 0.31666666666666665,
+      "negatives": 19,
+      "positives": 38,
+      "false_activation_rate": 1.0,
+      "missed_rate": 0.0,
+      "latency_p50_ms": 261.1154295009328,
+      "latency_p95_ms": 300.2703754511458,
+      "picked_distractor": 0.18333333333333332
+    },
+    "n32": {
+      "n_options": 32,
+      "accuracy": 0.016666666666666666,
+      "negatives": 19,
+      "positives": 38,
+      "false_activation_rate": 1.0,
+      "missed_rate": 0.0,
+      "latency_p50_ms": 214.99001550000685,
+      "latency_p95_ms": 261.6227685991361,
+      "picked_distractor": 0.9333333333333333
+    }
+  },
+  "gliclass-edge": {
+    "gate": {
+      "n_options": 2,
+      "accuracy": 0.7333333333333333,
+      "negatives": 19,
+      "positives": 38,
+      "false_activation_rate": 0.8421052631578947,
+      "missed_rate": 0.0,
+      "latency_p50_ms": 53.510656999606,
+      "latency_p95_ms": 74.18070245112175,
+      "picked_distractor": 0.0
+    },
+    "n6": {
+      "n_options": 6,
+      "accuracy": 0.5166666666666667,
+      "negatives": 19,
+      "positives": 38,
+      "false_activation_rate": 0.9473684210526315,
+      "missed_rate": 0.0,
+      "latency_p50_ms": 91.36796050006524,
+      "latency_p95_ms": 110.52750944945727,
+      "picked_distractor": 0.0
+    },
+    "n12": {
+      "n_options": 12,
+      "accuracy": 0.3333333333333333,
+      "negatives": 19,
+      "positives": 38,
+      "false_activation_rate": 0.9473684210526315,
+      "missed_rate": 0.0,
+      "latency_p50_ms": 107.4570955006493,
+      "latency_p95_ms": 130.102691301272,
+      "picked_distractor": 0.5833333333333334
+    },
+    "n20": {
+      "n_options": 20,
+      "accuracy": 0.3,
+      "negatives": 19,
+      "positives": 38,
+      "false_activation_rate": 1.0,
+      "missed_rate": 0.0,
+      "latency_p50_ms": 140.61474000027374,
+      "latency_p95_ms": 172.9186989511618,
+      "picked_distractor": 0.6666666666666666
+    },
+    "n32": {
+      "n_options": 32,
+      "accuracy": 0.15,
+      "negatives": 19,
+      "positives": 38,
+      "false_activation_rate": 1.0,
+      "missed_rate": 0.0,
+      "latency_p50_ms": 180.11490299977595,
+      "latency_p95_ms": 216.28834864959572,
+      "picked_distractor": 0.6833333333333333
+    }
+  },
+  "e5-zeroshot": {
+    "gate": {
+      "n_options": 2,
+      "accuracy": 0.7333333333333333,
+      "negatives": 19,
+      "positives": 38,
+      "false_activation_rate": 0.8421052631578947,
+      "missed_rate": 0.0,
+      "latency_p50_ms": 26.776578500175674,
+      "latency_p95_ms": 39.19846164972113,
+      "picked_distractor": 0.0
+    },
+    "n6": {
+      "n_options": 6,
+      "accuracy": 0.3333333333333333,
+      "negatives": 19,
+      "positives": 38,
+      "false_activation_rate": 0.6842105263157895,
+      "missed_rate": 0.6842105263157895,
+      "latency_p50_ms": 25.116036999861535,
+      "latency_p95_ms": 34.883491899654466,
+      "picked_distractor": 0.0
+    },
+    "n12": {
+      "n_options": 12,
+      "accuracy": 0.11666666666666667,
+      "negatives": 19,
+      "positives": 38,
+      "false_activation_rate": 0.8947368421052632,
+      "missed_rate": 0.42105263157894735,
+      "latency_p50_ms": 21.314140500180656,
+      "latency_p95_ms": 27.74767755063294,
+      "picked_distractor": 0.55
+    },
+    "n20": {
+      "n_options": 20,
+      "accuracy": 0.11666666666666667,
+      "negatives": 19,
+      "positives": 38,
+      "false_activation_rate": 0.8947368421052632,
+      "missed_rate": 0.34210526315789475,
+      "latency_p50_ms": 20.439009000256192,
+      "latency_p95_ms": 26.047806750375457,
+      "picked_distractor": 0.6333333333333333
+    },
+    "n32": {
+      "n_options": 32,
+      "accuracy": 0.11666666666666667,
+      "negatives": 19,
+      "positives": 38,
+      "false_activation_rate": 0.8947368421052632,
+      "missed_rate": 0.2894736842105263,
+      "latency_p50_ms": 24.314586000400595,
+      "latency_p95_ms": 41.70358255014435,
+      "picked_distractor": 0.6833333333333333
+    }
+  },
+  "nli-mdeberta": {
+    "gate": {
+      "n_options": 2,
+      "accuracy": 0.6833333333333333,
+      "negatives": 19,
+      "positives": 38,
+      "false_activation_rate": 1.0,
+      "missed_rate": 0.0,
+      "latency_p50_ms": 317.07719399946654,
+      "latency_p95_ms": 360.0786141501885,
+      "picked_distractor": 0.0
+    },
+    "n6": {
+      "n_options": 6,
+      "accuracy": 0.35,
+      "negatives": 19,
+      "positives": 38,
+      "false_activation_rate": 0.8421052631578947,
+      "missed_rate": 0.13157894736842105,
+      "latency_p50_ms": 1008.1792430009955,
+      "latency_p95_ms": 1103.2309875999997,
+      "picked_distractor": 0.0
+    },
+    "n12": {
+      "n_options": 12,
+      "accuracy": 0.35,
+      "negatives": 19,
+      "positives": 38,
+      "false_activation_rate": 0.8421052631578947,
+      "missed_rate": 0.13157894736842105,
+      "latency_p50_ms": 1949.7218984997744,
+      "latency_p95_ms": 2196.284934950381,
+      "picked_distractor": 0.016666666666666666
+    },
+    "n20": {
+      "n_options": 20,
+      "accuracy": 0.35,
+      "negatives": 19,
+      "positives": 38,
+      "false_activation_rate": 0.8421052631578947,
+      "missed_rate": 0.13157894736842105,
+      "latency_p50_ms": 3281.77067300021,
+      "latency_p95_ms": 3542.136181001115,
+      "picked_distractor": 0.06666666666666667
+    },
+    "n32": {
+      "n_options": 32,
+      "accuracy": 0.35,
+      "negatives": 19,
+      "positives": 38,
+      "false_activation_rate": 0.8421052631578947,
+      "missed_rate": 0.13157894736842105,
+      "latency_p50_ms": 5109.9057075007295,
+      "latency_p95_ms": 5532.02441919866,
+      "picked_distractor": 0.06666666666666667
+    }
+  },
+  "jeff-0.8b": {
+    "gate": {
+      "n_options": 2,
+      "accuracy": 0.6,
+      "negatives": 19,
+      "positives": 38,
+      "false_activation_rate": 0.10526315789473684,
+      "missed_rate": 0.5789473684210527,
+      "latency_p50_ms": 1983.7539754989848,
+      "latency_p95_ms": 2144.9096578490753,
+      "picked_distractor": 0.0
+    },
+    "n6": {
+      "n_options": 6,
+      "accuracy": 0.7666666666666667,
+      "negatives": 19,
+      "positives": 38,
+      "false_activation_rate": 0.3684210526315789,
+      "missed_rate": 0.07894736842105263,
+      "latency_p50_ms": 2861.375663000217,
+      "latency_p95_ms": 3061.0326413499024,
+      "picked_distractor": 0.0
+    },
+    "n12": {
+      "n_options": 12,
+      "accuracy": 0.7166666666666667,
+      "negatives": 19,
+      "positives": 38,
+      "false_activation_rate": 0.5263157894736842,
+      "missed_rate": 0.07894736842105263,
+      "latency_p50_ms": 3368.9382335005575,
+      "latency_p95_ms": 3531.243336899661,
+      "picked_distractor": 0.08333333333333333
+    },
+    "n20": {
+      "n_options": 20,
+      "accuracy": 0.7,
+      "negatives": 19,
+      "positives": 38,
+      "false_activation_rate": 0.5789473684210527,
+      "missed_rate": 0.07894736842105263,
+      "latency_p50_ms": 4184.777757500342,
+      "latency_p95_ms": 4397.721177299354,
+      "picked_distractor": 0.13333333333333333
+    },
+    "n32": {
+      "n_options": 32,
+      "accuracy": 0.6333333333333333,
+      "negatives": 19,
+      "positives": 38,
+      "false_activation_rate": 0.6842105263157895,
+      "missed_rate": 0.07894736842105263,
+      "latency_p50_ms": 5653.794391500924,
+      "latency_p95_ms": 5937.732911849889,
+      "picked_distractor": 0.18333333333333332
+    }
+  }
+}

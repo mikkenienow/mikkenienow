@@ -1,0 +1,2503 @@
+{
+  "gold+rules": {
+    "selector": "rules",
+    "scope": "route",
+    "router": "rota-ouro",
+    "n": 75,
+    "outcome_accuracy": 0.8533333333333334,
+    "tool_accuracy_addressed": 0.835820895522388,
+    "tool_accuracy_multi_tool_routes": 0.7884615384615384,
+    "n_multi": 52,
+    "args_accuracy_when_tool_ok": 1.0,
+    "n_with_args": 29,
+    "status_accuracy": 0.88,
+    "acted_when_not_addressed": 0,
+    "n_not_addressed": 8,
+    "asked_confirmation_when_not_addressed": 0,
+    "sensitive_executed_without_confirmation": 0,
+    "n_sensitive": 7,
+    "router_accuracy": null,
+    "decide_ms_p50": null,
+    "act_ms_p50": 0.04454999907466117,
+    "selection_ms_p50": null,
+    "n_model_selections": 0,
+    "by_tag": {
+      "asr": {
+        "n": 2,
+        "ok": 1.0
+      },
+      "clear": {
+        "n": 29,
+        "ok": 0.9655172413793104
+      },
+      "hard": {
+        "n": 8,
+        "ok": 0.125
+      },
+      "incomplete": {
+        "n": 2,
+        "ok": 1.0
+      },
+      "not_addressed": {
+        "n": 8,
+        "ok": 1.0
+      },
+      "paraphrase": {
+        "n": 17,
+        "ok": 0.8823529411764706
+      },
+      "sensitive": {
+        "n": 7,
+        "ok": 1.0
+      },
+      "trap": {
+        "n": 3,
+        "ok": 0.6666666666666666
+      }
+    },
+    "errors": [
+      {
+        "text": "Alexa, me diz as horas",
+        "gold": [
+          "info.time",
+          "executed"
+        ],
+        "got": [
+          "llm.answer",
+          "answering"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, já deu meio-dia?",
+        "gold": [
+          "info.time",
+          "executed"
+        ],
+        "got": [
+          "llm.answer",
+          "answering"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, estamos em que mês?",
+        "gold": [
+          "info.date",
+          "executed"
+        ],
+        "got": [
+          "llm.answer",
+          "answering"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, hoje é sexta?",
+        "gold": [
+          "info.date",
+          "executed"
+        ],
+        "got": [
+          "llm.answer",
+          "answering"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, o computador tá muito carregado?",
+        "gold": [
+          "info.system_status",
+          "executed"
+        ],
+        "got": [
+          "llm.answer",
+          "answering"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, quanto espaço livre tem no disco?",
+        "gold": [
+          "info.system_status",
+          "executed"
+        ],
+        "got": [
+          "llm.answer",
+          "answering"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, o servidor tá aguentando?",
+        "gold": [
+          "info.system_status",
+          "executed"
+        ],
+        "got": [
+          "llm.answer",
+          "answering"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, quanto de memória RAM eu preciso pra rodar um jogo pesado?",
+        "gold": [
+          "llm.answer",
+          "answering"
+        ],
+        "got": [
+          "info.system_status",
+          "executed"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, tá muito alto isso aí",
+        "gold": [
+          "media.set_volume",
+          "executed"
+        ],
+        "got": [
+          "media.play",
+          "executed"
+        ],
+        "args": {
+          "query": "tá muito alto isso aí"
+        },
+        "why": null
+      },
+      {
+        "text": "Alexa, chega de música",
+        "gold": [
+          "media.pause",
+          "executed"
+        ],
+        "got": [
+          "media.play",
+          "executed"
+        ],
+        "args": {
+          "query": "chega de música"
+        },
+        "why": null
+      },
+      {
+        "text": "Alexa, falta quanto pro timer acabar?",
+        "gold": [
+          "timer.list",
+          "executed"
+        ],
+        "got": [
+          "timer.create",
+          "needs_info"
+        ],
+        "args": {},
+        "why": [
+          "faltou a duração do timer"
+        ]
+      }
+    ],
+    "timestamp": "2026-10-11T20:19:37"
+  },
+  "gold+hybrid": {
+    "selector": "hybrid",
+    "scope": "route",
+    "router": "rota-ouro",
+    "n": 75,
+    "outcome_accuracy": 0.92,
+    "tool_accuracy_addressed": 0.9253731343283582,
+    "tool_accuracy_multi_tool_routes": 0.9038461538461539,
+    "n_multi": 52,
+    "args_accuracy_when_tool_ok": 0.9666666666666667,
+    "n_with_args": 30,
+    "status_accuracy": 0.9333333333333333,
+    "acted_when_not_addressed": 0,
+    "n_not_addressed": 8,
+    "asked_confirmation_when_not_addressed": 0,
+    "sensitive_executed_without_confirmation": 0,
+    "n_sensitive": 7,
+    "router_accuracy": null,
+    "decide_ms_p50": null,
+    "act_ms_p50": 0.0749829996493645,
+    "selection_ms_p50": 213.55,
+    "n_model_selections": 18,
+    "by_tag": {
+      "asr": {
+        "n": 2,
+        "ok": 1.0
+      },
+      "clear": {
+        "n": 29,
+        "ok": 0.9655172413793104
+      },
+      "hard": {
+        "n": 8,
+        "ok": 0.75
+      },
+      "incomplete": {
+        "n": 2,
+        "ok": 1.0
+      },
+      "not_addressed": {
+        "n": 8,
+        "ok": 1.0
+      },
+      "paraphrase": {
+        "n": 17,
+        "ok": 1.0
+      },
+      "sensitive": {
+        "n": 7,
+        "ok": 1.0
+      },
+      "trap": {
+        "n": 3,
+        "ok": 0.0
+      }
+    },
+    "errors": [
+      {
+        "text": "Alexa, quantas horas tem uma semana?",
+        "gold": [
+          "llm.answer",
+          "answering"
+        ],
+        "got": [
+          "info.date",
+          "executed"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, que dia foi a proclamação da república?",
+        "gold": [
+          "llm.answer",
+          "answering"
+        ],
+        "got": [
+          "info.date",
+          "executed"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, quanto de memória RAM eu preciso pra rodar um jogo pesado?",
+        "gold": [
+          "llm.answer",
+          "answering"
+        ],
+        "got": [
+          "info.system_status",
+          "executed"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, tá muito alto isso aí",
+        "gold": [
+          "media.set_volume",
+          "executed"
+        ],
+        "got": [
+          "media.set_volume",
+          "needs_info"
+        ],
+        "args": {},
+        "why": [
+          "faltou dizer o volume (um número, mais alto ou mais baixo)"
+        ]
+      },
+      {
+        "text": "Alexa, chega de música",
+        "gold": [
+          "media.pause",
+          "executed"
+        ],
+        "got": [
+          "media.play",
+          "executed"
+        ],
+        "args": {
+          "query": "chega de música"
+        },
+        "why": null
+      },
+      {
+        "text": "Alexa, falta quanto pro timer acabar?",
+        "gold": [
+          "timer.list",
+          "executed"
+        ],
+        "got": [
+          "timer.create",
+          "needs_info"
+        ],
+        "args": {},
+        "why": [
+          "faltou a duração do timer"
+        ]
+      }
+    ],
+    "timestamp": "2026-10-11T20:19:47"
+  },
+  "gold+model": {
+    "selector": "model",
+    "scope": "route",
+    "router": "rota-ouro",
+    "n": 75,
+    "outcome_accuracy": 0.9333333333333333,
+    "tool_accuracy_addressed": 0.9402985074626866,
+    "tool_accuracy_multi_tool_routes": 0.9230769230769231,
+    "n_multi": 52,
+    "args_accuracy_when_tool_ok": 0.9666666666666667,
+    "n_with_args": 30,
+    "status_accuracy": 0.9466666666666667,
+    "acted_when_not_addressed": 0,
+    "n_not_addressed": 8,
+    "asked_confirmation_when_not_addressed": 0,
+    "sensitive_executed_without_confirmation": 0,
+    "n_sensitive": 7,
+    "router_accuracy": null,
+    "decide_ms_p50": null,
+    "act_ms_p50": 216.4584649999597,
+    "selection_ms_p50": 222.5,
+    "n_model_selections": 52,
+    "by_tag": {
+      "asr": {
+        "n": 2,
+        "ok": 1.0
+      },
+      "clear": {
+        "n": 29,
+        "ok": 1.0
+      },
+      "hard": {
+        "n": 8,
+        "ok": 0.75
+      },
+      "incomplete": {
+        "n": 2,
+        "ok": 1.0
+      },
+      "not_addressed": {
+        "n": 8,
+        "ok": 1.0
+      },
+      "paraphrase": {
+        "n": 17,
+        "ok": 1.0
+      },
+      "sensitive": {
+        "n": 7,
+        "ok": 1.0
+      },
+      "trap": {
+        "n": 3,
+        "ok": 0.0
+      }
+    },
+    "errors": [
+      {
+        "text": "Alexa, quantas horas tem uma semana?",
+        "gold": [
+          "llm.answer",
+          "answering"
+        ],
+        "got": [
+          "info.date",
+          "executed"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, que dia foi a proclamação da república?",
+        "gold": [
+          "llm.answer",
+          "answering"
+        ],
+        "got": [
+          "info.date",
+          "executed"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, quanto de memória RAM eu preciso pra rodar um jogo pesado?",
+        "gold": [
+          "llm.answer",
+          "answering"
+        ],
+        "got": [
+          "info.system_status",
+          "executed"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, tá muito alto isso aí",
+        "gold": [
+          "media.set_volume",
+          "executed"
+        ],
+        "got": [
+          "media.set_volume",
+          "needs_info"
+        ],
+        "args": {},
+        "why": [
+          "faltou dizer o volume (um número, mais alto ou mais baixo)"
+        ]
+      },
+      {
+        "text": "Alexa, chega de música",
+        "gold": [
+          "media.pause",
+          "executed"
+        ],
+        "got": [
+          "media.play",
+          "executed"
+        ],
+        "args": {
+          "query": "chega de música"
+        },
+        "why": null
+      }
+    ],
+    "timestamp": "2026-10-11T20:20:05"
+  },
+  "cascade-e5-decider-gguf+rules": {
+    "selector": "rules",
+    "scope": "route",
+    "router": "cascade-e5-decider-gguf",
+    "n": 75,
+    "outcome_accuracy": 0.7466666666666667,
+    "tool_accuracy_addressed": 0.7313432835820896,
+    "tool_accuracy_multi_tool_routes": 0.6538461538461539,
+    "n_multi": 52,
+    "args_accuracy_when_tool_ok": 1.0,
+    "n_with_args": 25,
+    "status_accuracy": 0.8,
+    "acted_when_not_addressed": 1,
+    "n_not_addressed": 8,
+    "asked_confirmation_when_not_addressed": 0,
+    "sensitive_executed_without_confirmation": 0,
+    "n_sensitive": 7,
+    "router_accuracy": 0.88,
+    "decide_ms_p50": 19.6287510007096,
+    "act_ms_p50": 0.07828350044292165,
+    "selection_ms_p50": null,
+    "n_model_selections": 0,
+    "by_tag": {
+      "asr": {
+        "n": 2,
+        "ok": 1.0
+      },
+      "clear": {
+        "n": 29,
+        "ok": 0.896551724137931
+      },
+      "hard": {
+        "n": 8,
+        "ok": 0.125
+      },
+      "incomplete": {
+        "n": 2,
+        "ok": 1.0
+      },
+      "not_addressed": {
+        "n": 8,
+        "ok": 0.875
+      },
+      "paraphrase": {
+        "n": 17,
+        "ok": 0.6470588235294118
+      },
+      "sensitive": {
+        "n": 7,
+        "ok": 0.8571428571428571
+      },
+      "trap": {
+        "n": 3,
+        "ok": 0.6666666666666666
+      }
+    },
+    "errors": [
+      {
+        "text": "Alexa, me diz as horas",
+        "gold": [
+          "info.time",
+          "executed"
+        ],
+        "got": [
+          "note.add",
+          "executed"
+        ],
+        "args": {
+          "text": "me diz as horas"
+        },
+        "why": null
+      },
+      {
+        "text": "Alexa, já deu meio-dia?",
+        "gold": [
+          "info.time",
+          "executed"
+        ],
+        "got": [
+          "llm.answer",
+          "answering"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, tá que horas agora?",
+        "gold": [
+          "info.time",
+          "executed"
+        ],
+        "got": [
+          "note.add",
+          "executed"
+        ],
+        "args": {
+          "text": "tá que horas agora"
+        },
+        "why": null
+      },
+      {
+        "text": "Alexa, estamos em que mês?",
+        "gold": [
+          "info.date",
+          "executed"
+        ],
+        "got": [
+          "llm.answer",
+          "answering"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, hoje é sexta?",
+        "gold": [
+          "info.date",
+          "executed"
+        ],
+        "got": [
+          "llm.answer",
+          "answering"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, o computador tá muito carregado?",
+        "gold": [
+          "info.system_status",
+          "executed"
+        ],
+        "got": [
+          "llm.answer",
+          "answering"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, quanto espaço livre tem no disco?",
+        "gold": [
+          "info.system_status",
+          "executed"
+        ],
+        "got": [
+          "llm.answer",
+          "answering"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, o servidor tá aguentando?",
+        "gold": [
+          "info.system_status",
+          "executed"
+        ],
+        "got": [
+          "llm.answer",
+          "answering"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, quanto de memória RAM eu preciso pra rodar um jogo pesado?",
+        "gold": [
+          "llm.answer",
+          "answering"
+        ],
+        "got": [
+          "info.system_status",
+          "executed"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, quero ouvir um podcast de história",
+        "gold": [
+          "media.play",
+          "executed"
+        ],
+        "got": [
+          "llm.answer_large",
+          "answering"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, tá muito alto isso aí",
+        "gold": [
+          "media.set_volume",
+          "executed"
+        ],
+        "got": [
+          "media.play",
+          "executed"
+        ],
+        "args": {
+          "query": "tá muito alto isso aí"
+        },
+        "why": null
+      },
+      {
+        "text": "Alexa, deixa no mudo",
+        "gold": [
+          "media.set_volume",
+          "executed"
+        ],
+        "got": [
+          "home.set_device",
+          "needs_info"
+        ],
+        "args": {
+          "rooms": [
+            "sala"
+          ]
+        },
+        "why": [
+          "faltou qual dispositivo",
+          "faltou se é para ligar ou desligar"
+        ]
+      },
+      {
+        "text": "Alexa, chega de música",
+        "gold": [
+          "media.pause",
+          "executed"
+        ],
+        "got": [
+          "media.play",
+          "executed"
+        ],
+        "args": {
+          "query": "chega de música"
+        },
+        "why": null
+      },
+      {
+        "text": "Alexa, falta quanto pro timer acabar?",
+        "gold": [
+          "timer.list",
+          "executed"
+        ],
+        "got": [
+          "timer.create",
+          "needs_info"
+        ],
+        "args": {},
+        "why": [
+          "faltou a duração do timer"
+        ]
+      },
+      {
+        "text": "Alexa, anota aí: comprar ração do cachorro",
+        "gold": [
+          "note.add",
+          "executed"
+        ],
+        "got": [
+          null,
+          "ignored"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, o que eu tenho anotado?",
+        "gold": [
+          "note.list",
+          "executed"
+        ],
+        "got": [
+          "llm.answer",
+          "answering"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, limpa as anotações",
+        "gold": [
+          "note.clear",
+          "needs_confirmation"
+        ],
+        "got": [
+          null,
+          "ignored"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, cria um lembrete pra tirar o lixo",
+        "gold": [
+          "note.add",
+          "executed"
+        ],
+        "got": [
+          "llm.answer_large",
+          "answering"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "A Alexa da vizinha toca música o dia inteiro",
+        "gold": [
+          null,
+          "ignored"
+        ],
+        "got": [
+          "media.play",
+          "executed"
+        ],
+        "args": {
+          "query": "A Alexa da vizinha toca música o dia inteiro"
+        },
+        "why": null
+      }
+    ],
+    "timestamp": "2026-10-11T20:20:54"
+  },
+  "cascade-e5-decider-gguf+hybrid": {
+    "selector": "hybrid",
+    "scope": "route",
+    "router": "cascade-e5-decider-gguf",
+    "n": 75,
+    "outcome_accuracy": 0.8,
+    "tool_accuracy_addressed": 0.8059701492537313,
+    "tool_accuracy_multi_tool_routes": 0.75,
+    "n_multi": 52,
+    "args_accuracy_when_tool_ok": 0.9615384615384616,
+    "n_with_args": 26,
+    "status_accuracy": 0.84,
+    "acted_when_not_addressed": 1,
+    "n_not_addressed": 8,
+    "asked_confirmation_when_not_addressed": 0,
+    "sensitive_executed_without_confirmation": 0,
+    "n_sensitive": 7,
+    "router_accuracy": 0.88,
+    "decide_ms_p50": 18.249992999699316,
+    "act_ms_p50": 0.16701649929018458,
+    "selection_ms_p50": 208.15,
+    "n_model_selections": 20,
+    "by_tag": {
+      "asr": {
+        "n": 2,
+        "ok": 1.0
+      },
+      "clear": {
+        "n": 29,
+        "ok": 0.896551724137931
+      },
+      "hard": {
+        "n": 8,
+        "ok": 0.75
+      },
+      "incomplete": {
+        "n": 2,
+        "ok": 1.0
+      },
+      "not_addressed": {
+        "n": 8,
+        "ok": 0.875
+      },
+      "paraphrase": {
+        "n": 17,
+        "ok": 0.7058823529411765
+      },
+      "sensitive": {
+        "n": 7,
+        "ok": 0.8571428571428571
+      },
+      "trap": {
+        "n": 3,
+        "ok": 0.0
+      }
+    },
+    "errors": [
+      {
+        "text": "Alexa, me diz as horas",
+        "gold": [
+          "info.time",
+          "executed"
+        ],
+        "got": [
+          "timer.list",
+          "executed"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, tá que horas agora?",
+        "gold": [
+          "info.time",
+          "executed"
+        ],
+        "got": [
+          "timer.list",
+          "executed"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, quantas horas tem uma semana?",
+        "gold": [
+          "llm.answer",
+          "answering"
+        ],
+        "got": [
+          "info.date",
+          "executed"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, que dia foi a proclamação da república?",
+        "gold": [
+          "llm.answer",
+          "answering"
+        ],
+        "got": [
+          "info.date",
+          "executed"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, quanto de memória RAM eu preciso pra rodar um jogo pesado?",
+        "gold": [
+          "llm.answer",
+          "answering"
+        ],
+        "got": [
+          "info.system_status",
+          "executed"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, quero ouvir um podcast de história",
+        "gold": [
+          "media.play",
+          "executed"
+        ],
+        "got": [
+          "llm.answer_large",
+          "answering"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, tá muito alto isso aí",
+        "gold": [
+          "media.set_volume",
+          "executed"
+        ],
+        "got": [
+          "media.set_volume",
+          "needs_info"
+        ],
+        "args": {},
+        "why": [
+          "faltou dizer o volume (um número, mais alto ou mais baixo)"
+        ]
+      },
+      {
+        "text": "Alexa, deixa no mudo",
+        "gold": [
+          "media.set_volume",
+          "executed"
+        ],
+        "got": [
+          "home.set_device",
+          "needs_info"
+        ],
+        "args": {
+          "rooms": [
+            "sala"
+          ]
+        },
+        "why": [
+          "faltou qual dispositivo",
+          "faltou se é para ligar ou desligar"
+        ]
+      },
+      {
+        "text": "Alexa, chega de música",
+        "gold": [
+          "media.pause",
+          "executed"
+        ],
+        "got": [
+          "media.play",
+          "executed"
+        ],
+        "args": {
+          "query": "chega de música"
+        },
+        "why": null
+      },
+      {
+        "text": "Alexa, falta quanto pro timer acabar?",
+        "gold": [
+          "timer.list",
+          "executed"
+        ],
+        "got": [
+          "timer.create",
+          "needs_info"
+        ],
+        "args": {},
+        "why": [
+          "faltou a duração do timer"
+        ]
+      },
+      {
+        "text": "Alexa, anota aí: comprar ração do cachorro",
+        "gold": [
+          "note.add",
+          "executed"
+        ],
+        "got": [
+          null,
+          "ignored"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, o que eu tenho anotado?",
+        "gold": [
+          "note.list",
+          "executed"
+        ],
+        "got": [
+          "llm.answer",
+          "answering"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, limpa as anotações",
+        "gold": [
+          "note.clear",
+          "needs_confirmation"
+        ],
+        "got": [
+          null,
+          "ignored"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, cria um lembrete pra tirar o lixo",
+        "gold": [
+          "note.add",
+          "executed"
+        ],
+        "got": [
+          "llm.answer_large",
+          "answering"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "A Alexa da vizinha toca música o dia inteiro",
+        "gold": [
+          null,
+          "ignored"
+        ],
+        "got": [
+          "media.play",
+          "executed"
+        ],
+        "args": {
+          "query": "A Alexa da vizinha toca música o dia inteiro"
+        },
+        "why": null
+      }
+    ],
+    "timestamp": "2026-10-11T20:21:09"
+  },
+  "cascade-e5-decider-gguf+model": {
+    "selector": "model",
+    "scope": "route",
+    "router": "cascade-e5-decider-gguf",
+    "n": 75,
+    "outcome_accuracy": 0.8133333333333334,
+    "tool_accuracy_addressed": 0.8208955223880597,
+    "tool_accuracy_multi_tool_routes": 0.7692307692307693,
+    "n_multi": 52,
+    "args_accuracy_when_tool_ok": 0.9615384615384616,
+    "n_with_args": 26,
+    "status_accuracy": 0.8533333333333334,
+    "acted_when_not_addressed": 1,
+    "n_not_addressed": 8,
+    "asked_confirmation_when_not_addressed": 0,
+    "sensitive_executed_without_confirmation": 0,
+    "n_sensitive": 7,
+    "router_accuracy": 0.88,
+    "decide_ms_p50": 19.40590900085226,
+    "act_ms_p50": 208.24041749983735,
+    "selection_ms_p50": 216.64999999999998,
+    "n_model_selections": 48,
+    "by_tag": {
+      "asr": {
+        "n": 2,
+        "ok": 1.0
+      },
+      "clear": {
+        "n": 29,
+        "ok": 0.9310344827586207
+      },
+      "hard": {
+        "n": 8,
+        "ok": 0.75
+      },
+      "incomplete": {
+        "n": 2,
+        "ok": 1.0
+      },
+      "not_addressed": {
+        "n": 8,
+        "ok": 0.875
+      },
+      "paraphrase": {
+        "n": 17,
+        "ok": 0.7058823529411765
+      },
+      "sensitive": {
+        "n": 7,
+        "ok": 0.8571428571428571
+      },
+      "trap": {
+        "n": 3,
+        "ok": 0.0
+      }
+    },
+    "errors": [
+      {
+        "text": "Alexa, me diz as horas",
+        "gold": [
+          "info.time",
+          "executed"
+        ],
+        "got": [
+          "timer.list",
+          "executed"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, tá que horas agora?",
+        "gold": [
+          "info.time",
+          "executed"
+        ],
+        "got": [
+          "timer.list",
+          "executed"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, quantas horas tem uma semana?",
+        "gold": [
+          "llm.answer",
+          "answering"
+        ],
+        "got": [
+          "info.date",
+          "executed"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, que dia foi a proclamação da república?",
+        "gold": [
+          "llm.answer",
+          "answering"
+        ],
+        "got": [
+          "info.date",
+          "executed"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, quanto de memória RAM eu preciso pra rodar um jogo pesado?",
+        "gold": [
+          "llm.answer",
+          "answering"
+        ],
+        "got": [
+          "info.system_status",
+          "executed"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, quero ouvir um podcast de história",
+        "gold": [
+          "media.play",
+          "executed"
+        ],
+        "got": [
+          "llm.answer_large",
+          "answering"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, tá muito alto isso aí",
+        "gold": [
+          "media.set_volume",
+          "executed"
+        ],
+        "got": [
+          "media.set_volume",
+          "needs_info"
+        ],
+        "args": {},
+        "why": [
+          "faltou dizer o volume (um número, mais alto ou mais baixo)"
+        ]
+      },
+      {
+        "text": "Alexa, deixa no mudo",
+        "gold": [
+          "media.set_volume",
+          "executed"
+        ],
+        "got": [
+          "home.set_device",
+          "needs_info"
+        ],
+        "args": {
+          "rooms": [
+            "sala"
+          ]
+        },
+        "why": [
+          "faltou qual dispositivo",
+          "faltou se é para ligar ou desligar"
+        ]
+      },
+      {
+        "text": "Alexa, chega de música",
+        "gold": [
+          "media.pause",
+          "executed"
+        ],
+        "got": [
+          "media.play",
+          "executed"
+        ],
+        "args": {
+          "query": "chega de música"
+        },
+        "why": null
+      },
+      {
+        "text": "Alexa, anota aí: comprar ração do cachorro",
+        "gold": [
+          "note.add",
+          "executed"
+        ],
+        "got": [
+          null,
+          "ignored"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, o que eu tenho anotado?",
+        "gold": [
+          "note.list",
+          "executed"
+        ],
+        "got": [
+          "llm.answer",
+          "answering"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, limpa as anotações",
+        "gold": [
+          "note.clear",
+          "needs_confirmation"
+        ],
+        "got": [
+          null,
+          "ignored"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, cria um lembrete pra tirar o lixo",
+        "gold": [
+          "note.add",
+          "executed"
+        ],
+        "got": [
+          "llm.answer_large",
+          "answering"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "A Alexa da vizinha toca música o dia inteiro",
+        "gold": [
+          null,
+          "ignored"
+        ],
+        "got": [
+          "media.play",
+          "executed"
+        ],
+        "args": {
+          "query": "A Alexa da vizinha toca música o dia inteiro"
+        },
+        "why": null
+      }
+    ],
+    "timestamp": "2026-10-11T20:21:28"
+  },
+  "gold+rules+all": {
+    "selector": "rules",
+    "scope": "all",
+    "router": "rota-ouro",
+    "n": 75,
+    "outcome_accuracy": 0.84,
+    "tool_accuracy_addressed": 0.8208955223880597,
+    "tool_accuracy_multi_tool_routes": 0.7692307692307693,
+    "n_multi": 52,
+    "args_accuracy_when_tool_ok": 1.0,
+    "n_with_args": 29,
+    "status_accuracy": 0.8666666666666667,
+    "acted_when_not_addressed": 0,
+    "n_not_addressed": 8,
+    "asked_confirmation_when_not_addressed": 0,
+    "sensitive_executed_without_confirmation": 1,
+    "n_sensitive": 7,
+    "router_accuracy": null,
+    "decide_ms_p50": null,
+    "act_ms_p50": 0.05225000131758861,
+    "selection_ms_p50": null,
+    "n_model_selections": 0,
+    "by_tag": {
+      "asr": {
+        "n": 2,
+        "ok": 1.0
+      },
+      "clear": {
+        "n": 29,
+        "ok": 0.9655172413793104
+      },
+      "hard": {
+        "n": 8,
+        "ok": 0.125
+      },
+      "incomplete": {
+        "n": 2,
+        "ok": 1.0
+      },
+      "not_addressed": {
+        "n": 8,
+        "ok": 1.0
+      },
+      "paraphrase": {
+        "n": 17,
+        "ok": 0.8823529411764706
+      },
+      "sensitive": {
+        "n": 7,
+        "ok": 0.8571428571428571
+      },
+      "trap": {
+        "n": 3,
+        "ok": 0.6666666666666666
+      }
+    },
+    "errors": [
+      {
+        "text": "Alexa, me diz as horas",
+        "gold": [
+          "info.time",
+          "executed"
+        ],
+        "got": [
+          "llm.answer",
+          "answering"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, já deu meio-dia?",
+        "gold": [
+          "info.time",
+          "executed"
+        ],
+        "got": [
+          "llm.answer",
+          "answering"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, estamos em que mês?",
+        "gold": [
+          "info.date",
+          "executed"
+        ],
+        "got": [
+          "llm.answer",
+          "answering"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, hoje é sexta?",
+        "gold": [
+          "info.date",
+          "executed"
+        ],
+        "got": [
+          "llm.answer",
+          "answering"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, o computador tá muito carregado?",
+        "gold": [
+          "info.system_status",
+          "executed"
+        ],
+        "got": [
+          "llm.answer",
+          "answering"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, quanto espaço livre tem no disco?",
+        "gold": [
+          "info.system_status",
+          "executed"
+        ],
+        "got": [
+          "llm.answer",
+          "answering"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, o servidor tá aguentando?",
+        "gold": [
+          "info.system_status",
+          "executed"
+        ],
+        "got": [
+          "llm.answer",
+          "answering"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, quanto de memória RAM eu preciso pra rodar um jogo pesado?",
+        "gold": [
+          "llm.answer",
+          "answering"
+        ],
+        "got": [
+          "info.system_status",
+          "executed"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, tá muito alto isso aí",
+        "gold": [
+          "media.set_volume",
+          "executed"
+        ],
+        "got": [
+          "media.play",
+          "executed"
+        ],
+        "args": {
+          "query": "tá muito alto isso aí"
+        },
+        "why": null
+      },
+      {
+        "text": "Alexa, chega de música",
+        "gold": [
+          "media.pause",
+          "executed"
+        ],
+        "got": [
+          "media.play",
+          "executed"
+        ],
+        "args": {
+          "query": "chega de música"
+        },
+        "why": null
+      },
+      {
+        "text": "Alexa, falta quanto pro timer acabar?",
+        "gold": [
+          "timer.list",
+          "executed"
+        ],
+        "got": [
+          "timer.create",
+          "needs_info"
+        ],
+        "args": {},
+        "why": [
+          "faltou a duração do timer"
+        ]
+      },
+      {
+        "text": "Alexa, pode parar o alarme",
+        "gold": [
+          "timer.cancel_all",
+          "needs_confirmation"
+        ],
+        "got": [
+          "media.pause",
+          "executed"
+        ],
+        "args": {},
+        "why": null
+      }
+    ],
+    "timestamp": "2026-10-11T20:21:31"
+  },
+  "gold+hybrid+all": {
+    "selector": "hybrid",
+    "scope": "all",
+    "router": "rota-ouro",
+    "n": 75,
+    "outcome_accuracy": 0.92,
+    "tool_accuracy_addressed": 0.9253731343283582,
+    "tool_accuracy_multi_tool_routes": 0.9038461538461539,
+    "n_multi": 52,
+    "args_accuracy_when_tool_ok": 0.9666666666666667,
+    "n_with_args": 30,
+    "status_accuracy": 0.9333333333333333,
+    "acted_when_not_addressed": 0,
+    "n_not_addressed": 8,
+    "asked_confirmation_when_not_addressed": 0,
+    "sensitive_executed_without_confirmation": 0,
+    "n_sensitive": 7,
+    "router_accuracy": null,
+    "decide_ms_p50": null,
+    "act_ms_p50": 0.1861750006355578,
+    "selection_ms_p50": 218.05,
+    "n_model_selections": 22,
+    "by_tag": {
+      "asr": {
+        "n": 2,
+        "ok": 1.0
+      },
+      "clear": {
+        "n": 29,
+        "ok": 0.9655172413793104
+      },
+      "hard": {
+        "n": 8,
+        "ok": 0.75
+      },
+      "incomplete": {
+        "n": 2,
+        "ok": 1.0
+      },
+      "not_addressed": {
+        "n": 8,
+        "ok": 1.0
+      },
+      "paraphrase": {
+        "n": 17,
+        "ok": 1.0
+      },
+      "sensitive": {
+        "n": 7,
+        "ok": 1.0
+      },
+      "trap": {
+        "n": 3,
+        "ok": 0.0
+      }
+    },
+    "errors": [
+      {
+        "text": "Alexa, quantas horas tem uma semana?",
+        "gold": [
+          "llm.answer",
+          "answering"
+        ],
+        "got": [
+          "info.date",
+          "executed"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, que dia foi a proclamação da república?",
+        "gold": [
+          "llm.answer",
+          "answering"
+        ],
+        "got": [
+          "info.date",
+          "executed"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, quanto de memória RAM eu preciso pra rodar um jogo pesado?",
+        "gold": [
+          "llm.answer",
+          "answering"
+        ],
+        "got": [
+          "info.system_status",
+          "executed"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, tá muito alto isso aí",
+        "gold": [
+          "media.set_volume",
+          "executed"
+        ],
+        "got": [
+          "media.set_volume",
+          "needs_info"
+        ],
+        "args": {},
+        "why": [
+          "faltou dizer o volume (um número, mais alto ou mais baixo)"
+        ]
+      },
+      {
+        "text": "Alexa, chega de música",
+        "gold": [
+          "media.pause",
+          "executed"
+        ],
+        "got": [
+          "media.play",
+          "executed"
+        ],
+        "args": {
+          "query": "chega de música"
+        },
+        "why": null
+      },
+      {
+        "text": "Alexa, falta quanto pro timer acabar?",
+        "gold": [
+          "timer.list",
+          "executed"
+        ],
+        "got": [
+          "timer.create",
+          "needs_info"
+        ],
+        "args": {},
+        "why": [
+          "faltou a duração do timer"
+        ]
+      }
+    ],
+    "timestamp": "2026-10-11T20:21:42"
+  },
+  "gold+model+all": {
+    "selector": "model",
+    "scope": "all",
+    "router": "rota-ouro",
+    "n": 75,
+    "outcome_accuracy": 0.92,
+    "tool_accuracy_addressed": 0.9253731343283582,
+    "tool_accuracy_multi_tool_routes": 0.9038461538461539,
+    "n_multi": 52,
+    "args_accuracy_when_tool_ok": 0.9655172413793104,
+    "n_with_args": 29,
+    "status_accuracy": 0.9333333333333333,
+    "acted_when_not_addressed": 0,
+    "n_not_addressed": 8,
+    "asked_confirmation_when_not_addressed": 0,
+    "sensitive_executed_without_confirmation": 0,
+    "n_sensitive": 7,
+    "router_accuracy": null,
+    "decide_ms_p50": null,
+    "act_ms_p50": 222.3338359999616,
+    "selection_ms_p50": 222.0,
+    "n_model_selections": 67,
+    "by_tag": {
+      "asr": {
+        "n": 2,
+        "ok": 1.0
+      },
+      "clear": {
+        "n": 29,
+        "ok": 0.9655172413793104
+      },
+      "hard": {
+        "n": 8,
+        "ok": 0.75
+      },
+      "incomplete": {
+        "n": 2,
+        "ok": 1.0
+      },
+      "not_addressed": {
+        "n": 8,
+        "ok": 1.0
+      },
+      "paraphrase": {
+        "n": 17,
+        "ok": 1.0
+      },
+      "sensitive": {
+        "n": 7,
+        "ok": 1.0
+      },
+      "trap": {
+        "n": 3,
+        "ok": 0.0
+      }
+    },
+    "errors": [
+      {
+        "text": "Alexa, quantas horas tem uma semana?",
+        "gold": [
+          "llm.answer",
+          "answering"
+        ],
+        "got": [
+          "info.date",
+          "executed"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, que dia foi a proclamação da república?",
+        "gold": [
+          "llm.answer",
+          "answering"
+        ],
+        "got": [
+          "info.date",
+          "executed"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, quanto de memória RAM eu preciso pra rodar um jogo pesado?",
+        "gold": [
+          "llm.answer",
+          "answering"
+        ],
+        "got": [
+          "info.system_status",
+          "executed"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, tá muito alto isso aí",
+        "gold": [
+          "media.set_volume",
+          "executed"
+        ],
+        "got": [
+          "media.set_volume",
+          "needs_info"
+        ],
+        "args": {},
+        "why": [
+          "faltou dizer o volume (um número, mais alto ou mais baixo)"
+        ]
+      },
+      {
+        "text": "Alexa, chega de música",
+        "gold": [
+          "media.pause",
+          "executed"
+        ],
+        "got": [
+          "media.play",
+          "executed"
+        ],
+        "args": {
+          "query": "chega de música"
+        },
+        "why": null
+      },
+      {
+        "text": "Alexa, me lembra de ligar pro dentista",
+        "gold": [
+          "note.add",
+          "executed"
+        ],
+        "got": [
+          "home.set_device",
+          "needs_info"
+        ],
+        "args": {
+          "rooms": [
+            "sala"
+          ],
+          "state": "on"
+        },
+        "why": [
+          "faltou qual dispositivo"
+        ]
+      }
+    ],
+    "timestamp": "2026-10-11T20:22:01"
+  },
+  "cascade-e5-decider-gguf+rules+all": {
+    "selector": "rules",
+    "scope": "all",
+    "router": "cascade-e5-decider-gguf",
+    "n": 75,
+    "outcome_accuracy": 0.7866666666666666,
+    "tool_accuracy_addressed": 0.7761194029850746,
+    "tool_accuracy_multi_tool_routes": 0.7115384615384616,
+    "n_multi": 52,
+    "args_accuracy_when_tool_ok": 1.0,
+    "n_with_args": 27,
+    "status_accuracy": 0.8266666666666667,
+    "acted_when_not_addressed": 1,
+    "n_not_addressed": 8,
+    "asked_confirmation_when_not_addressed": 0,
+    "sensitive_executed_without_confirmation": 1,
+    "n_sensitive": 7,
+    "router_accuracy": 0.88,
+    "decide_ms_p50": 14.287795998825459,
+    "act_ms_p50": 0.09716650038171792,
+    "selection_ms_p50": null,
+    "n_model_selections": 0,
+    "by_tag": {
+      "asr": {
+        "n": 2,
+        "ok": 1.0
+      },
+      "clear": {
+        "n": 29,
+        "ok": 0.9310344827586207
+      },
+      "hard": {
+        "n": 8,
+        "ok": 0.125
+      },
+      "incomplete": {
+        "n": 2,
+        "ok": 1.0
+      },
+      "not_addressed": {
+        "n": 8,
+        "ok": 0.875
+      },
+      "paraphrase": {
+        "n": 17,
+        "ok": 0.8235294117647058
+      },
+      "sensitive": {
+        "n": 7,
+        "ok": 0.7142857142857143
+      },
+      "trap": {
+        "n": 3,
+        "ok": 0.6666666666666666
+      }
+    },
+    "errors": [
+      {
+        "text": "Alexa, me diz as horas",
+        "gold": [
+          "info.time",
+          "executed"
+        ],
+        "got": [
+          "note.add",
+          "executed"
+        ],
+        "args": {
+          "text": "me diz as horas"
+        },
+        "why": null
+      },
+      {
+        "text": "Alexa, já deu meio-dia?",
+        "gold": [
+          "info.time",
+          "executed"
+        ],
+        "got": [
+          "llm.answer",
+          "answering"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, estamos em que mês?",
+        "gold": [
+          "info.date",
+          "executed"
+        ],
+        "got": [
+          "llm.answer",
+          "answering"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, hoje é sexta?",
+        "gold": [
+          "info.date",
+          "executed"
+        ],
+        "got": [
+          "llm.answer",
+          "answering"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, o computador tá muito carregado?",
+        "gold": [
+          "info.system_status",
+          "executed"
+        ],
+        "got": [
+          "llm.answer",
+          "answering"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, quanto espaço livre tem no disco?",
+        "gold": [
+          "info.system_status",
+          "executed"
+        ],
+        "got": [
+          "llm.answer",
+          "answering"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, o servidor tá aguentando?",
+        "gold": [
+          "info.system_status",
+          "executed"
+        ],
+        "got": [
+          "llm.answer",
+          "answering"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, quanto de memória RAM eu preciso pra rodar um jogo pesado?",
+        "gold": [
+          "llm.answer",
+          "answering"
+        ],
+        "got": [
+          "info.system_status",
+          "executed"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, quero ouvir um podcast de história",
+        "gold": [
+          "media.play",
+          "executed"
+        ],
+        "got": [
+          "llm.answer_large",
+          "answering"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, tá muito alto isso aí",
+        "gold": [
+          "media.set_volume",
+          "executed"
+        ],
+        "got": [
+          "media.play",
+          "executed"
+        ],
+        "args": {
+          "query": "tá muito alto isso aí"
+        },
+        "why": null
+      },
+      {
+        "text": "Alexa, chega de música",
+        "gold": [
+          "media.pause",
+          "executed"
+        ],
+        "got": [
+          "media.play",
+          "executed"
+        ],
+        "args": {
+          "query": "chega de música"
+        },
+        "why": null
+      },
+      {
+        "text": "Alexa, falta quanto pro timer acabar?",
+        "gold": [
+          "timer.list",
+          "executed"
+        ],
+        "got": [
+          "timer.create",
+          "needs_info"
+        ],
+        "args": {},
+        "why": [
+          "faltou a duração do timer"
+        ]
+      },
+      {
+        "text": "Alexa, pode parar o alarme",
+        "gold": [
+          "timer.cancel_all",
+          "needs_confirmation"
+        ],
+        "got": [
+          "media.pause",
+          "executed"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, anota aí: comprar ração do cachorro",
+        "gold": [
+          "note.add",
+          "executed"
+        ],
+        "got": [
+          null,
+          "ignored"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, limpa as anotações",
+        "gold": [
+          "note.clear",
+          "needs_confirmation"
+        ],
+        "got": [
+          null,
+          "ignored"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "A Alexa da vizinha toca música o dia inteiro",
+        "gold": [
+          null,
+          "ignored"
+        ],
+        "got": [
+          "media.play",
+          "executed"
+        ],
+        "args": {
+          "query": "A Alexa da vizinha toca música o dia inteiro"
+        },
+        "why": null
+      }
+    ],
+    "timestamp": "2026-10-11T20:22:49"
+  },
+  "cascade-e5-decider-gguf+hybrid+all": {
+    "selector": "hybrid",
+    "scope": "all",
+    "router": "cascade-e5-decider-gguf",
+    "n": 75,
+    "outcome_accuracy": 0.88,
+    "tool_accuracy_addressed": 0.8955223880597015,
+    "tool_accuracy_multi_tool_routes": 0.8653846153846154,
+    "n_multi": 52,
+    "args_accuracy_when_tool_ok": 0.9655172413793104,
+    "n_with_args": 29,
+    "status_accuracy": 0.8933333333333333,
+    "acted_when_not_addressed": 1,
+    "n_not_addressed": 8,
+    "asked_confirmation_when_not_addressed": 0,
+    "sensitive_executed_without_confirmation": 0,
+    "n_sensitive": 7,
+    "router_accuracy": 0.88,
+    "decide_ms_p50": 20.614533001207747,
+    "act_ms_p50": 0.4227205008646706,
+    "selection_ms_p50": 236.8,
+    "n_model_selections": 27,
+    "by_tag": {
+      "asr": {
+        "n": 2,
+        "ok": 1.0
+      },
+      "clear": {
+        "n": 29,
+        "ok": 0.9310344827586207
+      },
+      "hard": {
+        "n": 8,
+        "ok": 0.75
+      },
+      "incomplete": {
+        "n": 2,
+        "ok": 1.0
+      },
+      "not_addressed": {
+        "n": 8,
+        "ok": 0.875
+      },
+      "paraphrase": {
+        "n": 17,
+        "ok": 1.0
+      },
+      "sensitive": {
+        "n": 7,
+        "ok": 0.8571428571428571
+      },
+      "trap": {
+        "n": 3,
+        "ok": 0.0
+      }
+    },
+    "errors": [
+      {
+        "text": "Alexa, quantas horas tem uma semana?",
+        "gold": [
+          "llm.answer",
+          "answering"
+        ],
+        "got": [
+          "info.date",
+          "executed"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, que dia foi a proclamação da república?",
+        "gold": [
+          "llm.answer",
+          "answering"
+        ],
+        "got": [
+          "info.date",
+          "executed"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, quanto de memória RAM eu preciso pra rodar um jogo pesado?",
+        "gold": [
+          "llm.answer",
+          "answering"
+        ],
+        "got": [
+          "info.system_status",
+          "executed"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, tá muito alto isso aí",
+        "gold": [
+          "media.set_volume",
+          "executed"
+        ],
+        "got": [
+          "media.set_volume",
+          "needs_info"
+        ],
+        "args": {},
+        "why": [
+          "faltou dizer o volume (um número, mais alto ou mais baixo)"
+        ]
+      },
+      {
+        "text": "Alexa, chega de música",
+        "gold": [
+          "media.pause",
+          "executed"
+        ],
+        "got": [
+          "media.play",
+          "executed"
+        ],
+        "args": {
+          "query": "chega de música"
+        },
+        "why": null
+      },
+      {
+        "text": "Alexa, falta quanto pro timer acabar?",
+        "gold": [
+          "timer.list",
+          "executed"
+        ],
+        "got": [
+          "timer.create",
+          "needs_info"
+        ],
+        "args": {},
+        "why": [
+          "faltou a duração do timer"
+        ]
+      },
+      {
+        "text": "Alexa, anota aí: comprar ração do cachorro",
+        "gold": [
+          "note.add",
+          "executed"
+        ],
+        "got": [
+          null,
+          "ignored"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, limpa as anotações",
+        "gold": [
+          "note.clear",
+          "needs_confirmation"
+        ],
+        "got": [
+          null,
+          "ignored"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "A Alexa da vizinha toca música o dia inteiro",
+        "gold": [
+          null,
+          "ignored"
+        ],
+        "got": [
+          "media.play",
+          "executed"
+        ],
+        "args": {
+          "query": "A Alexa da vizinha toca música o dia inteiro"
+        },
+        "why": null
+      }
+    ],
+    "timestamp": "2026-10-11T20:23:06"
+  },
+  "cascade-e5-decider-gguf+model+all": {
+    "selector": "model",
+    "scope": "all",
+    "router": "cascade-e5-decider-gguf",
+    "n": 75,
+    "outcome_accuracy": 0.88,
+    "tool_accuracy_addressed": 0.8955223880597015,
+    "tool_accuracy_multi_tool_routes": 0.8653846153846154,
+    "n_multi": 52,
+    "args_accuracy_when_tool_ok": 0.9642857142857143,
+    "n_with_args": 28,
+    "status_accuracy": 0.8933333333333333,
+    "acted_when_not_addressed": 1,
+    "n_not_addressed": 8,
+    "asked_confirmation_when_not_addressed": 0,
+    "sensitive_executed_without_confirmation": 0,
+    "n_sensitive": 7,
+    "router_accuracy": 0.88,
+    "decide_ms_p50": 21.194416000071215,
+    "act_ms_p50": 225.42946199973812,
+    "selection_ms_p50": 225.3,
+    "n_model_selections": 66,
+    "by_tag": {
+      "asr": {
+        "n": 2,
+        "ok": 1.0
+      },
+      "clear": {
+        "n": 29,
+        "ok": 0.9310344827586207
+      },
+      "hard": {
+        "n": 8,
+        "ok": 0.75
+      },
+      "incomplete": {
+        "n": 2,
+        "ok": 1.0
+      },
+      "not_addressed": {
+        "n": 8,
+        "ok": 0.875
+      },
+      "paraphrase": {
+        "n": 17,
+        "ok": 1.0
+      },
+      "sensitive": {
+        "n": 7,
+        "ok": 0.8571428571428571
+      },
+      "trap": {
+        "n": 3,
+        "ok": 0.0
+      }
+    },
+    "errors": [
+      {
+        "text": "Alexa, quantas horas tem uma semana?",
+        "gold": [
+          "llm.answer",
+          "answering"
+        ],
+        "got": [
+          "info.date",
+          "executed"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, que dia foi a proclamação da república?",
+        "gold": [
+          "llm.answer",
+          "answering"
+        ],
+        "got": [
+          "info.date",
+          "executed"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, quanto de memória RAM eu preciso pra rodar um jogo pesado?",
+        "gold": [
+          "llm.answer",
+          "answering"
+        ],
+        "got": [
+          "info.system_status",
+          "executed"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, tá muito alto isso aí",
+        "gold": [
+          "media.set_volume",
+          "executed"
+        ],
+        "got": [
+          "media.set_volume",
+          "needs_info"
+        ],
+        "args": {},
+        "why": [
+          "faltou dizer o volume (um número, mais alto ou mais baixo)"
+        ]
+      },
+      {
+        "text": "Alexa, chega de música",
+        "gold": [
+          "media.pause",
+          "executed"
+        ],
+        "got": [
+          "media.play",
+          "executed"
+        ],
+        "args": {
+          "query": "chega de música"
+        },
+        "why": null
+      },
+      {
+        "text": "Alexa, me lembra de ligar pro dentista",
+        "gold": [
+          "note.add",
+          "executed"
+        ],
+        "got": [
+          "home.set_device",
+          "needs_info"
+        ],
+        "args": {
+          "rooms": [
+            "sala"
+          ],
+          "state": "on"
+        },
+        "why": [
+          "faltou qual dispositivo"
+        ]
+      },
+      {
+        "text": "Alexa, anota aí: comprar ração do cachorro",
+        "gold": [
+          "note.add",
+          "executed"
+        ],
+        "got": [
+          null,
+          "ignored"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "Alexa, limpa as anotações",
+        "gold": [
+          "note.clear",
+          "needs_confirmation"
+        ],
+        "got": [
+          null,
+          "ignored"
+        ],
+        "args": {},
+        "why": null
+      },
+      {
+        "text": "A Alexa da vizinha toca música o dia inteiro",
+        "gold": [
+          null,
+          "ignored"
+        ],
+        "got": [
+          "media.play",
+          "executed"
+        ],
+        "args": {
+          "query": "A Alexa da vizinha toca música o dia inteiro"
+        },
+        "why": null
+      }
+    ],
+    "timestamp": "2026-10-11T20:23:33"
+  }
+}

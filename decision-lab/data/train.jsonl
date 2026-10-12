@@ -1,0 +1,64 @@
+{"text": "Você vai querer café?", "label": "ignore"}
+{"text": "Onde você estacionou o carro?", "label": "ignore"}
+{"text": "Esse professor é muito chato", "label": "ignore"}
+{"text": "Amanhã eu passo aí na sua casa", "label": "ignore"}
+{"text": "Cuidado que o chão tá molhado", "label": "ignore"}
+{"text": "A Alexa lá do escritório é bem antiga", "label": "ignore"}
+{"text": "Acabou o leite de novo", "label": "ignore"}
+{"text": "Filho, desliga esse videogame e vai estudar", "label": "ignore"}
+{"text": "E agora, a previsão do tempo para o fim de semana", "label": "ignore"}
+{"text": "Você sabe se o João já chegou?", "label": "ignore"}
+{"text": "ãhn", "label": "ignore"}
+{"text": "beleza", "label": "ignore"}
+{"text": "Que saudade da praia", "label": "ignore"}
+{"text": "O Pedro falou que a luz do apartamento dele caiu ontem", "label": "ignore"}
+{"text": "Alexa, acende a luz do quarto", "label": "home_control"}
+{"text": "Alexa, desliga o ar", "label": "home_control"}
+{"text": "Alexa, abre a porta da garagem", "label": "home_control"}
+{"text": "Alexa, liga a luz da cozinha", "label": "home_control"}
+{"text": "Alexa, coloca o ar em 20 graus", "label": "home_control"}
+{"text": "Alexa, apaga a luz da varanda", "label": "home_control"}
+{"text": "Alexa, fecha as persianas", "label": "home_control"}
+{"text": "Alexa, liga a tomada da sala", "label": "home_control"}
+{"text": "Alexa, ativa o modo noite", "label": "home_control"}
+{"text": "Alexa, deixa a luz mais fraca", "label": "home_control"}
+{"text": "Alexa, toca Legião Urbana", "label": "media"}
+{"text": "Alexa, abaixa o volume", "label": "media"}
+{"text": "Alexa, continua a música", "label": "media"}
+{"text": "Alexa, pula essa faixa", "label": "media"}
+{"text": "Alexa, toca um samba", "label": "media"}
+{"text": "Alexa, coloca um podcast", "label": "media"}
+{"text": "Alexa, volume no máximo", "label": "media"}
+{"text": "Alexa, toca minha playlist favorita", "label": "media"}
+{"text": "Alexa, sintoniza a rádio Jovem Pan", "label": "media"}
+{"text": "Alexa, música ambiente", "label": "media"}
+{"text": "Alexa, timer de cinco minutos", "label": "timer_alarm"}
+{"text": "Alexa, me acorda às sete", "label": "timer_alarm"}
+{"text": "Alexa, me lembra de pagar a conta amanhã", "label": "timer_alarm"}
+{"text": "Alexa, cancela o timer", "label": "timer_alarm"}
+{"text": "Alexa, alarme pras seis horas", "label": "timer_alarm"}
+{"text": "Alexa, me avisa daqui a meia hora", "label": "timer_alarm"}
+{"text": "Alexa, quanto falta pro alarme tocar?", "label": "timer_alarm"}
+{"text": "Alexa, cria um lembrete pra reunião", "label": "timer_alarm"}
+{"text": "Alexa, desliga o despertador", "label": "timer_alarm"}
+{"text": "Alexa, adia o alarme", "label": "timer_alarm"}
+{"text": "Alexa, qual a altura do Everest?", "label": "knowledge"}
+{"text": "Alexa, como vai estar o tempo hoje?", "label": "knowledge"}
+{"text": "Alexa, quem descobriu o Brasil?", "label": "knowledge"}
+{"text": "Alexa, quanto é 12 vezes 8?", "label": "knowledge"}
+{"text": "Alexa, o que é fotossíntese?", "label": "knowledge"}
+{"text": "Alexa, quantos anos tem o Pelé?", "label": "knowledge"}
+{"text": "Alexa, qual a cotação do dólar?", "label": "knowledge"}
+{"text": "Alexa, pesquisa o horário do mercado", "label": "knowledge"}
+{"text": "Alexa, como se diz obrigado em japonês?", "label": "knowledge"}
+{"text": "Alexa, quem é o técnico da seleção?", "label": "knowledge"}
+{"text": "Alexa, escreve uma mensagem de aniversário pra minha avó", "label": "complex"}
+{"text": "Alexa, monta um treino de academia pra mim", "label": "complex"}
+{"text": "Alexa, me ajuda a planejar a festa do meu filho", "label": "complex"}
+{"text": "Alexa, faz um resumo do livro que eu estou lendo", "label": "complex"}
+{"text": "Alexa, cria uma lista de tarefas pra mudança de casa", "label": "complex"}
+{"text": "Alexa, compara esses dois notebooks e me recomenda um", "label": "complex"}
+{"text": "Alexa, inventa uma piada sobre programadores", "label": "complex"}
+{"text": "Alexa, prepara um roteiro de viagem pro Nordeste", "label": "complex"}
+{"text": "Alexa, revisa esse texto e melhora a escrita", "label": "complex"}
+{"text": "Alexa, sugere um cardápio pro jantar com o que tem na geladeira", "label": "complex"}
