@@ -283,7 +283,7 @@ def _where(rooms: list[str]) -> str:
 def _say_device(args: dict[str, Any], result: dict[str, Any]) -> str:
     verb = (("Abri" if args["state"] == "on" else "Fechei") if args["device"] in OPENABLE
             else ("Liguei" if args["state"] == "on" else "Desliguei"))
-    return f"{verb} {DEVICE_NAMES[args['device']]} {_where(args['rooms'])}".strip() + "."
+    return f"{verb} {DEVICE_NAMES[args['device']]} {_where(args['rooms'])}".strip() + " (simulado: nenhum aparelho de verdade foi acionado)."
 
 
 def human_duration(seconds: int) -> str:
@@ -348,17 +348,17 @@ def build_registry() -> ToolRegistry:
 
         # --- mídia (simulada) ---
         Tool("media.pause", "MEDIA", "Pausar a música", "Pause or stop whatever is playing",
-             _media_pause, none, lambda a, r: "Pausei.",
+             _media_pause, none, lambda a, r: "Pausa simulada: não há player de verdade.",
              keywords=r"\b(pausa|pausar|pause|para a musica|para o som|para de tocar|parar|stop)\b"),
         Tool("media.set_volume", "MEDIA", "Mudar o volume (0 a 10)", "Change the volume: louder, quieter, mute, or a level",
-             _media_volume, extract_volume, lambda a, r: f"Volume em {r['volume']}.",
+             _media_volume, extract_volume, lambda a, r: f"Volume simulado em {r['volume']}: nenhum som foi alterado.",
              params={"level": Param("int", required=False, min=0, max=10, description="o volume"),
                      "change": Param("enum", required=False, choices=("up", "down"))},
              check=lambda a: None if ("level" in a) != ("change" in a) else "faltou dizer o volume (um número, mais alto ou mais baixo)",
              keywords=r"volume|aument|abaix|diminu|mais alto|mais baixo|\bmudo\b|sem som|silencia"),
         Tool("media.play", "MEDIA", "Tocar música, rádio ou podcast", "Play music, a song, an artist, a radio or a podcast",
              _media_play, lambda text: {"query": strip_request(text, r"toca|tocar|toque|bota|coloca|poe|play|quero ouvir|ouvir|liga")[:120] or None},
-             lambda a, r: f"Tocando: {a['query']}.",
+             lambda a, r: f"Entendi: tocar “{a['query']}”. Ainda é simulado: nenhum som foi iniciado, não há player.",
              params={"query": Param("str", max_len=120, description="o que tocar")}, default=True),
 
         # --- timers (reais: disparam um evento na interface) ---

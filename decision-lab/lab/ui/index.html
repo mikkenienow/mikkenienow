@@ -395,7 +395,7 @@ function renderHome(s) {
   });
   $("devices").innerHTML = tiles.join("");
   $("noDevices").hidden = tiles.length > 0;
-  $("media").innerHTML = `<div class="row"><span>tocando</span><b>${esc(s.media.playing || "nada")}</b></div><div class="row"><span>volume</span><b>${s.media.volume} / 10</b></div>`;
+  $("media").innerHTML = `<div class="row"><span>tocando (simulado, sem som)</span><b>${esc(s.media.playing || "nada")}</b></div><div class="row"><span>volume</span><b>${s.media.volume} / 10</b></div>`;
   const TS = { running: "rodando", fired: "tocou ⏰", cancelled: "cancelado" };
   $("timers").innerHTML = s.timers.length ? s.timers.slice().reverse().map(t =>
       `<div class="row"><span>${esc(t.label || t.request)}${t.seconds ? ` · ${t.seconds >= 60 ? Math.round(t.seconds / 60) + " min" : t.seconds + " s"}` : ""}</span>
