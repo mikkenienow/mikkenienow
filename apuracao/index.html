@@ -7,110 +7,166 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   :root {
-    --bg: #f6f7f9; --card: #ffffff; --text: #16181d; --muted: #5f6673; --border: #e2e5ea;
-    --lula: #c8102e; --flavio: #1f4fbf; --diff: #7a7f8a;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root { --bg: #0f1115; --card: #181b21; --text: #eceef2; --muted: #9aa1ad; --border: #2a2e36;
-            --lula: #ff5a6e; --flavio: #6b94ff; --diff: #a3a9b4; }
+    --bg: #0d0f13; --card: #171a21; --text: #f1f3f7; --muted: #98a1b0; --border: #272c36;
+    --lula: #ff5a6e; --flavio: #6b94ff;          /* texto e linhas sobre fundo escuro */
+    --lula-bg: #b30d27; --flavio-bg: #1a43a3;    /* preenchimentos com texto branco */
   }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--text);
-         font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-  main { max-width: 960px; margin: 0 auto; padding: 24px 16px 48px; }
-  h1 { font-size: 1.4rem; margin: 0 0 4px; }
-  .sub { color: var(--muted); font-size: .9rem; margin-bottom: 20px; }
-  .status { display: inline-flex; align-items: center; gap: 6px; }
-  .dot { width: 8px; height: 8px; border-radius: 50%; background: #2a9d4b; }
-  .dot.err { background: #d97706; }
-  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
-  .cand .name { font-weight: 600; font-size: 1.05rem; }
-  .cand .pct { font-size: 2.2rem; font-weight: 700; font-variant-numeric: tabular-nums; }
-  .cand .votes { color: var(--muted); font-variant-numeric: tabular-nums; }
-  .lula { border-top: 4px solid var(--lula); } .lula .pct { color: var(--lula); }
-  .flavio { border-top: 4px solid var(--flavio); } .flavio .pct { color: var(--flavio); }
-  .bar { display: flex; height: 14px; border-radius: 7px; overflow: hidden; margin: 16px 0 6px; background: var(--border); }
+  /* 1rem escala com a tela: 20px em 1920×1080, 13px em 1280×720 */
+  html { font-size: clamp(11px, min(1.05vw, 1.9vh), 34px); }
+  body { margin: 0; background: var(--bg); color: var(--text); overflow: hidden;
+         font: 1rem/1.3 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .num { font-variant-numeric: tabular-nums; }
+
+  #tv { height: 100vh; padding: .8rem 1rem; display: grid; gap: .8rem;
+        grid-template-columns: 1.7fr 1fr; grid-template-rows: auto minmax(0, 1fr); }
+  header { grid-column: 1 / -1; display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
+  h1 { font-size: 1.5rem; margin: 0; }
+  .status { color: var(--muted); display: inline-flex; align-items: center; gap: .5rem; cursor: pointer; }
+  .dot { width: .6rem; height: .6rem; border-radius: 50%; background: #34c759; }
+  .dot.err { background: #ff9f0a; }
+  .col { display: grid; gap: .8rem; min-height: 0; min-width: 0; }
+  .left { grid-template-rows: auto minmax(0, 1fr); }
+  .right { grid-template-rows: auto minmax(0, 1fr); }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: .8rem; padding: .8rem 1rem; min-height: 0; min-width: 0; }
+  .card h2 { margin: 0 0 .5rem; font-size: .95rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+
+  #cands { display: grid; grid-template-columns: 1fr 1.15fr 1fr; gap: .8rem; }
+  .cand { border-top: .3rem solid; text-align: center; }
+  .cand .name { font-size: 1.5rem; font-weight: 700; }
+  .cand .pct { font-size: 3.7rem; font-weight: 800; line-height: 1.05; }
+  .cand .votes { color: var(--muted); font-size: 1.25rem; }
+  .lula { border-color: var(--lula); } .lula .pct { color: var(--lula); }
+  .flavio { border-color: var(--flavio); } .flavio .pct { color: var(--flavio); }
+  .diff { text-align: center; display: flex; flex-direction: column; justify-content: center; }
+  .diff .lead { color: var(--muted); font-size: 1.2rem; }
+  .diff .big { font-size: 2.5rem; font-weight: 800; line-height: 1.15; }
+  .diff .pp { font-size: 1.3rem; color: var(--muted); }
+  .bar { display: flex; height: 1rem; border-radius: .5rem; overflow: hidden; margin: .6rem 0 .4rem; background: var(--border); }
   .bar div { transition: width .6s ease; }
-  .diff { margin-top: 12px; text-align: center; }
-  .diff .big { font-size: 1.6rem; font-weight: 700; font-variant-numeric: tabular-nums; }
-  .diff .lead { color: var(--muted); }
-  .progress { color: var(--muted); font-size: .9rem; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px; }
-  .chart-card { margin-top: 12px; }
-  .chart-card h2 { font-size: 1rem; margin: 0 0 8px; }
-  .chart-wrap { position: relative; height: 320px; }
-  footer { color: var(--muted); font-size: .8rem; margin-top: 16px; }
-  @media (max-width: 560px) {
-    .grid { grid-template-columns: 1fr; }
-    .cand .pct { font-size: 1.8rem; }
-    .chart-wrap { height: 260px; }
+  .progress { display: flex; justify-content: space-between; gap: .5rem; color: var(--muted); font-size: 1rem; }
+
+  #charts { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; min-height: 0; }
+  #charts .card { display: flex; flex-direction: column; }
+  .chart-wrap { position: relative; flex: 1; min-height: 0; }
+
+  #regioes { display: flex; flex-direction: column; gap: .4rem; }
+  .reg { flex: 1; display: flex; flex-direction: column; justify-content: center; border-top: 1px solid var(--border); padding-top: .35rem; }
+  .reg:first-of-type { border-top: 0; padding-top: 0; }
+  .reg .l1 { display: flex; justify-content: space-between; align-items: baseline; }
+  .reg .rn { font-weight: 700; font-size: 1.15rem; }
+  .reg .rs { color: var(--muted); font-size: .85rem; }
+  .reg .bar { height: .7rem; margin: .25rem 0; }
+  .reg .l3 { display: flex; justify-content: space-between; font-size: 1rem; font-weight: 600; }
+  .reg .l3 .cl { color: var(--lula); } .reg .l3 .cf { color: var(--flavio); }
+  .reg .l3 .ld { color: var(--muted); font-weight: 500; }
+
+  #ufs-card { display: flex; flex-direction: column; }
+  #ufs { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(7, 1fr); grid-auto-rows: 1fr; gap: .3rem; }
+  .uf { border-radius: .4rem; background: var(--border); color: #fff; display: flex; flex-direction: column;
+        align-items: center; justify-content: center; line-height: 1.1; min-width: 0; }
+  .uf b { font-size: 1.05rem; }
+  .uf small { font-size: .72rem; opacity: .9; }
+  .uf.l { background: var(--lula-bg); } .uf.f { background: var(--flavio-bg); }
+  .legenda { display: flex; gap: 1rem; color: var(--muted); font-size: .8rem; margin-top: .4rem; }
+  .legenda i { display: inline-block; width: .7rem; height: .7rem; border-radius: .2rem; margin-right: .3rem; vertical-align: -.05rem; }
+
+  /* celular: empilha e libera a rolagem */
+  @media (max-width: 900px) {
+    html { font-size: 15px; }
+    body { overflow: auto; }
+    #tv { height: auto; grid-template-columns: 1fr; grid-template-rows: none; }
+    header { flex-direction: column; gap: .2rem; }
+    .left, .right { grid-template-rows: none; }
+    #cands { grid-template-columns: 1fr 1fr; }
+    .diff { grid-column: 1 / -1; order: 3; }
+    .cand .pct { font-size: 2.2rem; }
+    #charts { grid-template-columns: 1fr; }
+    .chart-wrap { height: 16rem; flex: none; }
+    .reg { padding: .5rem 0; }
+    #ufs { grid-auto-rows: 3.4rem; }
   }
 </style>
 </head>
 <body>
-<main>
-  <h1 id="titulo">Apuração Presidente 2026 · 2º turno</h1>
-  <div class="sub">
-    <span class="status"><span class="dot" id="dot"></span><span id="status">Conectando ao TSE…</span></span>
+<div id="tv">
+  <header>
+    <h1 id="titulo">Apuração Presidente 2026 · 2º turno</h1>
+    <div class="status" id="statusbox" title="Clique para tela cheia"><span class="dot" id="dot"></span><span id="status">Conectando ao TSE…</span></div>
+  </header>
+
+  <div class="col left">
+    <section id="cands">
+      <div class="card cand lula">
+        <div class="name" id="lula-name">Lula</div>
+        <div class="pct num" id="lula-pct">–</div>
+        <div class="votes num" id="lula-votes">–</div>
+      </div>
+      <div class="card diff">
+        <div class="lead" id="lead">Diferença</div>
+        <div class="big num" id="diff">–</div>
+        <div class="pp num" id="pp"></div>
+        <div class="bar"><div id="bar-lula" style="background:var(--lula);width:50%"></div><div id="bar-flavio" style="background:var(--flavio);width:50%"></div></div>
+        <div class="progress num"><span id="secoes">Seções: –</span><span id="hora">–</span></div>
+      </div>
+      <div class="card cand flavio">
+        <div class="name" id="flavio-name">Flávio Bolsonaro</div>
+        <div class="pct num" id="flavio-pct">–</div>
+        <div class="votes num" id="flavio-votes">–</div>
+      </div>
+    </section>
+
+    <section id="charts">
+      <div class="card"><h2>Evolução (% dos votos válidos)</h2><div class="chart-wrap"><canvas id="chart"></canvas></div></div>
+      <div class="card"><h2>Diferença de votos (Flávio − Lula)</h2><div class="chart-wrap"><canvas id="chartDiff"></canvas></div></div>
+    </section>
   </div>
 
-  <div class="grid">
-    <div class="card cand lula">
-      <div class="name" id="lula-name">Lula</div>
-      <div class="pct" id="lula-pct">–</div>
-      <div class="votes" id="lula-votes">–</div>
-    </div>
-    <div class="card cand flavio">
-      <div class="name" id="flavio-name">Flávio Bolsonaro</div>
-      <div class="pct" id="flavio-pct">–</div>
-      <div class="votes" id="flavio-votes">–</div>
-    </div>
+  <div class="col right">
+    <section class="card" id="regioes"><h2>Por região</h2></section>
+    <section class="card" id="ufs-card">
+      <h2>Por estado</h2>
+      <div id="ufs"></div>
+      <div class="legenda"><span><i style="background:var(--lula-bg)"></i>Lula na frente</span><span><i style="background:var(--flavio-bg)"></i>Flávio na frente</span><span>número = margem em p.p.</span></div>
+    </section>
   </div>
-
-  <div class="card diff">
-    <div class="lead" id="lead">Diferença</div>
-    <div class="big" id="diff">–</div>
-    <div class="bar"><div id="bar-lula" style="background:var(--lula);width:50%"></div><div id="bar-flavio" style="background:var(--flavio);width:50%"></div></div>
-    <div class="progress">
-      <span id="secoes">Seções totalizadas: –</span>
-      <span id="hora">Última totalização: –</span>
-    </div>
-  </div>
-
-  <div class="card chart-card">
-    <h2>Evolução por % de seções apuradas (% dos votos válidos)</h2>
-    <div class="chart-wrap"><canvas id="chart"></canvas></div>
-  </div>
-  <div class="card chart-card">
-    <h2>Diferença de votos (Flávio − Lula)</h2>
-    <div class="chart-wrap"><canvas id="chartDiff"></canvas></div>
-  </div>
-
-  <footer>
-    Fonte: resultados oficiais do TSE (resultados.tse.jus.br). Atualiza a cada 30 s; um novo ponto entra no gráfico
-    a cada nova totalização divulgada.
-  </footer>
-</main>
+</div>
 
 <script>
 // 2º turno = eleição 6258 (padrão); ?turno=1 abre o 1º turno (6257)
 const TURNO = new URLSearchParams(location.search).get("turno") === "1" ? 1 : 2;
 const ELEICAO = TURNO === 1 ? "006257" : "006258";
+const base = ab => `https://resultados.tse.jus.br/oficial/ele2026/${+ELEICAO}/dados/${ab}/${ab}-c0001-e${ELEICAO}-u.json`;
 const URL_TSE = `https://resultados.tse.jus.br/oficial/ele2026/${+ELEICAO}/dados/br/br-c0001-e${ELEICAO}-u.json`;
 const INTERVALO_MS = 30000;
+const RETRY_MS = 6000;   // o TSE responde 429 de vez em quando; tenta de novo logo
 const STORAGE_KEY = `apuracao-2026-t${TURNO}-historico`;
+
+const REGIOES = {
+  "Norte": ["ac", "ap", "am", "pa", "ro", "rr", "to"],
+  "Nordeste": ["al", "ba", "ce", "ma", "pb", "pe", "pi", "rn", "se"],
+  "Centro-Oeste": ["df", "go", "mt", "ms"],
+  "Sudeste": ["es", "mg", "rj", "sp"],
+  "Sul": ["pr", "rs", "sc"],
+  "Exterior": ["zz"]
+};
+const TODAS_UFS = Object.values(REGIOES).flat();
+const NOME_UF = c => c === "zz" ? "EX" : c.toUpperCase();
 
 const fmtInt = n => n.toLocaleString("pt-BR");
 const fmtPct = n => n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "%";
+const fmtPct1 = n => n.toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + "%";
 const num = s => parseFloat(String(s).replace(/\./g, "").replace(",", "."));
 const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 const $ = id => document.getElementById(id);
+const fs = () => Math.max(10, parseFloat(getComputedStyle(document.documentElement).fontSize) * 0.85);
 
 $("titulo").textContent = `Apuração Presidente 2026 · ${TURNO}º turno`;
 document.title = `Apuração ${TURNO}º turno · Lula × Flávio`;
 
 let historico = [];
 try { historico = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch (e) { historico = []; }
+const ufs = {};   // ultimo dado bom de cada UF
 
 function acharCandidatos(dados) {
   const cands = [];
@@ -127,22 +183,22 @@ function acharCandidatos(dados) {
 const opcoesBase = () => ({
   responsive: true, maintainAspectRatio: false, animation: { duration: 400 },
   interaction: { mode: "index", intersect: false },
-  plugins: { legend: { labels: { color: css("--text") } } },
+  plugins: { legend: { labels: { color: css("--text"), font: () => ({ size: fs() }) } } },
   scales: {
-    x: { type: "linear", title: { display: true, text: "% seções totalizadas", color: css("--muted") },
-         ticks: { color: css("--muted"), callback: v => v + "%" }, grid: { color: css("--border") } },
-    y: { ticks: { color: css("--muted") }, grid: { color: css("--border") } }
+    x: { type: "linear", title: { display: true, text: "% seções totalizadas", color: css("--muted"), font: () => ({ size: fs() }) },
+         ticks: { color: css("--muted"), font: () => ({ size: fs() }), maxTicksLimit: 8, maxRotation: 0, callback: v => (+v.toFixed(2)).toLocaleString("pt-BR") + "%" }, grid: { color: css("--border") } },
+    y: { ticks: { color: css("--muted"), font: () => ({ size: fs() }) }, grid: { color: css("--border") } }
   }
 });
 
 const chart = new Chart($("chart"), {
   type: "line",
   data: { datasets: [
-    { label: "Lula", data: [], borderColor: css("--lula"), backgroundColor: css("--lula"), tension: .25, pointRadius: 3 },
-    { label: "Flávio", data: [], borderColor: css("--flavio"), backgroundColor: css("--flavio"), tension: .25, pointRadius: 3 }
+    { label: "Lula", data: [], borderColor: css("--lula"), backgroundColor: css("--lula"), tension: .25, pointRadius: 4, borderWidth: 3 },
+    { label: "Flávio", data: [], borderColor: css("--flavio"), backgroundColor: css("--flavio"), tension: .25, pointRadius: 4, borderWidth: 3 }
   ]},
   options: (() => { const o = opcoesBase();
-    o.scales.y.ticks.callback = v => v + "%";
+    o.scales.y.ticks.callback = v => v.toLocaleString("pt-BR") + "%";
     o.plugins.tooltip = { callbacks: { label: c => `${c.dataset.label}: ${fmtPct(c.parsed.y)}`,
                                        title: i => `${fmtPct(i[0].parsed.x)} das seções` } };
     return o; })()
@@ -177,21 +233,78 @@ function render(p) {
 
   const dif = p.flavioVotos - p.lulaVotos;
   const difPct = p.flavioPct - p.lulaPct;
-  if (dif === 0) { $("lead").textContent = "Empate"; $("diff").textContent = "0 votos"; $("diff").style.color = ""; }
+  if (dif === 0) { $("lead").textContent = "Empate"; $("diff").textContent = "0 votos"; $("diff").style.color = ""; $("pp").textContent = ""; }
   else {
-    const lider = dif > 0 ? "Flávio" : "Lula";
-    $("lead").textContent = `${lider} à frente por`;
-    $("diff").textContent = `${fmtInt(Math.abs(dif))} votos (${fmtPct(Math.abs(difPct)).replace("%", " p.p.")})`;
+    $("lead").textContent = `${dif > 0 ? "Flávio" : "Lula"} à frente por`;
+    $("diff").textContent = `${fmtInt(Math.abs(dif))} votos`;
     $("diff").style.color = css(dif > 0 ? "--flavio" : "--lula");
+    $("pp").textContent = fmtPct(Math.abs(difPct)).replace("%", " p.p.");
   }
   const soma = p.lulaVotos + p.flavioVotos || 1;
   $("bar-lula").style.width = (p.lulaVotos / soma * 100) + "%";
   $("bar-flavio").style.width = (p.flavioVotos / soma * 100) + "%";
   $("secoes").textContent = `Seções totalizadas: ${fmtPct(p.secoes)}`;
-  $("hora").textContent = `Última totalização: ${p.hora}`;
+  $("hora").textContent = `Totalização: ${p.hora}`;
+}
+
+function somar(lista) {
+  const r = { l: 0, f: 0, ts: 0, st: 0 };
+  for (const uf of lista) { const d = ufs[uf]; if (d) { r.l += d.l; r.f += d.f; r.ts += d.ts; r.st += d.st; } }
+  return r;
+}
+function linhaDif(l, f) {
+  const d = f - l;
+  return d === 0 ? "empate" : `${d > 0 ? "Flávio" : "Lula"} +${fmtInt(Math.abs(d))}`;
+}
+
+function renderRegioes() {
+  const box = $("regioes");
+  box.querySelectorAll(".reg").forEach(e => e.remove());
+  for (const [nome, lista] of Object.entries(REGIOES)) {
+    const r = somar(lista), tot = r.l + r.f;
+    const pl = tot ? r.l / tot * 100 : 0, pf = tot ? r.f / tot * 100 : 0;
+    const el = document.createElement("div");
+    el.className = "reg";
+    el.innerHTML = `
+      <div class="l1"><span class="rn">${nome}</span><span class="rs num">${r.ts ? fmtPct1(r.st / r.ts * 100) : "–"} das seções</span></div>
+      <div class="bar"><div style="background:var(--lula);width:${tot ? pl : 50}%"></div><div style="background:var(--flavio);width:${tot ? pf : 50}%"></div></div>
+      <div class="l3 num"><span class="cl">${tot ? fmtPct1(pl) : "–"}</span><span class="ld">${tot ? linhaDif(r.l, r.f) : "sem dados"}</span><span class="cf">${tot ? fmtPct1(pf) : "–"}</span></div>`;
+    box.appendChild(el);
+  }
+}
+
+function renderUFs() {
+  const box = $("ufs");
+  box.innerHTML = "";
+  const ordem = [...TODAS_UFS].sort((a, b) => NOME_UF(a).localeCompare(NOME_UF(b)));
+  for (const uf of ordem) {
+    const d = ufs[uf], tot = d ? d.l + d.f : 0;
+    const el = document.createElement("div");
+    el.className = "uf num" + (tot ? (d.l > d.f ? " l" : " f") : "");
+    const marg = tot ? Math.abs(d.l - d.f) / tot * 100 : null;
+    el.innerHTML = `<b>${NOME_UF(uf)}</b><small>${marg === null ? "–" : marg.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}</small>`;
+    el.title = tot ? `${NOME_UF(uf)}: Lula ${fmtPct1(d.l / tot * 100)} · Flávio ${fmtPct1(d.f / tot * 100)}` : NOME_UF(uf);
+    box.appendChild(el);
+  }
+}
+
+async function atualizarUFs(lista = TODAS_UFS, tentativa = 0) {
+  const res = await Promise.allSettled(lista.map(uf => fetch(base(uf)).then(r => { if (!r.ok) throw 0; return r.json(); })));
+  const falhas = [];
+  res.forEach((r, i) => {
+    if (r.status !== "fulfilled") { falhas.push(lista[i]); return; }   // mantem o ultimo dado bom
+    const { lula, flavio } = acharCandidatos(r.value);
+    if (!lula || !flavio) return;
+    ufs[lista[i]] = { l: parseInt(lula.vap, 10) || 0, f: parseInt(flavio.vap, 10) || 0,
+                      ts: parseInt(r.value.s.ts, 10) || 0, st: parseInt(r.value.s.st, 10) || 0 };
+  });
+  renderRegioes();
+  renderUFs();
+  if (falhas.length && tentativa < 3) setTimeout(() => atualizarUFs(falhas, tentativa + 1), RETRY_MS);
 }
 
 async function atualizar() {
+  let ok = false;
   try {
     // Sem cache-buster: o CDN do TSE renova o arquivo a cada ~60 s e devolve 429 para quem fura o cache
     const r = await fetch(URL_TSE);
@@ -218,17 +331,32 @@ async function atualizar() {
     }
     render(p);
     $("dot").classList.remove("err");
-    $("status").textContent = (dados.s && dados.tf === "s" ? "Apuração encerrada" : "Ao vivo") +
+    $("status").textContent = (dados.tf === "s" ? "Apuração encerrada" : "Ao vivo") +
       ` · verificado às ${new Date().toLocaleTimeString("pt-BR")}`;
+    ok = true;
   } catch (e) {
     $("dot").classList.add("err");
-    $("status").textContent = `Falha ao consultar o TSE (${e.message}). Tentando de novo em ${INTERVALO_MS / 1000} s…`;
+    $("status").textContent = `Falha ao consultar o TSE (${e.message}). Tentando de novo em ${RETRY_MS / 1000} s…`;
   }
+  if (ok) atualizarUFs();
+  setTimeout(atualizar, ok ? INTERVALO_MS : RETRY_MS);
 }
 
+// TV: clique no status (ou tecla F) = tela cheia; tenta manter a tela acesa
+function telaCheia() {
+  if (document.fullscreenElement) document.exitFullscreen();
+  else document.documentElement.requestFullscreen?.().catch(() => {});
+}
+$("statusbox").addEventListener("click", telaCheia);
+addEventListener("keydown", e => { if (e.key === "f" || e.key === "F") telaCheia(); });
+async function manterAcesa() { try { await navigator.wakeLock?.request("screen"); } catch (e) {} }
+manterAcesa();
+document.addEventListener("visibilitychange", () => { if (!document.hidden) manterAcesa(); });
+
+renderRegioes();
+renderUFs();
 if (historico.length) { desenharGraficos(); render(historico[historico.length - 1]); }
 atualizar();
-setInterval(atualizar, INTERVALO_MS);
 </script>
 </body>
 </html>
