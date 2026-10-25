@@ -49,7 +49,7 @@
 </head>
 <body>
 <main>
-  <h1>Apuração Presidente 2026 · 1º turno</h1>
+  <h1 id="titulo">Apuração Presidente 2026 · 2º turno</h1>
   <div class="sub">
     <span class="status"><span class="dot" id="dot"></span><span id="status">Conectando ao TSE…</span></span>
   </div>
@@ -93,15 +93,21 @@
 </main>
 
 <script>
-const URL_TSE = "https://resultados.tse.jus.br/oficial/ele2026/6257/dados/br/br-c0001-e006257-u.json";
+// 2º turno = eleição 6258 (padrão); ?turno=1 abre o 1º turno (6257)
+const TURNO = new URLSearchParams(location.search).get("turno") === "1" ? 1 : 2;
+const ELEICAO = TURNO === 1 ? "006257" : "006258";
+const URL_TSE = `https://resultados.tse.jus.br/oficial/ele2026/${+ELEICAO}/dados/br/br-c0001-e${ELEICAO}-u.json`;
 const INTERVALO_MS = 30000;
-const STORAGE_KEY = "apuracao-2026-t1-historico";
+const STORAGE_KEY = `apuracao-2026-t${TURNO}-historico`;
 
 const fmtInt = n => n.toLocaleString("pt-BR");
 const fmtPct = n => n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "%";
 const num = s => parseFloat(String(s).replace(/\./g, "").replace(",", "."));
 const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 const $ = id => document.getElementById(id);
+
+$("titulo").textContent = `Apuração Presidente 2026 · ${TURNO}º turno`;
+document.title = `Apuração ${TURNO}º turno · Lula × Flávio`;
 
 let historico = [];
 try { historico = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch (e) { historico = []; }
@@ -187,7 +193,9 @@ function render(p) {
 
 async function atualizar() {
   try {
-    const r = await fetch(URL_TSE + "?t=" + Date.now(), { cache: "no-store" });
+    // Sem cache-buster: o CDN do TSE renova o arquivo a cada ~60 s e devolve 429 para quem fura o cache
+    const r = await fetch(URL_TSE);
+    if (r.status === 429) throw new Error("TSE sobrecarregado (429)");
     if (!r.ok) throw new Error("HTTP " + r.status);
     const dados = await r.json();
     const { lula, flavio } = acharCandidatos(dados);
@@ -199,8 +207,8 @@ async function atualizar() {
       lulaVotos: parseInt(lula.vap, 10), lulaPct: num(lula.pvapn),
       flavioVotos: parseInt(flavio.vap, 10), flavioPct: num(flavio.pvapn)
     };
-    $("lula-name").textContent = lula.nmu === "LULA" ? "Lula" : lula.nmu;
-    $("flavio-name").textContent = "Flávio Bolsonaro";
+    $("lula-name").textContent = "Lula" + (lula.e === "s" ? " · ELEITO" : "");
+    $("flavio-name").textContent = "Flávio Bolsonaro" + (flavio.e === "s" ? " · ELEITO" : "");
 
     const ultimo = historico[historico.length - 1];
     if (!ultimo || ultimo.hora !== p.hora || ultimo.secoes !== p.secoes) {
