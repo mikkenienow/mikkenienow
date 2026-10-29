@@ -1,0 +1,382 @@
+{
+  "e5-logreg -> decider-0.8b-schema": [
+    {
+      "tau": 0.0,
+      "accuracy": 0.8679245283018868,
+      "negatives": 53,
+      "positives": 99,
+      "false_activation_rate": 0.11320754716981132,
+      "missed_rate": 0.020202020202020204,
+      "escalated": 0.0,
+      "mean_latency_ms": 18.530499572322967
+    },
+    {
+      "tau": 0.3,
+      "accuracy": 0.8930817610062893,
+      "negatives": 53,
+      "positives": 99,
+      "false_activation_rate": 0.07547169811320754,
+      "missed_rate": 0.04040404040404041,
+      "escalated": 0.16352201257861634,
+      "mean_latency_ms": 79.34294025785933
+    },
+    {
+      "tau": 0.4,
+      "accuracy": 0.8867924528301887,
+      "negatives": 53,
+      "positives": 99,
+      "false_activation_rate": 0.11320754716981132,
+      "missed_rate": 0.06060606060606061,
+      "escalated": 0.44025157232704404,
+      "mean_latency_ms": 178.39805859118584
+    },
+    {
+      "tau": 0.5,
+      "accuracy": 0.8616352201257862,
+      "negatives": 53,
+      "positives": 99,
+      "false_activation_rate": 0.1509433962264151,
+      "missed_rate": 0.06060606060606061,
+      "escalated": 0.6477987421383647,
+      "mean_latency_ms": 253.52847626413822
+    },
+    {
+      "tau": 0.6,
+      "accuracy": 0.8113207547169812,
+      "negatives": 53,
+      "positives": 99,
+      "false_activation_rate": 0.3018867924528302,
+      "missed_rate": 0.06060606060606061,
+      "escalated": 0.8364779874213837,
+      "mean_latency_ms": 321.18705460376856
+    },
+    {
+      "tau": 0.7,
+      "accuracy": 0.7924528301886793,
+      "negatives": 53,
+      "positives": 99,
+      "false_activation_rate": 0.3584905660377358,
+      "missed_rate": 0.06060606060606061,
+      "escalated": 0.9685534591194969,
+      "mean_latency_ms": 369.6156059811228
+    },
+    {
+      "tau": 0.8,
+      "accuracy": 0.7861635220125787,
+      "negatives": 53,
+      "positives": 99,
+      "false_activation_rate": 0.37735849056603776,
+      "missed_rate": 0.06060606060606061,
+      "escalated": 1.0,
+      "mean_latency_ms": 380.5078099811273
+    },
+    {
+      "tau": 0.9,
+      "accuracy": 0.7861635220125787,
+      "negatives": 53,
+      "positives": 99,
+      "false_activation_rate": 0.37735849056603776,
+      "missed_rate": 0.06060606060606061,
+      "escalated": 1.0,
+      "mean_latency_ms": 380.5078099811273
+    },
+    {
+      "tau": 1.01,
+      "accuracy": 0.7861635220125787,
+      "negatives": 53,
+      "positives": 99,
+      "false_activation_rate": 0.37735849056603776,
+      "missed_rate": 0.06060606060606061,
+      "escalated": 1.0,
+      "mean_latency_ms": 380.5078099811273
+    }
+  ],
+  "e5-logreg -> jeff-0.8b": [
+    {
+      "tau": 0.0,
+      "accuracy": 0.8679245283018868,
+      "negatives": 53,
+      "positives": 99,
+      "false_activation_rate": 0.11320754716981132,
+      "missed_rate": 0.020202020202020204,
+      "escalated": 0.0,
+      "mean_latency_ms": 18.530499572322967
+    },
+    {
+      "tau": 0.3,
+      "accuracy": 0.9119496855345912,
+      "negatives": 53,
+      "positives": 99,
+      "false_activation_rate": 0.05660377358490566,
+      "missed_rate": 0.04040404040404041,
+      "escalated": 0.16352201257861634,
+      "mean_latency_ms": 478.12392369810624
+    },
+    {
+      "tau": 0.4,
+      "accuracy": 0.9119496855345912,
+      "negatives": 53,
+      "positives": 99,
+      "false_activation_rate": 0.09433962264150944,
+      "missed_rate": 0.04040404040404041,
+      "escalated": 0.44025157232704404,
+      "mean_latency_ms": 1243.7335553962146
+    },
+    {
+      "tau": 0.5,
+      "accuracy": 0.9056603773584906,
+      "negatives": 53,
+      "positives": 99,
+      "false_activation_rate": 0.1320754716981132,
+      "missed_rate": 0.030303030303030304,
+      "escalated": 0.6477987421383647,
+      "mean_latency_ms": 1811.9873964402336
+    },
+    {
+      "tau": 0.6,
+      "accuracy": 0.8301886792452831,
+      "negatives": 53,
+      "positives": 99,
+      "false_activation_rate": 0.33962264150943394,
+      "missed_rate": 0.04040404040404041,
+      "escalated": 0.8364779874213837,
+      "mean_latency_ms": 2349.5044161068995
+    },
+    {
+      "tau": 0.7,
+      "accuracy": 0.7987421383647799,
+      "negatives": 53,
+      "positives": 99,
+      "false_activation_rate": 0.4339622641509434,
+      "missed_rate": 0.04040404040404041,
+      "escalated": 0.9685534591194969,
+      "mean_latency_ms": 2726.868363327032
+    },
+    {
+      "tau": 0.8,
+      "accuracy": 0.7924528301886793,
+      "negatives": 53,
+      "positives": 99,
+      "false_activation_rate": 0.4528301886792453,
+      "missed_rate": 0.04040404040404041,
+      "escalated": 1.0,
+      "mean_latency_ms": 2818.33077033961
+    },
+    {
+      "tau": 0.9,
+      "accuracy": 0.7924528301886793,
+      "negatives": 53,
+      "positives": 99,
+      "false_activation_rate": 0.4528301886792453,
+      "missed_rate": 0.04040404040404041,
+      "escalated": 1.0,
+      "mean_latency_ms": 2818.33077033961
+    },
+    {
+      "tau": 1.01,
+      "accuracy": 0.7924528301886793,
+      "negatives": 53,
+      "positives": 99,
+      "false_activation_rate": 0.4528301886792453,
+      "missed_rate": 0.04040404040404041,
+      "escalated": 1.0,
+      "mean_latency_ms": 2818.33077033961
+    }
+  ],
+  "e5-logreg -> jeff-0.8b-pt": [
+    {
+      "tau": 0.0,
+      "accuracy": 0.8679245283018868,
+      "negatives": 53,
+      "positives": 99,
+      "false_activation_rate": 0.11320754716981132,
+      "missed_rate": 0.020202020202020204,
+      "escalated": 0.0,
+      "mean_latency_ms": 18.530499572322967
+    },
+    {
+      "tau": 0.3,
+      "accuracy": 0.9182389937106918,
+      "negatives": 53,
+      "positives": 99,
+      "false_activation_rate": 0.07547169811320754,
+      "missed_rate": 0.020202020202020204,
+      "escalated": 0.16352201257861634,
+      "mean_latency_ms": 492.6517821886763
+    },
+    {
+      "tau": 0.4,
+      "accuracy": 0.9245283018867925,
+      "negatives": 53,
+      "positives": 99,
+      "false_activation_rate": 0.09433962264150944,
+      "missed_rate": 0.020202020202020204,
+      "escalated": 0.44025157232704404,
+      "mean_latency_ms": 1282.6161586540966
+    },
+    {
+      "tau": 0.5,
+      "accuracy": 0.9119496855345912,
+      "negatives": 53,
+      "positives": 99,
+      "false_activation_rate": 0.1320754716981132,
+      "missed_rate": 0.010101010101010102,
+      "escalated": 0.6477987421383647,
+      "mean_latency_ms": 1877.8889553962401
+    },
+    {
+      "tau": 0.6,
+      "accuracy": 0.8490566037735849,
+      "negatives": 53,
+      "positives": 99,
+      "false_activation_rate": 0.3018867924528302,
+      "missed_rate": 0.020202020202020204,
+      "escalated": 0.8364779874213837,
+      "mean_latency_ms": 2432.5942602012587
+    },
+    {
+      "tau": 0.7,
+      "accuracy": 0.8301886792452831,
+      "negatives": 53,
+      "positives": 99,
+      "false_activation_rate": 0.3584905660377358,
+      "missed_rate": 0.020202020202020204,
+      "escalated": 0.9685534591194969,
+      "mean_latency_ms": 2830.493701471692
+    },
+    {
+      "tau": 0.8,
+      "accuracy": 0.8238993710691824,
+      "negatives": 53,
+      "positives": 99,
+      "false_activation_rate": 0.37735849056603776,
+      "missed_rate": 0.020202020202020204,
+      "escalated": 1.0,
+      "mean_latency_ms": 2925.8946060062813
+    },
+    {
+      "tau": 0.9,
+      "accuracy": 0.8238993710691824,
+      "negatives": 53,
+      "positives": 99,
+      "false_activation_rate": 0.37735849056603776,
+      "missed_rate": 0.020202020202020204,
+      "escalated": 1.0,
+      "mean_latency_ms": 2925.8946060062813
+    },
+    {
+      "tau": 1.01,
+      "accuracy": 0.8238993710691824,
+      "negatives": 53,
+      "positives": 99,
+      "false_activation_rate": 0.37735849056603776,
+      "missed_rate": 0.020202020202020204,
+      "escalated": 1.0,
+      "mean_latency_ms": 2925.8946060062813
+    }
+  ],
+  "e5-logreg -> qwen3.5-4b-chat": [
+    {
+      "tau": 0.0,
+      "accuracy": 0.8679245283018868,
+      "negatives": 53,
+      "positives": 99,
+      "false_activation_rate": 0.11320754716981132,
+      "missed_rate": 0.020202020202020204,
+      "escalated": 0.0,
+      "mean_latency_ms": 18.530499572322967
+    },
+    {
+      "tau": 0.3,
+      "accuracy": 0.9433962264150944,
+      "negatives": 53,
+      "positives": 99,
+      "false_activation_rate": 0.03773584905660377,
+      "missed_rate": 0.020202020202020204,
+      "escalated": 0.16352201257861634,
+      "mean_latency_ms": 1739.3495418490338
+    },
+    {
+      "tau": 0.4,
+      "accuracy": 0.9685534591194969,
+      "negatives": 53,
+      "positives": 99,
+      "false_activation_rate": 0.07547169811320754,
+      "missed_rate": 0.010101010101010102,
+      "escalated": 0.44025157232704404,
+      "mean_latency_ms": 4613.160285610025
+    },
+    {
+      "tau": 0.5,
+      "accuracy": 0.949685534591195,
+      "negatives": 53,
+      "positives": 99,
+      "false_activation_rate": 0.11320754716981132,
+      "missed_rate": 0.0,
+      "escalated": 0.6477987421383647,
+      "mean_latency_ms": 6789.804764905631
+    },
+    {
+      "tau": 0.6,
+      "accuracy": 0.9056603773584906,
+      "negatives": 53,
+      "positives": 99,
+      "false_activation_rate": 0.22641509433962265,
+      "missed_rate": 0.0,
+      "escalated": 0.8364779874213837,
+      "mean_latency_ms": 8771.744770018833
+    },
+    {
+      "tau": 0.7,
+      "accuracy": 0.8930817610062893,
+      "negatives": 53,
+      "positives": 99,
+      "false_activation_rate": 0.2641509433962264,
+      "missed_rate": 0.0,
+      "escalated": 0.9685534591194969,
+      "mean_latency_ms": 10153.898199326995
+    },
+    {
+      "tau": 0.8,
+      "accuracy": 0.8867924528301887,
+      "negatives": 53,
+      "positives": 99,
+      "false_activation_rate": 0.2830188679245283,
+      "missed_rate": 0.0,
+      "escalated": 1.0,
+      "mean_latency_ms": 10494.287996006235
+    },
+    {
+      "tau": 0.9,
+      "accuracy": 0.8867924528301887,
+      "negatives": 53,
+      "positives": 99,
+      "false_activation_rate": 0.2830188679245283,
+      "missed_rate": 0.0,
+      "escalated": 1.0,
+      "mean_latency_ms": 10494.287996006235
+    },
+    {
+      "tau": 1.01,
+      "accuracy": 0.8867924528301887,
+      "negatives": 53,
+      "positives": 99,
+      "false_activation_rate": 0.2830188679245283,
+      "missed_rate": 0.0,
+      "escalated": 1.0,
+      "mean_latency_ms": 10494.287996006235
+    }
+  ],
+  "e5-logreg -> decider-0.8b-gguf-restore": [
+    {
+      "tau": 0.3,
+      "accuracy": 0.8930817610062893,
+      "negatives": 53,
+      "positives": 99,
+      "false_activation_rate": 0.07547169811320754,
+      "missed_rate": 0.04040404040404041,
+      "escalated": 0.16352201257861634,
+      "mean_latency_ms": 56.24656356603622
+    }
+  ]
+}

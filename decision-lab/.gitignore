@@ -1,0 +1,11 @@
+.venv
+vendor
+models
+runs/logs/
+runs/decisions.jsonl
+__pycache__/
+*.pyc
+runs/slots/
+runs/notes.jsonl
+runs/music/
+runs/player.ps1

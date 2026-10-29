@@ -1,0 +1,28 @@
+{"text": "Alexa, manda um zap pro João dizendo que já saí", "decision": "complex", "tool": "system.cannot_do", "status": "unsupported", "tags": ["unsupported"]}
+{"text": "Alexa, liga pra minha mãe", "decision": "complex", "tool": "system.cannot_do", "status": "unsupported", "tags": ["unsupported"]}
+{"text": "Alexa, pede uma pizza de calabresa", "decision": "complex", "tool": "system.cannot_do", "status": "unsupported", "tags": ["unsupported"]}
+{"text": "Alexa, marca uma consulta no dentista pra sexta", "decision": "complex", "tool": "system.cannot_do", "status": "unsupported", "tags": ["unsupported"]}
+{"text": "Alexa, abre o YouTube", "decision": "complex", "tool": "system.cannot_do", "status": "unsupported", "tags": ["unsupported"]}
+{"text": "Alexa, liga o aspirador robô", "decision": "home_control", "tool": "system.cannot_do", "status": "unsupported", "tags": ["unsupported", "hard"]}
+{"text": "Alexa, compra mais papel higiênico na internet", "decision": "complex", "tool": "system.cannot_do", "status": "unsupported", "tags": ["unsupported"]}
+{"text": "Alexa, posta uma foto no Instagram", "decision": "complex", "tool": "system.cannot_do", "status": "unsupported", "tags": ["unsupported"]}
+{"text": "Alexa, chama um Uber pra mim", "decision": "complex", "tool": "system.cannot_do", "status": "unsupported", "tags": ["unsupported"]}
+{"text": "Alexa, toca Djavan no Spotify", "decision": "media", "tool": "system.cannot_do", "status": "unsupported", "tags": ["unsupported", "hard"]}
+{"text": "Alexa, transfere cem reais pro meu irmão", "decision": "complex", "tool": "system.cannot_do", "status": "unsupported", "tags": ["unsupported"]}
+{"text": "Alexa, manda um e-mail pro meu chefe pedindo férias", "decision": "complex", "tool": "system.cannot_do", "status": "unsupported", "tags": ["unsupported", "hard"]}
+{"text": "Alexa, reserva uma mesa pra dois no restaurante", "decision": "complex", "tool": "system.cannot_do", "status": "unsupported", "tags": ["unsupported"]}
+{"text": "Alexa, o que você sabe fazer?", "decision": "knowledge", "tool": "system.help", "status": "executed", "tags": ["help"]}
+{"text": "Alexa, quais são os seus comandos?", "decision": "knowledge", "tool": "system.help", "status": "executed", "tags": ["help"]}
+{"text": "Alexa, me ajuda a usar isso aqui", "decision": "knowledge", "tool": "system.help", "status": "executed", "tags": ["help", "paraphrase"]}
+{"text": "Alexa, o que eu posso te pedir?", "decision": "knowledge", "tool": "system.help", "status": "executed", "tags": ["help", "paraphrase"]}
+{"text": "Alexa, toca uma música pra mim", "decision": "media", "tool": "media.play", "args": {}, "status": "executed", "tags": ["music"]}
+{"text": "Alexa, quero ouvir Caetano", "decision": "media", "tool": "media.play", "args": {"query": "Caetano"}, "status": "executed", "tags": ["music"]}
+{"text": "Alexa, põe um som aí", "decision": "media", "tool": "media.play", "args": {}, "status": "executed", "tags": ["music", "paraphrase"]}
+{"text": "Alexa, o que tá tocando agora?", "decision": "media", "tool": "media.status", "status": "executed", "tags": ["music"]}
+{"text": "Alexa, qual é essa música?", "decision": "media", "tool": "media.status", "status": "executed", "tags": ["music", "paraphrase"]}
+{"text": "Alexa, para a música", "decision": "media", "tool": "media.pause", "status": "executed", "tags": ["music"]}
+{"text": "Alexa, retoma a música de onde parou", "decision": "media", "tool": "media.play", "args": {}, "status": "executed", "tags": ["music"]}
+{"text": "Alexa, qual a capital da Noruega?", "decision": "knowledge", "tool": "llm.answer", "status": "answering", "tags": ["not_unsupported"]}
+{"text": "Alexa, como faço pra mandar um e-mail com anexo?", "decision": "knowledge", "tool": "llm.answer", "status": "answering", "tags": ["not_unsupported", "trap"]}
+{"text": "Alexa, quem inventou o telefone?", "decision": "knowledge", "tool": "llm.answer", "status": "answering", "tags": ["not_unsupported", "trap"]}
+{"text": "Alexa, quanto custa uma pizza em média?", "decision": "knowledge", "tool": "llm.answer", "status": "answering", "tags": ["not_unsupported", "trap"]}

@@ -1,0 +1,116 @@
+{
+  "base": "http://127.0.0.1:8001",
+  "timestamp": "2026-10-11T20:18:40",
+  "backend": "cascade-e5-decider-gguf",
+  "tool_selector": "hybrid",
+  "ping_ms": {
+    "p50": 1.3,
+    "p95": 5.0,
+    "n": 20
+  },
+  "act_round_trip_ms": {
+    "p50": 27.1,
+    "p95": 531.0,
+    "mean": 138.2,
+    "n": 36
+  },
+  "act_server_ms": {
+    "p50": 20.7,
+    "p95": 517.0
+  },
+  "overhead_ms_p50": 6.4,
+  "sse_seconds": 20,
+  "sse_events": 80,
+  "unexpected": [],
+  "checks": [
+    {
+      "check": "servidor responde e o modelo está carregado",
+      "ok": true,
+      "detail": "cascade-e5-decider-gguf"
+    },
+    {
+      "check": "lista de ferramentas é fechada e não tem execução de comando",
+      "ok": true,
+      "detail": "15 ferramentas, seletor hybrid"
+    },
+    {
+      "check": "stream de eventos (SSE) abre",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "decisão -> ferramenta -> resultado (36 falas)",
+      "ok": true,
+      "detail": "36/36 com o desfecho esperado"
+    },
+    {
+      "check": "estado da casa mudou de verdade",
+      "ok": true,
+      "detail": {
+        "luz:escritorio": "on",
+        "tv:quarto": "off"
+      }
+    },
+    {
+      "check": "anotação foi gravada no PC",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "ação sensível fica pendente (não executa)",
+      "ok": true,
+      "detail": "Abrir o portão da garagem?"
+    },
+    {
+      "check": "outro cliente não consegue confirmar",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "quem pediu confirma e a ação roda",
+      "ok": true,
+      "detail": "Abri o portão da garagem."
+    },
+    {
+      "check": "o mesmo token não vale duas vezes",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "cancelar timers pede confirmação",
+      "ok": true,
+      "detail": "Cancelar todos os timers?"
+    },
+    {
+      "check": "recusa falada cancela o pedido e o timer continua",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "confirmação falada executa",
+      "ok": true,
+      "detail": "Cancelei 1 timer(s)."
+    },
+    {
+      "check": "timer real é criado",
+      "ok": true,
+      "detail": "Timer de 3 s criado; toca às 20:18:28."
+    },
+    {
+      "check": "o aviso do timer chega pelo stream",
+      "ok": true,
+      "detail": "3.00 s depois de criar (pedido: 3 s)"
+    },
+    {
+      "check": "julgamento (👍/👎) é aceito",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "stream ficou aberto 20 s sem cair",
+      "ok": true,
+      "detail": "78 eventos, 44 decisões vistas"
+    }
+  ],
+  "passed": true
+}

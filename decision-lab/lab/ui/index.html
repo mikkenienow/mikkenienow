@@ -1,0 +1,558 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<meta name="theme-color" content="#2457d6">
+<title>Decision Lab</title>
+<style>
+  :root { --bg:#eef0f4; --panel:#fff; --text:#171a1f; --muted:#667080; --line:#dde1e7; --soft:#f3f5f8;
+          --accent:#2457d6; --on-accent:#fff; --ok:#1c8748; --warn:#a86400; --none:#7d8794; --llm:#7340c2; --err:#c0392b; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#0d0f12; --panel:#181b20; --text:#e8eaed; --muted:#98a1ad; --line:#2a2f37; --soft:#20242b;
+            --accent:#5b8cff; --on-accent:#fff; --ok:#4cc27e; --warn:#e3a33a; --none:#7b8490; --llm:#b08aff; --err:#ff7b6b; }
+  }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html, body { height:100%; margin:0; }
+  html { -webkit-text-size-adjust:100%; }
+  body { background:var(--bg); color:var(--text); font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; overscroll-behavior:none; }
+  button, input, select { font:inherit; color:inherit; }
+  button { cursor:pointer; touch-action:manipulation; }
+
+  /* casca do app: cabeçalho, conteúdo que rola, navegação embaixo */
+  #app { height:100vh; height:100dvh; max-width:560px; margin:0 auto; display:flex; flex-direction:column; background:var(--bg); }
+  header { flex:none; display:flex; align-items:center; gap:10px; padding:calc(8px + env(safe-area-inset-top)) 14px 8px;
+           background:var(--panel); border-bottom:1px solid var(--line); }
+  header h1 { font-size:17px; margin:0; font-weight:650; }
+  #status { margin-left:auto; display:flex; align-items:center; gap:6px; font-size:13px; color:var(--muted); }
+  #status i { width:9px; height:9px; border-radius:50%; background:var(--none); }
+  #status.ok i { background:var(--ok); } #status.busy i { background:var(--accent); animation:pulse 1s infinite; }
+  #status.err i { background:var(--err); }
+  @keyframes pulse { 50% { opacity:.3; } }
+  .tab { flex:1 1 auto; min-height:0; display:none; flex-direction:column; }
+  .tab.active { display:flex; }
+  .scroll { flex:1 1 auto; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:12px 12px 16px; }
+  nav { flex:none; display:flex; background:var(--panel); border-top:1px solid var(--line); padding-bottom:env(safe-area-inset-bottom); }
+  nav button { flex:1; background:none; border:0; padding:7px 0 8px; display:flex; flex-direction:column; align-items:center; gap:1px;
+               font-size:11.5px; color:var(--muted); min-height:54px; position:relative; }
+  nav button span { font-size:21px; line-height:1.15; filter:grayscale(1); opacity:.7; }
+  nav button.active { color:var(--accent); font-weight:600; }
+  nav button.active span { filter:none; opacity:1; }
+  nav button.dot::after { content:""; position:absolute; top:7px; left:calc(50% + 10px); width:8px; height:8px; border-radius:50%; background:var(--ok); }
+
+  /* aba Testar: conversa */
+  #chat { display:flex; flex-direction:column; gap:8px; }
+  .hello { background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:16px; color:var(--muted); font-size:14.5px; }
+  .hello b { color:var(--text); display:block; font-size:16px; margin-bottom:4px; }
+  .me { align-self:flex-end; max-width:86%; background:var(--accent); color:var(--on-accent); padding:9px 13px; border-radius:18px 18px 4px 18px; word-break:break-word; }
+  .bot { align-self:flex-start; width:92%; background:var(--panel); border:1px solid var(--line); border-radius:4px 18px 18px 18px; padding:11px 13px 9px; }
+  .bot .head { display:flex; gap:10px; align-items:flex-start; }
+  .bot .ico { font-size:26px; line-height:1.1; }
+  .bot .what { font-weight:650; font-size:16px; line-height:1.25; }
+  .bot .sub { color:var(--muted); font-size:13px; margin-top:2px; }
+  .bot.r-NONE .what { color:var(--none); } .bot.r-HOME_AUTOMATION .what, .bot.r-MEDIA .what, .bot.r-TIMERS .what { color:var(--ok); }
+  .bot.r-LLM .what, .bot.r-LLM_LARGE .what { color:var(--llm); } .bot.r-CLARIFY .what { color:var(--warn); } .bot.err .what { color:var(--err); }
+  .bot .answer { margin-top:9px; padding:9px 11px; border-radius:10px; background:var(--soft); font-size:15px; white-space:pre-wrap; }
+  .bot .answer.wait { color:var(--muted); font-style:italic; }
+  .bot .foot { display:flex; align-items:center; gap:8px; margin-top:9px; }
+  .fb { min-width:46px; height:38px; border-radius:19px; border:1px solid var(--line); background:var(--soft); font-size:17px; }
+  .fb.sel-ok { background:var(--ok); border-color:var(--ok); } .fb.sel-no { background:var(--err); border-color:var(--err); }
+  .more { margin-left:auto; background:none; border:0; color:var(--muted); font-size:13px; padding:8px 4px; }
+  .bot.done { border-color:color-mix(in srgb, var(--ok) 55%, var(--line)); }
+  .bot.ask { border-color:var(--warn); } .bot.ask .what { color:var(--warn); }
+  .confirm { display:flex; gap:10px; margin-top:11px; }
+  .confirm button { flex:1; height:48px; border-radius:14px; font-size:16px; font-weight:600; border:1px solid var(--line); background:var(--soft); }
+  .confirm .yes { background:var(--warn); border-color:var(--warn); color:#fff; }
+  .fix { display:none; flex-wrap:wrap; gap:6px; margin-top:9px; }
+  .fix.open { display:flex; }
+  .fix small { width:100%; color:var(--muted); font-size:13px; }
+  .fix button { border:1px solid var(--line); background:var(--soft); border-radius:16px; padding:7px 12px; font-size:14px; min-height:36px; }
+  .fix button.sel { background:var(--accent); border-color:var(--accent); color:var(--on-accent); }
+  .detail { display:none; margin-top:9px; border-top:1px solid var(--line); padding-top:8px; font-size:13px; color:var(--muted); }
+  .detail.open { display:block; }
+  .score { display:grid; grid-template-columns:104px 1fr 38px; gap:8px; align-items:center; margin:3px 0; }
+  .score .bar { height:7px; background:var(--soft); border-radius:4px; overflow:hidden; }
+  .score .bar i { display:block; height:100%; background:var(--accent); border-radius:4px; }
+  .score b { text-align:right; font-weight:500; font-variant-numeric:tabular-nums; }
+  .sys { align-self:center; font-size:12.5px; color:var(--muted); text-align:center; padding:2px 10px; }
+  .typing { align-self:flex-start; background:var(--panel); border:1px solid var(--line); border-radius:4px 18px 18px 18px; padding:11px 15px; color:var(--muted); font-size:14px; }
+
+  #chips { flex:none; display:flex; gap:8px; overflow-x:auto; padding:8px 12px; scrollbar-width:none; background:var(--bg); }
+  #chips::-webkit-scrollbar { display:none; }
+  .chip { flex:0 0 auto; height:38px; padding:0 14px; border-radius:19px; border:1px solid var(--line); background:var(--panel); font-size:14px; white-space:nowrap; }
+  .chip.go { background:var(--accent); border-color:var(--accent); color:var(--on-accent); font-weight:600; }
+  #composer { flex:none; display:flex; gap:8px; padding:6px 12px 10px; background:var(--bg); }
+  #text { flex:1 1 auto; min-width:0; height:48px; padding:0 16px; border-radius:24px; border:1px solid var(--line); background:var(--panel); font-size:16px; outline:none; }
+  #text:focus { border-color:var(--accent); }
+  .round { flex:none; width:48px; height:48px; border-radius:50%; border:0; background:var(--accent); color:var(--on-accent); font-size:20px; }
+  .round.alt { background:var(--panel); color:var(--text); border:1px solid var(--line); }
+  .round.rec { background:var(--err); color:#fff; }
+  button:disabled { opacity:.45; }
+
+  /* abas Casa / Rede / Ajustes */
+  h2 { font-size:13px; margin:16px 4px 8px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; font-weight:600; }
+  h2:first-child { margin-top:2px; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:14px; }
+  .tiles { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .tile { background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:12px; min-height:92px; display:flex; flex-direction:column; gap:2px; }
+  .tile .ico { font-size:26px; } .tile b { font-size:15px; } .tile small { color:var(--muted); font-size:13px; }
+  .tile.on { border-color:var(--ok); background:color-mix(in srgb, var(--ok) 12%, var(--panel)); }
+  .tile.on small { color:var(--ok); font-weight:600; }
+  .empty { color:var(--muted); font-size:14.5px; text-align:center; padding:26px 12px; }
+  .big { width:100%; height:54px; border-radius:16px; border:0; background:var(--accent); color:var(--on-accent); font-size:17px; font-weight:600; }
+  .big.alt { background:var(--panel); color:var(--text); border:1px solid var(--line); font-weight:500; }
+  .stats { display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-top:12px; }
+  .stat { background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:12px 8px; text-align:center; }
+  .stat b { display:block; font-size:24px; font-variant-numeric:tabular-nums; } .stat small { color:var(--muted); font-size:12px; line-height:1.2; display:block; }
+  .note { color:var(--muted); font-size:13.5px; margin:10px 4px 0; }
+  .row { display:flex; justify-content:space-between; gap:10px; padding:9px 0; border-top:1px solid var(--line); font-size:14.5px; }
+  .row:first-child { border-top:0; padding-top:0; } .row:last-child { padding-bottom:0; }
+  .row b { font-weight:600; text-align:right; font-variant-numeric:tabular-nums; }
+  .row span { color:var(--muted); word-break:break-word; }
+  label.field { display:block; font-size:14px; color:var(--muted); margin:0 0 14px; }
+  label.field:last-child { margin-bottom:0; }
+  label.field select, label.field input[type=range] { display:block; width:100%; margin-top:6px; }
+  select { height:48px; padding:0 12px; border-radius:12px; border:1px solid var(--line); background:var(--soft); font-size:16px; }
+  input[type=range] { height:32px; accent-color:var(--accent); }
+  .field em { font-style:normal; color:var(--text); font-weight:600; }
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <h1>Decision Lab</h1>
+    <div id="status"><i></i><span>conectando…</span></div>
+  </header>
+
+  <section class="tab active" id="tab-chat">
+    <div class="scroll" id="chatScroll">
+      <div id="chat">
+        <div class="hello"><b>Fale como se estivesse em casa</b>
+          Mande uma frase — com ou sem “Alexa”. O modelo decide se é com o assistente e o PC executa a ação:
+          hora, timer de verdade, anotação, música no PC, casa simulada. Ações sensíveis pedem confirmação.
+          Pergunte <b style="display:inline">“o que você sabe fazer?”</b> para ver o que é real e o que é simulado.
+          Depois marque 👍 ou 👎 em cada resposta: isso vira dado de teste.</div>
+      </div>
+    </div>
+    <div id="chips"></div>
+    <div id="composer">
+      <input id="text" type="text" placeholder="Digite ou dite uma fala…" autocomplete="off" autocapitalize="sentences" enterkeyhint="send">
+      <button class="round alt" id="mic" aria-label="Falar" hidden>🎤</button>
+      <button class="round" id="send" aria-label="Enviar">➤</button>
+    </div>
+  </section>
+
+  <section class="tab" id="tab-home">
+    <div class="scroll">
+      <h2>Dispositivos</h2>
+      <div class="tiles" id="devices"></div>
+      <div class="empty" id="noDevices">Nada foi ligado ainda.<br>Peça algo na aba Testar: “Alexa, acende a luz da sala”.</div>
+      <h2>Mídia</h2>
+      <div class="card" id="media"></div>
+      <h2>Timers (reais)</h2>
+      <div class="card" id="timers"></div>
+      <h2>Anotações (arquivo no PC)</h2>
+      <div class="card" id="notes"></div>
+    </div>
+  </section>
+
+  <section class="tab" id="tab-net">
+    <div class="scroll">
+      <h2>Este aparelho</h2>
+      <button class="big" id="ping">📶 Medir rede até o PC</button>
+      <div class="stats">
+        <div class="stat"><b id="sPing">–</b><small>ms<br>só a rede</small></div>
+        <div class="stat"><b id="sRoute">–</b><small>ms<br>fala → resposta</small></div>
+        <div class="stat"><b id="sDecision">–</b><small>ms<br>só a decisão</small></div>
+      </div>
+      <p class="note" id="netNote">“Só a rede” são 20 idas e voltas vazias. “Fala → resposta” é quanto você esperou em cada fala enviada (mediana); a diferença para “só a decisão” é rede + servidor.</p>
+      <h2>Todos os aparelhos</h2>
+      <div class="card" id="net"><div class="empty">sem medições</div></div>
+    </div>
+  </section>
+
+  <section class="tab" id="tab-cfg">
+    <div class="scroll">
+      <h2>Modelo</h2>
+      <div class="card">
+        <label class="field">Modelo de decisão<select id="backend"></select></label>
+        <label class="field">Confiança mínima para agir: <em id="thrv">0%</em>
+          <input id="thr" type="range" min="0" max="0.95" step="0.05" value="0"></label>
+        <label class="field">Quando a confiança é baixa
+          <select id="low"><option value="ignore">ignorar a fala</option><option value="clarify">pedir para repetir</option></select></label>
+        <label class="field" style="display:flex;align-items:center;gap:10px;color:var(--text)">
+          <input id="direct" type="checkbox" checked style="width:22px;height:22px"> Tudo que eu digito é para o assistente
+          (sem precisar dizer “Alexa”)</label>
+        <label class="field" style="display:flex;align-items:center;gap:10px;color:var(--text)">
+          <input id="speak" type="checkbox" style="width:22px;height:22px"> Falar as respostas (voz do próprio aparelho)</label>
+      </div>
+      <h2>Seus julgamentos (👍 / 👎)</h2>
+      <div class="card" id="fbStats"></div>
+      <h2>Ferramentas permitidas</h2>
+      <p class="note" id="toolSel" style="margin:0 4px 8px"></p>
+      <div class="card" id="toolList"></div>
+      <h2>Sessão do servidor</h2>
+      <div class="card" id="stats"></div>
+      <h2>Ações</h2>
+      <button class="big alt" id="demo2">▶ Rodar demonstração (12 falas)</button>
+      <div style="height:10px"></div>
+      <button class="big alt" id="clear">Limpar conversa</button>
+    </div>
+  </section>
+
+  <nav>
+    <button data-tab="chat" class="active"><span>💬</span>Testar</button>
+    <button data-tab="home"><span>🏠</span>Casa</button>
+    <button data-tab="net"><span>📶</span>Rede</button>
+    <button data-tab="cfg"><span>⚙️</span>Ajustes</button>
+  </nav>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const SID = Math.random().toString(36).slice(2, 6);          // identifica as falas deste aparelho no stream
+const SOURCE = `ui:${SID}`;
+const cards = {};                                            // id da decisão -> cartão
+const mine = { ping: [], route: [], decision: [] };          // medições deste aparelho
+let pending = 0, demoRunning = false;
+
+const DEMO = [
+  "Cara, você viu o jogo ontem?", "Alexa, acende a luz da sala", "Gol! Gol do Brasil!",
+  "Amor, você lembrou de comprar pão?", "Alexa, bota um timer de 10 minutos",
+  "A Alexa da minha tia não entende nada que ela fala", "Alexa, toca uma música do Djavan",
+  "Alexa, pesquisa pra mim quais são os melhores filmes de ficção científica", "tá bom, já vou",
+  "Alexa, apaga todas as luzes", "Alexandre, vem jantar!", "Alexa, escreve um email pro meu chefe pedindo férias",
+];
+const CHIPS = ["O que você sabe fazer?", "Toca uma música", "O que está tocando?", "Pausa a música", "Volume 3",
+               "Manda um e-mail pro meu chefe", "Alexa, que horas são?", "Alexa, acende a luz da sala", "Alexa, timer de 10 segundos", "Você viu o jogo ontem?",
+               "Alexa, me lembra de comprar pão", "Alexa, abre a porta da frente", "Alexa, como está o PC?",
+               "A Alexa da minha tia não entende nada", "Alexa, toca Djavan", "Alexandre, vem jantar!",
+               "Alexa, quais são meus lembretes?", "Alexa, qual a capital da Austrália?", "Alexa, cancela os timers"];
+const LABELS = { ignore: "Ignorar", home_control: "Casa", media: "Mídia", timer_alarm: "Timer", knowledge: "Pergunta", complex: "Tarefa complexa", confirmation: "Confirmação" };
+const DEVICE = { luz: ["💡", "Luz"], clima: ["❄️", "Ar / clima"], tv: ["📺", "TV"], cortina: ["🪟", "Cortina"], porta: ["🚪", "Porta"],
+                 portao: ["🚧", "Portão"], ventilador: ["🌀", "Ventilador"], cafeteira: ["☕", "Cafeteira"], maquina: ["🧺", "Máquina"], tomada: ["🔌", "Tomada"] };
+const VERB = { on: "Liguei", off: "Desliguei", ajustar: "Ajustei" };
+const STATE = { on: "ON", off: "OFF", ajustar: "ajustado" };
+
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function el(tag, cls, html) { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
+function median(a) { if (!a.length) return null; const s = [...a].sort((x, y) => x - y); return s[s.length >> 1]; }
+function setStatus(text, cls = "") { $("status").className = cls; $("status").lastElementChild.textContent = text; }
+function speak(text) {  // prévia da saída de voz: síntese do próprio navegador, sem servidor
+  if (!$("speak").checked || !window.speechSynthesis || !text) return;
+  const u = new SpeechSynthesisUtterance(text); u.lang = "pt-BR";
+  speechSynthesis.speak(u);
+}
+function toBottom() { const s = $("chatScroll"); requestAnimationFrame(() => s.scrollTop = s.scrollHeight); }
+function post(path, body) { return fetch(path, { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body) }); }
+
+// ---------- o que o assistente "fez", em linguagem de gente ----------
+const TOOL_ICON = { "media.status": "🎧", "system.help": "ℹ️", "system.cannot_do": "🚫", "info.time": "🕒", "info.date": "📅", "info.system_status": "🖥️", "media.play": "🎵", "media.pause": "⏸️",
+                    "media.set_volume": "🎚️", "timer.create": "⏱️", "timer.list": "⏱️", "timer.cancel_all": "⏱️",
+                    "note.add": "📝", "note.list": "📝", "note.clear": "📝", "llm.answer": "💬", "llm.answer_large": "🧠" };
+
+function describe(rec) {  // rec.tool.real: a ferramenta mexeu de verdade no PC? (o player pode estar em modo simulado)
+  const tool = rec.tool || { status: "ignored" };
+  const pct = rec.confidence == null ? "" : ` · ${Math.round(rec.confidence * 100)}%`;
+  const kind = tool.name && tool.kind !== "unsupported" ? ` · ${tool.name}${tool.name.startsWith("llm.") ? "" : tool.real ? " (real)" : " (simulado)"}` : "";
+  const ms = rec.total_ms != null ? rec.total_ms : rec.latency_ms;
+  const sub = `${LABELS[rec.decision] || rec.decision}${pct}${kind} · ${ms.toFixed(0)} ms`;
+  let ico = TOOL_ICON[tool.name] || "•";
+  if (tool.name === "home.set_device") ico = (DEVICE[tool.args.device] || ["🏠"])[0];
+  switch (tool.status) {
+    case "ignored":
+      return rec.decision === "ignore" ? { ico: "🙈", what: "Ignorei — não era comigo", sub }
+                                       : { ico: "🤔", what: "Ignorei por baixa confiança", sub };
+    case "executed": return { ico, what: tool.say, sub, cls: "done" };
+    case "answering": return { ico, what: rec.route === "LLM_LARGE" ? "Tarefa complexa → modelo grande" : "É uma pergunta → respondendo", sub, llm: true };
+    case "needs_confirmation": return { ico: "⚠️", what: tool.say, sub: `ação sensível — precisa da sua confirmação · ${sub}`, confirm: tool.confirm, cls: "ask" };
+    case "needs_info": return { ico: "🤷", what: tool.say, sub, cls: "ask" };
+    case "unsupported": return { ico: "🚫", what: tool.say, sub: `entendi, mas não tenho ferramenta para isso · ${sub}`, cls: "ask" };
+    case "clarify": return { ico: "❓", what: tool.say, sub, cls: "ask" };
+    case "cancelled": return { ico: "✋", what: "Cancelado — não fiz nada", sub: "resposta à confirmação" };
+    case "expired": return { ico: "⌛", what: tool.say, sub: "resposta à confirmação" };
+    default: return { ico: "⛔", what: tool.say || "Não posso fazer isso", sub: `${tool.status} · ${sub}`, cls: "err" };
+  }
+}
+
+function addCard(rec, roundTrip) {
+  const d = describe(rec);
+  const card = el("div", `bot r-${rec.route} ${d.cls || ""}`);
+  const tool = rec.tool || {};
+  const sel = tool.selection ? `escolha da ferramenta: ${tool.selection.method}${tool.selection.confidence != null ? " (" + Math.round(tool.selection.confidence * 100) + "%)" : ""}${tool.selection.ms ? " · " + tool.selection.ms.toFixed(0) + " ms" : ""}` : "";
+  const toolInfo = tool.name ? `<div style="margin-top:6px">ferramenta <b>${esc(tool.name)}</b> ${esc(JSON.stringify(tool.args || {}))}</div>
+      ${sel ? `<div>${esc(sel)}</div>` : ""}${tool.errors ? `<div>${esc(tool.errors.join("; "))}</div>` : ""}` : "";
+  const scores = rec.scores ? Object.entries(rec.scores).sort((a, b) => b[1] - a[1]).map(([k, v]) =>
+    `<div class="score"><span>${esc(LABELS[k] || k)}</span><div class="bar"><i style="width:${Math.round(v * 100)}%"></i></div><b>${Math.round(v * 100)}%</b></div>`).join("") : "";
+  card.innerHTML = `<div class="head"><div class="ico">${d.ico}</div><div><div class="what">${esc(d.what)}</div><div class="sub">${esc(d.sub)}</div></div></div>
+    ${d.llm ? '<div class="answer wait">pensando…</div>' : ""}
+    ${d.confirm ? '<div class="confirm"><button class="yes">Confirmar</button><button class="no">Cancelar</button></div>' : ""}
+    <div class="foot"><button class="fb" data-v="1" aria-label="Acertou">👍</button><button class="fb" data-v="0" aria-label="Errou">👎</button>
+      <button class="more">detalhes ▾</button></div>
+    <div class="fix"><small>O certo era:</small>${Object.entries(LABELS).filter(([k]) => k !== rec.decision && k !== "confirmation").map(([k, v]) => `<button data-k="${k}">${v}</button>`).join("")}</div>
+    <div class="detail">${scores}
+      <div style="margin-top:6px">esperei ${roundTrip.toFixed(0)} ms neste aparelho (decisão ${rec.latency_ms.toFixed(0)} + rede/servidor ${(roundTrip - rec.latency_ms).toFixed(0)})</div>
+      <div>${esc(rec.backend)}${rec.metadata && rec.metadata.stage ? " · estágio " + rec.metadata.stage : ""} · ${esc(rec.route_reason || "")}</div>${toolInfo}</div>`;
+  if (d.confirm) {
+    const box = card.querySelector(".confirm"), what = card.querySelector(".what"), sub = card.querySelector(".sub");
+    const answer = async (approve) => {
+      box.querySelectorAll("button").forEach(b => b.disabled = true);
+      try {
+        const out = (await (await post("/v1/act/confirm", { token: d.confirm.token, approve, client: SID })).json()).tool;
+        box.remove(); card.classList.remove("ask");
+        const ok = out.status === "executed";
+        card.querySelector(".ico").textContent = ok ? "✅" : out.status === "cancelled" ? "✋" : "⌛";
+        what.textContent = ok ? out.say : out.status === "cancelled" ? "Cancelado — não fiz nada" : out.say;
+        sub.textContent = ok ? `confirmado por você · ${out.name}${out.real ? " (real)" : " (simulado)"}` : "nada foi executado";
+        if (ok) card.classList.add("done");
+      } catch (e) { box.querySelectorAll("button").forEach(b => b.disabled = false); }
+    };
+    box.querySelector(".yes").onclick = () => answer(true);
+    box.querySelector(".no").onclick = () => answer(false);
+    setTimeout(() => { if (box.isConnected) { box.remove(); what.textContent = "A confirmação expirou — nada foi feito"; } }, d.confirm.expires_in * 1000);
+  }
+  const [up, down] = card.querySelectorAll(".fb"), fix = card.querySelector(".fix");
+  const sendFb = (correct, expected) => post("/v1/feedback", { decision_id: rec.id, correct, expected, input: rec.input, decision: rec.decision, backend: rec.backend })
+    .then(r => r.json()).then(renderFeedback).catch(() => {});
+  up.onclick = () => { up.classList.add("sel-ok"); down.classList.remove("sel-no"); fix.classList.remove("open"); sendFb(true, null); };
+  down.onclick = () => { down.classList.add("sel-no"); up.classList.remove("sel-ok"); fix.classList.add("open"); sendFb(false, null); toBottomIfLast(card); };
+  fix.querySelectorAll("button").forEach(b => b.onclick = () => {
+    fix.querySelectorAll("button").forEach(x => x.classList.remove("sel")); b.classList.add("sel"); sendFb(false, b.dataset.k); });
+  card.querySelector(".more").onclick = (e) => { const open = card.querySelector(".detail").classList.toggle("open"); e.target.textContent = open ? "detalhes ▴" : "detalhes ▾"; toBottomIfLast(card); };
+  $("chat").appendChild(card);
+  cards[rec.id] = card;
+  if (tool.say && !["ignored", "answering"].includes(tool.status)) speak(tool.say);
+  if (d.llm) setTimeout(() => { const a = card.querySelector(".answer.wait"); if (a) a.textContent = "sem resposta do LLM (o servidor do modelo está no ar?)"; }, 120000);
+  return card;
+}
+function toBottomIfLast(card) { if (card === $("chat").lastElementChild) toBottom(); }
+
+function addAnswer(ev) {
+  const card = cards[ev.decision_id];
+  if (!card) return;
+  const a = card.querySelector(".answer");
+  if (!a) return;
+  a.classList.remove("wait");
+  a.textContent = ev.answer; speak(ev.answer);
+  a.appendChild(el("div", "sub", `${esc((ev.llm || "").split(" ")[0])} · ${(ev.llm_latency_ms / 1000).toFixed(1)} s`));
+  toBottomIfLast(card);
+}
+
+// ---------- enviar uma fala ----------
+async function send(text) {
+  text = text.trim();
+  if (!text) return;
+  $("chat").appendChild(el("div", "me", esc(text)));
+  const typing = el("div", "typing", "decidindo…");
+  $("chat").appendChild(typing); toBottom();
+  pending++; setStatus("decidindo…", "busy");
+  const slow = setTimeout(() => typing.textContent = "ainda decidindo… (modelo carregando, pode levar ~20 s)", 3000);
+  const body = { input: text, backend: $("backend").value, min_confidence: parseFloat($("thr").value), low_confidence: $("low").value, source: SOURCE, client: SID, addressed: $("direct").checked };
+  const t0 = performance.now();
+  try {
+    const r = await post("/v1/act", body);   // decisão -> ferramenta permitida -> resultado
+    if (!r.ok) throw new Error(`servidor respondeu ${r.status}: ${(await r.text()).slice(0, 160)}`);
+    const rec = await r.json();
+    const roundTrip = performance.now() - t0;
+    typing.remove();
+    if (rec.route === "CONFIRM")   // respondeu por fala a um pedido de confirmação: o cartão antigo não vale mais
+      document.querySelectorAll(".bot.ask").forEach(c => { const b = c.querySelector(".confirm"); if (b) { b.remove(); c.classList.remove("ask"); c.querySelector(".sub").textContent = "respondido por fala"; } });
+    addCard(rec, roundTrip);
+    const serverMs = rec.total_ms != null ? rec.total_ms : rec.latency_ms;   // decisão + ferramenta
+    mine.route.push(roundTrip); mine.decision.push(serverMs); renderMine();
+    post("/v1/client_timing", { kind: "route", round_trip_ms: roundTrip, decision_ms: serverMs, decision_id: rec.id }).then(refreshNet).catch(() => {});
+    if (navigator.vibrate && rec.tool && rec.tool.status !== "ignored") navigator.vibrate(12);
+  } catch (e) {
+    typing.remove();
+    const card = el("div", "bot err", `<div class="head"><div class="ico">⚠️</div><div><div class="what">Não consegui decidir</div>
+      <div class="sub">${esc(e.message)}<br>Confira em Ajustes se o modelo escolhido está no ar.</div></div></div>`);
+    $("chat").appendChild(card);
+  } finally {
+    clearTimeout(slow); toBottom();
+    if (--pending === 0) setStatus("pronto", "ok");
+  }
+}
+
+async function runDemo() {
+  if (demoRunning) return;
+  demoRunning = true; show("chat");
+  $("chat").appendChild(el("div", "sys", "demonstração: 12 falas de uma casa — algumas são com a Alexa, outras não"));
+  for (const t of DEMO) { await send(t); await new Promise(r => setTimeout(r, 350)); }
+  $("chat").appendChild(el("div", "sys", "fim da demonstração — marque 👍/👎 nas respostas")); toBottom();
+  demoRunning = false;
+}
+
+// ---------- abas ----------
+function show(name) {
+  document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t.id === `tab-${name}`));
+  document.querySelectorAll("nav button").forEach(b => { const on = b.dataset.tab === name; b.classList.toggle("active", on); if (on) b.classList.remove("dot"); });
+  if (name === "chat") toBottom();
+  if (name === "net") refreshNet();
+  if (name === "cfg") { refreshStats(); renderTools().catch(() => {}); fetch("/v1/feedback").then(r => r.json()).then(renderFeedback).catch(() => {}); }
+  if (name === "home") fetch("/v1/state").then(r => r.json()).then(renderHome).catch(() => {});
+}
+
+// ---------- Casa ----------
+function renderHome(s) {
+  const tiles = Object.entries(s.devices).map(([key, state]) => {
+    const [dev, room] = key.split(":"), d = DEVICE[dev] || ["🏠", dev];
+    return `<div class="tile ${state === "on" ? "on" : ""}"><div class="ico">${d[0]}</div><b>${esc(d[1])}</b>
+      <small>${esc(room === "*" ? "casa toda" : room)} · ${STATE[state] || state}</small></div>`;
+  });
+  $("devices").innerHTML = tiles.join("");
+  $("noDevices").hidden = tiles.length > 0;
+  fetch("/v1/player").then(r => r.json()).then(p => {
+    const real = p.real ? "no PC" : "SIMULADO, sem som";
+    const pos = p.title && p.duration_s ? ` · ${Math.floor(p.position_s / 60)}:${String(Math.floor(p.position_s % 60)).padStart(2, "0")} de ${Math.floor(p.duration_s / 60)}:${String(Math.floor(p.duration_s % 60)).padStart(2, "0")}` : "";
+    $("media").innerHTML = `<div class="row"><span>${p.paused ? "pausada" : p.ended ? "terminou" : p.playing ? "tocando" : "parado"} (${real})</span><b>${esc(p.title || "nada")}${pos}</b></div>
+      <div class="row"><span>volume do player</span><b>${p.volume} / 10</b></div>
+      <div class="row"><span>músicas encontradas neste PC</span><b>${p.library_tracks}</b></div>`;
+  }).catch(() => { $("media").innerHTML = '<div class="empty" style="padding:6px">sem informação do player</div>'; });
+  const TS = { running: "rodando", fired: "tocou ⏰", cancelled: "cancelado" };
+  $("timers").innerHTML = s.timers.length ? s.timers.slice().reverse().map(t =>
+      `<div class="row"><span>${esc(t.label || t.request)}${t.seconds ? ` · ${t.seconds >= 60 ? Math.round(t.seconds / 60) + " min" : t.seconds + " s"}` : ""}</span>
+       <b>${esc(TS[t.status] || "")} ${esc(t.due || t.created)}</b></div>`).join("")
+    : '<div class="empty" style="padding:6px">nenhum timer</div>';
+  fetch("/v1/notes").then(r => r.json()).then(n => {
+    $("notes").innerHTML = n.notes.length ? n.notes.slice().reverse().map(x => `<div class="row"><span>${esc(x.text)}</span><b>${esc(x.ts.slice(11, 16))}</b></div>`).join("")
+                                          : '<div class="empty" style="padding:6px">nenhuma anotação</div>';
+  }).catch(() => {});
+}
+
+function timerFired(ev) {
+  const t = ev.timer || {};
+  $("chat").appendChild(el("div", "bot done", `<div class="head"><div class="ico">⏰</div><div><div class="what">Timer terminou: ${esc(t.label || "timer")}</div>
+    <div class="sub">criado às ${esc(t.created || "")} · ${t.seconds} s · evento real disparado pelo PC</div></div></div>`));
+  toBottom(); speak(`O timer ${t.label && t.label !== "timer" ? "de " + t.label + " " : ""}terminou.`);
+  if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 400]);
+  if (!$("tab-chat").classList.contains("active")) document.querySelector('nav button[data-tab="chat"]').classList.add("dot");
+}
+
+async function renderTools() {
+  const t = await (await fetch("/v1/tools")).json();
+  const tag = (x) => x.kind === "unsupported" ? "avisa que não sabe" : x.name.startsWith("llm.") ? "LLM local" : x.real ? "REAL" : "SIMULADA";
+  $("toolList").innerHTML = t.tools.map(x => `<div class="row"><span><b style="font-weight:600;color:var(--text)">${esc(x.name)}</b><br>${esc(x.effect || x.description)}
+    ${x.examples.length ? `<br><i>“${esc(x.examples.join("” · “"))}”</i>` : ""}</span>
+    <b style="color:${x.real ? "var(--ok)" : "var(--warn)"}">${tag(x)}${x.sensitive ? "<br>🔒 confirma" : ""}</b></div>`).join("");
+  $("toolSel").textContent = `Seletor: ${t.selector}. O modelo só escolhe entre estas ${t.tools.length}; não existe ferramenta de "rodar comando".`;
+}
+
+// ---------- Rede ----------
+function renderMine() {
+  const f = (v) => v == null ? "–" : v.toFixed(0);
+  $("sPing").textContent = f(median(mine.ping)); $("sRoute").textContent = f(median(mine.route)); $("sDecision").textContent = f(median(mine.decision));
+}
+async function refreshNet() {
+  const s = await (await fetch("/v1/client_timings")).json();
+  const rows = Object.entries(s).map(([k, v]) => { const [ip, kind] = k.split(" ");
+    return `<div class="row"><span>${esc(ip)}<br><small>${kind === "ping" ? "só a rede" : "fala → resposta"} · ${v.n} medições</small></span>
+      <b>${v.round_trip_p50_ms} ms<br><small style="font-weight:400;color:var(--muted)">p95 ${v.round_trip_p95_ms}</small></b></div>`; });
+  $("net").innerHTML = rows.join("") || '<div class="empty">sem medições</div>';
+}
+async function pingNet(n = 20) {
+  const b = $("ping"); b.disabled = true; mine.ping = [];
+  try {
+    for (let i = 0; i < n; i++) {
+      const t0 = performance.now();
+      await fetch("/health", { cache: "no-store" });
+      const ms = performance.now() - t0;
+      mine.ping.push(ms); renderMine(); b.textContent = `medindo… ${i + 1}/${n}`;
+      await post("/v1/client_timing", { kind: "ping", round_trip_ms: ms });
+    }
+    const worst = Math.max(...mine.ping);
+    $("netNote").textContent = `Rede até o PC: ${median(mine.ping).toFixed(0)} ms (mediana de ${n}), pior ${worst.toFixed(0)} ms. Agora mande falas na aba Testar para medir “fala → resposta”.`;
+  } catch (e) { $("netNote").textContent = `Falha ao medir a rede: ${e.message}`; }
+  b.disabled = false; b.textContent = "📶 Medir de novo"; refreshNet();
+}
+
+// ---------- Ajustes ----------
+async function refreshStats() {
+  const s = await (await fetch("/v1/stats")).json();
+  $("stats").innerHTML = `<div class="row"><span>decisões</span><b>${s.decisions}</b></div>
+    <div class="row"><span>tempo médio da decisão</span><b>${s.mean_decision_ms} ms</b></div>
+    <div class="row"><span>chamadas ao LLM</span><b>${s.llm_calls}</b></div>
+    <div class="row"><span>chamadas ao LLM evitadas</span><b>${s.llm_calls_avoided}</b></div>`;
+}
+function renderFeedback(f) {
+  $("fbStats").innerHTML = f.n ? `<div class="row"><span>respostas julgadas</span><b>${f.n}</b></div>
+    <div class="row"><span>👍 acertos</span><b>${f.correct} (${Math.round(100 * f.correct / f.n)}%)</b></div>
+    <div class="row"><span>👎 ativou sem ser com ele</span><b>${f.false_activations}</b></div>
+    <div class="row"><span>👎 ignorou um pedido</span><b>${f.missed}</b></div>`
+    : '<div class="empty" style="padding:6px">Marque 👍 ou 👎 nas respostas da aba Testar.</div>';
+}
+
+// ---------- início ----------
+async function waitReady() {  // o servidor pré-carrega o modelo padrão ao subir
+  for (;;) {
+    try {
+      const h = await (await fetch("/health", { cache: "no-store" })).json();
+      if (!h.preloading) { if (pending === 0) setStatus(h.preload && h.preload.status === "failed" ? "modelo fora do ar" : "pronto", h.preload && h.preload.status === "failed" ? "err" : "ok"); return; }
+      setStatus("carregando modelo…", "busy");
+    } catch (e) { setStatus("sem conexão", "err"); }
+    await new Promise(r => setTimeout(r, 1500));
+  }
+}
+
+async function init() {
+  const go = el("button", "chip go", "▶ Demo"); go.onclick = runDemo; $("chips").appendChild(go);
+  for (const t of CHIPS) { const b = el("button", "chip", esc(t)); b.onclick = () => send(t); $("chips").appendChild(b); }
+  const b = await (await fetch("/v1/backends")).json();
+  for (const [name, spec] of Object.entries(b.backends)) {
+    const o = el("option"); o.value = name; o.textContent = `${name}${name === b.default ? " (padrão)" : ""}`;
+    if (name === b.default) o.selected = true;
+    $("backend").appendChild(o);
+  }
+  renderHome(await (await fetch("/v1/state")).json());
+  renderFeedback(await (await fetch("/v1/feedback")).json());
+  renderMine(); waitReady();
+  const es = new EventSource("/v1/events");
+  es.onmessage = (m) => {
+    const ev = JSON.parse(m.data);
+    if (ev.type === "llm_answer") addAnswer(ev);
+    else if (ev.type === "timer_fired") timerFired(ev);
+    else if (ev.type === "state") { renderHome(ev); if (!$("tab-home").classList.contains("active")) document.querySelector('nav button[data-tab="home"]').classList.add("dot"); }
+    else if (ev.type === "decision" && ev.source !== SOURCE && !String(ev.source || "").startsWith("pipeline")) {
+      $("chat").appendChild(el("div", "sys", `outro aparelho: “${esc(ev.input)}” → ${esc(LABELS[ev.decision] || ev.decision)}`)); toBottom();
+    }
+  };
+  es.onerror = () => setStatus("reconectando…", "err");
+  es.onopen = () => { if (pending === 0) waitReady(); };
+}
+
+document.querySelectorAll("nav button").forEach(b => b.onclick = () => show(b.dataset.tab));
+$("send").onclick = () => { const t = $("text").value; $("text").value = ""; send(t); };
+$("text").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); $("send").click(); } });
+$("text").addEventListener("focus", () => setTimeout(toBottom, 250));
+try { $("direct").checked = localStorage.getItem("direct") !== "0"; } catch (e) { /* segue ligado */ }
+$("direct").onchange = () => { try { localStorage.setItem("direct", $("direct").checked ? "1" : "0"); } catch (e) { /* idem */ } };
+$("thr").oninput = () => $("thrv").textContent = Math.round(parseFloat($("thr").value) * 100) + "%";
+$("ping").onclick = () => pingNet();
+try { $("speak").checked = localStorage.getItem("speak") === "1"; } catch (e) { /* armazenamento bloqueado: segue desligado */ }
+$("speak").onchange = () => { try { localStorage.setItem("speak", $("speak").checked ? "1" : "0"); } catch (e) { /* idem */ }
+  if ($("speak").checked) speak("Vou falar as respostas."); };
+$("demo2").onclick = runDemo;
+$("clear").onclick = () => { $("chat").querySelectorAll(".me,.bot,.sys,.typing").forEach(n => n.remove()); show("chat"); };
+
+// teclado no iOS: o viewport visual encolhe, mas o layout não — ajusta a altura do app à área visível
+if (window.visualViewport) {
+  const fit = () => { $("app").style.height = visualViewport.height + "px"; window.scrollTo(0, 0); toBottom(); };
+  visualViewport.addEventListener("resize", fit);
+}
+
+// Voz pelo navegador (prévia da Fase 4): só existe em HTTPS/localhost. Fora disso, use o ditado do teclado.
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let rec = null;
+if (SR && window.isSecureContext) {
+  $("mic").hidden = false;
+  $("mic").onclick = () => {
+    if (rec) { rec.stop(); rec = null; $("mic").classList.remove("rec"); return; }
+    rec = new SR(); rec.lang = "pt-BR"; rec.continuous = true; rec.interimResults = false;
+    rec.onresult = (e) => { for (let i = e.resultIndex; i < e.results.length; i++) if (e.results[i].isFinal) send(e.results[i][0].transcript); };
+    rec.onend = () => { if (rec) rec.start(); };
+    rec.start(); $("mic").classList.add("rec");
+  };
+}
+init().catch(e => setStatus("sem conexão", "err"));
+</script>
+</body>
+</html>

@@ -1,0 +1,194 @@
+{
+  "n": 159,
+  "accuracy": 0.2893081761006289,
+  "accuracy_strict": 0.2641509433962264,
+  "intent_accuracy_when_addressed": 0.9666666666666667,
+  "negatives": 53,
+  "positives": 99,
+  "false_activation_rate": 0.7547169811320755,
+  "missed_rate": 0.696969696969697,
+  "latency_ms": {
+    "mean": 25.700030081748512,
+    "p50": 24.387687999933405,
+    "p95": 34.77155429995946,
+    "max": 47.14450100027534
+  },
+  "score_kind": [
+    "similarity"
+  ],
+  "ece": null,
+  "auroc_confidence": 0.6431319738360908,
+  "by_tag": {
+    "ambiguous": {
+      "n": 11,
+      "accuracy": 0.45454545454545453
+    },
+    "asr": {
+      "n": 13,
+      "accuracy": 0.3076923076923077
+    },
+    "background": {
+      "n": 5,
+      "accuracy": 0.2
+    },
+    "casual": {
+      "n": 28,
+      "accuracy": 0.21428571428571427
+    },
+    "clear": {
+      "n": 91,
+      "accuracy": 0.26373626373626374
+    },
+    "command": {
+      "n": 82,
+      "accuracy": 0.3780487804878049
+    },
+    "english": {
+      "n": 5,
+      "accuracy": 0.2
+    },
+    "hard": {
+      "n": 28,
+      "accuracy": 0.35714285714285715
+    },
+    "long": {
+      "n": 9,
+      "accuracy": 0.2222222222222222
+    },
+    "mentions_wake": {
+      "n": 6,
+      "accuracy": 0.8333333333333334
+    },
+    "near_wake": {
+      "n": 2,
+      "accuracy": 1.0
+    },
+    "no_wake": {
+      "n": 9,
+      "accuracy": 0.4444444444444444
+    },
+    "question": {
+      "n": 37,
+      "accuracy": 0.21621621621621623
+    },
+    "short": {
+      "n": 19,
+      "accuracy": 0.21052631578947367
+    },
+    "to_human": {
+      "n": 13,
+      "accuracy": 0.3076923076923077
+    }
+  },
+  "by_label": {
+    "complex": {
+      "n": 15,
+      "accuracy": 0.13333333333333333
+    },
+    "home_control": {
+      "n": 32,
+      "accuracy": 0.5625
+    },
+    "ignore": {
+      "n": 58,
+      "accuracy": 0.25862068965517243
+    },
+    "knowledge": {
+      "n": 21,
+      "accuracy": 0.0
+    },
+    "media": {
+      "n": 18,
+      "accuracy": 0.3333333333333333
+    },
+    "timer_alarm": {
+      "n": 15,
+      "accuracy": 0.3333333333333333
+    }
+  },
+  "llm": {
+    "llm_calls": 13,
+    "llm_calls_if_no_router": 159,
+    "calls_avoided_pct": 0.9182389937106918,
+    "llm_needed": 36,
+    "llm_missed": 35,
+    "llm_wasted": 11
+  },
+  "threshold_sweep": [
+    {
+      "threshold": 0.79,
+      "accuracy": 0.2893081761006289,
+      "false_activation_rate": 0.7547169811320755,
+      "missed_rate": 0.696969696969697
+    },
+    {
+      "threshold": 0.801,
+      "accuracy": 0.3018867924528302,
+      "false_activation_rate": 0.7169811320754716,
+      "missed_rate": 0.696969696969697
+    },
+    {
+      "threshold": 0.812,
+      "accuracy": 0.31446540880503143,
+      "false_activation_rate": 0.6792452830188679,
+      "missed_rate": 0.696969696969697
+    },
+    {
+      "threshold": 0.823,
+      "accuracy": 0.3710691823899371,
+      "false_activation_rate": 0.5283018867924528,
+      "missed_rate": 0.7070707070707071
+    },
+    {
+      "threshold": 0.834,
+      "accuracy": 0.4276729559748428,
+      "false_activation_rate": 0.3584905660377358,
+      "missed_rate": 0.7070707070707071
+    },
+    {
+      "threshold": 0.845,
+      "accuracy": 0.4716981132075472,
+      "false_activation_rate": 0.1320754716981132,
+      "missed_rate": 0.7575757575757576
+    },
+    {
+      "threshold": 0.856,
+      "accuracy": 0.48427672955974843,
+      "false_activation_rate": 0.07547169811320754,
+      "missed_rate": 0.7777777777777778
+    },
+    {
+      "threshold": 0.867,
+      "accuracy": 0.41509433962264153,
+      "false_activation_rate": 0.03773584905660377,
+      "missed_rate": 0.9191919191919192
+    },
+    {
+      "threshold": 0.878,
+      "accuracy": 0.39622641509433965,
+      "false_activation_rate": 0.0,
+      "missed_rate": 0.9696969696969697
+    },
+    {
+      "threshold": 0.889,
+      "accuracy": 0.3836477987421384,
+      "false_activation_rate": 0.0,
+      "missed_rate": 0.98989898989899
+    }
+  ],
+  "perturbation_agreement": 0.7358490566037735,
+  "accuracy_perturbed": 0.2641509433962264,
+  "backend": "e5-zeroshot",
+  "kind": "zero-shot-embedding",
+  "model": "intfloat/multilingual-e5-small",
+  "option_lang": "pt",
+  "load_seconds": 3.067300031034392e-05,
+  "cpu_seconds_per_decision": 0.099811320754717,
+  "wall_seconds_per_decision": 0.025749293924528394,
+  "cpu_cores_busy": 3.8762740853114512,
+  "rss_mb": {
+    "server": null,
+    "lab_process_delta": 3
+  },
+  "timestamp": "2026-10-03T20:55:01"
+}
